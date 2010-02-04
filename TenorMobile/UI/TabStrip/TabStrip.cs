@@ -1,0 +1,122 @@
+﻿using System;
+
+using System.Collections.Generic;
+using System.Text;
+using System.Windows.Forms;
+using System.ComponentModel;
+using System.Drawing;
+
+namespace Tenor.Mobile.UI
+{
+    /// <summary>
+    /// The TabControl style for new WM 6.5 devices.
+    /// </summary>
+    public class TabStrip : TabControl
+    {
+        /// <summary>
+        /// Creates a new instance of the TabStrip.
+        /// </summary>
+        public TabStrip()
+        {
+            EnableStyles = true;
+        }
+
+        /// <summary>
+        /// Enables or disables the new visual style of WM 6.5.
+        /// </summary>
+        [DefaultValue(true)]
+        public bool EnableStyles
+        {
+            get; set;
+        }
+
+
+        SizeF scaleFactor;
+        /// <summary>
+        /// Scales a control's location, size, padding and margin.
+        /// </summary>
+        /// <param name="factor"></param>
+        /// <param name="specified"></param>
+        protected override void ScaleControl(System.Drawing.SizeF factor, BoundsSpecified specified)
+        {
+
+            base.ScaleControl(factor, specified);
+            scaleFactor = factor;
+        }
+
+        int oldTabCount = 0;
+        /// <summary>
+        /// Raises the Paint event.
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            if (oldTabCount != TabPages.Count)
+            {
+                ResizeTabs();
+                oldTabCount = TabPages.Count;
+            }
+
+            base.OnPaint(e);
+        }
+
+        /// <summary>
+        /// Raises the HandleCreated event.
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+
+            ResizeTabs();
+
+            if (EnableStyles)
+                ApplyStyles();
+
+        }
+
+        private void ResizeTabs()
+        {
+            try
+            {
+                if (scaleFactor.Height > 1)
+                {
+                    int baseHeight = 20;
+                    int newHeight = Convert.ToInt32(baseHeight * scaleFactor.Height);
+
+                    //get the native C++ tab control.
+                    IntPtr window = NativeMethods.GetWindow(this.Handle, NativeMethods.GW.CHILD);
+                    int num = NativeMethods.SendMessage(window, NativeMethods.WMSG.TCM_SETITEMSIZE, 0, NativeMethods.MakeLParam(new Point(0, newHeight)));
+
+                    int offset = 11;
+
+                    foreach (TabPage t in this.TabPages)
+                    {
+                        t.Text = string.Format("  {0}  ", t.Text);
+                        NativeMethods.SetWindowPos(t.Handle, IntPtr.Zero, 0, 0, t.Width, t.Height - (newHeight - baseHeight) + offset, NativeMethods.SWP.SWP_NOACTIVATE | NativeMethods.SWP.SWP_NOMOVE | NativeMethods.SWP.SWP_NOREPOSITION | NativeMethods.SWP.SWP_NOZORDER);
+                    }
+                }
+            }
+            catch (Win32Exception)
+            { }
+        }
+
+        private void ApplyStyles()
+        {
+
+
+            try
+            {
+                //get the native C++ tab control.
+                IntPtr window = NativeMethods.GetWindow(this.Handle, NativeMethods.GW.CHILD);
+                //get current tabstrip style
+                int num = NativeMethods.GetWindowLong(window, NativeMethods.GWL.STYLE).ToInt32();
+                //add winmo 6.5 style
+                num = NativeMethods.SetWindowLong(window, NativeMethods.GWL.STYLE, (int)(num | 0x4000));
+
+            }
+            catch (Win32Exception)
+            { }
+        }
+    }
+}
