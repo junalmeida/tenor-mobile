@@ -18,19 +18,10 @@ namespace Tenor.Mobile.UI
         /// </summary>
         public TabStrip()
         {
-            EnableStyles = true;
-        }
-
-        /// <summary>
-        /// Enables or disables the new visual style of WM 6.5.
-        /// </summary>
-        [DefaultValue(true)]
-        public bool EnableStyles
-        {
-            get; set;
         }
 
 
+        int oldTabCount = 0;
         SizeF scaleFactor;
         /// <summary>
         /// Scales a control's location, size, padding and margin.
@@ -42,22 +33,25 @@ namespace Tenor.Mobile.UI
 
             base.ScaleControl(factor, specified);
             scaleFactor = factor;
-        }
-
-        int oldTabCount = 0;
-        /// <summary>
-        /// Raises the Paint event.
-        /// </summary>
-        /// <param name="e"></param>
-        protected override void OnPaint(PaintEventArgs e)
-        {
             if (oldTabCount != TabPages.Count)
             {
                 ResizeTabs();
                 oldTabCount = TabPages.Count;
             }
+        }
 
-            base.OnPaint(e);
+        /// <summary>
+        /// Raises the Resize event.
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+            if (oldTabCount != TabPages.Count)
+            {
+                ResizeTabs();
+                oldTabCount = TabPages.Count;
+            }
         }
 
         /// <summary>
@@ -68,15 +62,13 @@ namespace Tenor.Mobile.UI
         {
             base.OnHandleCreated(e);
 
-            ResizeTabs();
-
-            if (EnableStyles)
-                ApplyStyles();
-
+            ApplyStyles();
         }
 
         private void ResizeTabs()
         {
+
+#if PocketPC      
             try
             {
                 if (scaleFactor.Height > 1)
@@ -99,12 +91,13 @@ namespace Tenor.Mobile.UI
             }
             catch (Win32Exception)
             { }
+
+#endif        
         }
 
         private void ApplyStyles()
         {
-
-
+#if PocketPC
             try
             {
                 //get the native C++ tab control.
@@ -117,6 +110,7 @@ namespace Tenor.Mobile.UI
             }
             catch (Win32Exception)
             { }
+#endif
         }
     }
 }

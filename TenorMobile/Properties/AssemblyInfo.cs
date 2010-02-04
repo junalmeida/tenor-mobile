@@ -10,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Tenor")]
 [assembly: AssemblyProduct("Tenor Framework")]
-[assembly: AssemblyCopyright("This component is licensed under the MIT License")]
+[assembly: AssemblyCopyright("This component is licensed under the MIT License. http://tenor.sourceforge.net")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
