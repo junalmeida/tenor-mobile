@@ -19,7 +19,6 @@ namespace Tenor.Mobile.UI
         /// <summary>
         /// Controls whether to draw separators between list items.
         /// </summary>
-        [DefaultValue(false)]
         public bool DrawSeparators
         {
             get { return drawSeparators; }
@@ -29,7 +28,6 @@ namespace Tenor.Mobile.UI
         /// <summary>
         /// Gets or sets the color of the separators.
         /// </summary>
-        [DefaultValue("InactiveBorder")]
         public Color SeparatorColor
         {
             get;
@@ -46,11 +44,29 @@ namespace Tenor.Mobile.UI
             m_timer.Interval = 10;
             m_timer.Tick += new EventHandler(m_timer_Tick);
             SeparatorColor = SystemColors.InactiveBorder;
+
         }
 
         void KListControl_Initialize(object sender, EventArgs e)
         {
             CreateBackBuffer();
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="e"></param>
+        protected override void OnParentChanged(EventArgs e)
+        {
+            base.OnParentChanged(e);
+
+            if (Extensions.IsDesignMode(this))
+            {
+                this.Clear();
+                for (int i = 1; i <= 10; i++)
+                    AddItem("Item " + i.ToString(), i);
+            }
         }
 
         /// <summary>
@@ -899,7 +915,7 @@ namespace Tenor.Mobile.UI
         }
 
 
-        SizeF scaleFactor;
+        SizeF scaleFactor = new SizeF(1, 1);
         protected override void ScaleControl(SizeF factor, BoundsSpecified specified)
         {
             scaleFactor = factor;

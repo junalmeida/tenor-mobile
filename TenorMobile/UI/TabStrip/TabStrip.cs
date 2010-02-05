@@ -21,15 +21,6 @@ namespace Tenor.Mobile.UI
         {
         }
 
-        protected bool DesignMode
-        {
-            get
-            {
-                ISite site = this.Site;
-                return ((site != null) && site.DesignMode);
-            }
-        }
- 
 
         int oldTabCount = 0;
         SizeF scaleFactor;
@@ -43,11 +34,7 @@ namespace Tenor.Mobile.UI
 
             base.ScaleControl(factor, specified);
             scaleFactor = factor;
-            if (oldTabCount != TabPages.Count)
-            {
-                ResizeTabs();
-                oldTabCount = TabPages.Count;
-            }
+            CheckIfResizeIsNeeded();
         }
 
         /// <summary>
@@ -57,12 +44,18 @@ namespace Tenor.Mobile.UI
         protected override void OnResize(EventArgs e)
         {
             base.OnResize(e);
+            CheckIfResizeIsNeeded();
+        }
+
+        private void CheckIfResizeIsNeeded()
+        {
             if (oldTabCount != TabPages.Count)
             {
                 ResizeTabs();
                 oldTabCount = TabPages.Count;
             }
         }
+
 
         /// <summary>
         /// Raises the HandleCreated event.
@@ -77,7 +70,7 @@ namespace Tenor.Mobile.UI
 
         private void ResizeTabs()
         {
-            if (!DesignMode)
+            if (!Extensions.IsDesignMode(this))
             {
                 try
                 {
@@ -107,7 +100,7 @@ namespace Tenor.Mobile.UI
 
         private void ApplyStyles()
         {
-            if (!DesignMode)
+            if (!Extensions.IsDesignMode(this))
             {
                 try
                 {
