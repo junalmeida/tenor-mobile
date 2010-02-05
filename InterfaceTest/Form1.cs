@@ -70,5 +70,10 @@ namespace InterfaceTest
             }
 
         }
+
+        private void tabStrip1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
     }
 }

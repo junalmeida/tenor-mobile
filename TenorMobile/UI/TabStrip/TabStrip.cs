@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.ComponentModel;
 using System.Drawing;
+using System.Runtime.InteropServices;
 
 namespace Tenor.Mobile.UI
 {
@@ -16,10 +17,19 @@ namespace Tenor.Mobile.UI
         /// <summary>
         /// Creates a new instance of the TabStrip.
         /// </summary>
-        public TabStrip()
+        public TabStrip() : base()
         {
         }
 
+        protected bool DesignMode
+        {
+            get
+            {
+                ISite site = this.Site;
+                return ((site != null) && site.DesignMode);
+            }
+        }
+ 
 
         int oldTabCount = 0;
         SizeF scaleFactor;
@@ -67,50 +77,51 @@ namespace Tenor.Mobile.UI
 
         private void ResizeTabs()
         {
-
-#if PocketPC      
-            try
+            if (!DesignMode)
             {
-                if (scaleFactor.Height > 1)
+                try
                 {
-                    int baseHeight = 20;
-                    int newHeight = Convert.ToInt32(baseHeight * scaleFactor.Height);
-
-                    //get the native C++ tab control.
-                    IntPtr window = NativeMethods.GetWindow(this.Handle, NativeMethods.GW.CHILD);
-                    int num = NativeMethods.SendMessage(window, NativeMethods.WMSG.TCM_SETITEMSIZE, 0, NativeMethods.MakeLParam(new Point(0, newHeight)));
-
-                    int offset = 11;
-
-                    foreach (TabPage t in this.TabPages)
+                    if (scaleFactor.Height > 1)
                     {
-                        t.Text = string.Format("  {0}  ", t.Text);
-                        NativeMethods.SetWindowPos(t.Handle, IntPtr.Zero, 0, 0, t.Width, t.Height - (newHeight - baseHeight) + offset, NativeMethods.SWP.SWP_NOACTIVATE | NativeMethods.SWP.SWP_NOMOVE | NativeMethods.SWP.SWP_NOREPOSITION | NativeMethods.SWP.SWP_NOZORDER);
+                        int baseHeight = 20;
+                        int newHeight = Convert.ToInt32(baseHeight * scaleFactor.Height);
+
+                        //get the native C++ tab control.
+                        IntPtr window = NativeMethods.GetWindow(this.Handle, NativeMethods.GW.CHILD);
+                        int num = NativeMethods.SendMessage(window, NativeMethods.WMSG.TCM_SETITEMSIZE, 0, NativeMethods.MakeLParam(new Point(0, newHeight)));
+
+                        int offset = 11;
+
+                        foreach (TabPage t in this.TabPages)
+                        {
+                            t.Text = string.Format("  {0}  ", t.Text);
+                            NativeMethods.SetWindowPos(t.Handle, IntPtr.Zero, 0, 0, t.Width, t.Height - (newHeight - baseHeight) + offset, NativeMethods.SWP.SWP_NOACTIVATE | NativeMethods.SWP.SWP_NOMOVE | NativeMethods.SWP.SWP_NOREPOSITION | NativeMethods.SWP.SWP_NOZORDER);
+                        }
                     }
                 }
-            }
-            catch (Win32Exception)
-            { }
+                catch (Win32Exception)
+                { }
 
-#endif        
+            }
         }
 
         private void ApplyStyles()
         {
-#if PocketPC
-            try
+            if (!DesignMode)
             {
-                //get the native C++ tab control.
-                IntPtr window = NativeMethods.GetWindow(this.Handle, NativeMethods.GW.CHILD);
-                //get current tabstrip style
-                int num = NativeMethods.GetWindowLong(window, NativeMethods.GWL.STYLE).ToInt32();
-                //add winmo 6.5 style
-                num = NativeMethods.SetWindowLong(window, NativeMethods.GWL.STYLE, (int)(num | 0x4000));
+                try
+                {
+                    //get the native C++ tab control.
+                    IntPtr window = NativeMethods.GetWindow(this.Handle, NativeMethods.GW.CHILD);
+                    //get current tabstrip style
+                    int num = NativeMethods.GetWindowLong(window, NativeMethods.GWL.STYLE).ToInt32();
+                    //add winmo 6.5 style
+                    num = NativeMethods.SetWindowLong(window, NativeMethods.GWL.STYLE, (int)(num | 0x4000));
 
+                }
+                catch (Win32Exception)
+                { }
             }
-            catch (Win32Exception)
-            { }
-#endif
         }
     }
 }
