@@ -5,58 +5,68 @@ using System.Drawing;
 
 namespace Tenor.Mobile.UI
 {
+    /// <summary>
+    /// Represents a single item on the KListControl
+    /// </summary>
+    public sealed class KListItem : object
+    {
+        internal KListItem()
+        {
+        }
+
+        #region IKListItem Members
+
+        public KListControl Parent { get; internal set; }
+
+        public Rectangle Bounds { get; internal set; }
+
+        public int XIndex { get; internal set; }
+
+        public int YIndex { get; internal set; }
+
+        public bool Selected { get; internal set; }
+
+        public string Text { get; set; }
+
+        public object Value { get; set; }
+
+        internal void Render(Graphics g, Rectangle bounds)
+        {
+            if (Parent != null)
+            {
+                StringFormat format = new StringFormat();
+                format.Alignment = StringAlignment.Near;
+                format.LineAlignment = StringAlignment.Center;
+                SolidBrush textBrush;
+                if (Selected)
+                {
+                    SolidBrush backBrush;
+                    backBrush = new SolidBrush(SystemColors.Highlight);
+                    textBrush = new SolidBrush(SystemColors.HighlightText);
+                    g.FillRectangle(backBrush, bounds);
+                }
+                else
+                {
+                    //backBrush = new SolidBrush(SystemColors.Window);
+                    textBrush = new SolidBrush(SystemColors.ControlText);
+                }
+
+                g.DrawString("  " + Text, Parent.Font, textBrush, bounds, format);
+            }
+        }
+
+        #endregion
+    }
+
+    public delegate void DrawItemEventHandler(object sender, DrawItemEventArgs e);
 
     /// <summary>
-    /// Interface for items contained within the list.
+    /// The arguments necessary to draw an item.
     /// </summary>
-    public interface IKListItem
+    public sealed class DrawItemEventArgs : EventArgs
     {
-        /// <summary>
-        /// Gets or sets the parent.
-        /// </summary>
-        /// <value>The parent.</value>
-        KListControl Parent { get; set; }
-
-        /// <summary>
-        /// The unscrolled bounds for this item.
-        /// </summary>
-        Rectangle Bounds { get; set; }
-
-        /// <summary>
-        /// Gets or sets the X.
-        /// </summary>
-        /// <value>The X.</value>
-        int XIndex { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Y.
-        /// </summary>
-        /// <value>The Y.</value>
-        int YIndex { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="IKListItem"/> is selected.
-        /// </summary>
-        /// <value><c>true</c> if selected; otherwise, <c>false</c>.</value>
-        bool Selected { get; set; }
-
-        /// <summary>
-        /// Gets or sets the text.
-        /// </summary>
-        /// <value>The text.</value>
-        string Text { get; set; }
-
-        /// <summary>
-        /// Gets or sets the value.
-        /// </summary>
-        /// <value>The value.</value>
-        object Value { get; set; }
-
-        /// <summary>
-        /// Renders the specified graphics object.
-        /// </summary>
-        /// <param name="g">The graphics.</param>
-        /// <param name="bounds">The bounds.</param>
-        void Render(Graphics g, Rectangle bounds);
+        public Graphics Graphics { get; internal set; }
+        public KListItem Item { get; internal set; }
+        public Rectangle Bounds { get; internal set; }
     }
 }

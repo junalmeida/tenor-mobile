@@ -83,6 +83,13 @@ namespace Tenor.Mobile.UI
         }
 
         /// <summary>
+        /// Occurs when the item needs to be rendered.
+        /// </summary>
+        public event DrawItemEventHandler DrawItem;
+
+
+
+        /// <summary>
         /// Occurs when the selected item changes.
         /// </summary>
         public event EventHandler SelectedItemChanged;
@@ -93,9 +100,9 @@ namespace Tenor.Mobile.UI
         public event EventHandler SelectedItemClicked;
 
         /// <summary>
-        /// Gets the <see cref="IKListItem"/> at the specified index.
+        /// Gets the <see cref="KListItem"/> at the specified index.
         /// </summary>
-        public IKListItem this[int index]
+        public KListItem this[int index]
         {
             get
             {
@@ -104,9 +111,9 @@ namespace Tenor.Mobile.UI
         }
 
         /// <summary>
-        /// Gets the <see cref="IKListItem"/> at the specified index.
+        /// Gets the <see cref="KListItem"/> at the specified index.
         /// </summary>
-        public IKListItem this[int x, int y]
+        public KListItem this[int x, int y]
         {
             get
             {
@@ -129,7 +136,7 @@ namespace Tenor.Mobile.UI
         /// Gets the selected item.
         /// </summary>
         /// <value>The selected item.</value>
-        public IKListItem SelectedItem
+        public KListItem SelectedItem
         {
             get
             {
@@ -243,51 +250,6 @@ namespace Tenor.Mobile.UI
         }
 
 
-        private class KListItem :IKListItem
-        {
-            #region IKListItem Members
-
-            public KListControl Parent { get; set; }
-
-            public Rectangle Bounds { get; set; }
-
-            public int XIndex { get; set; }
-
-            public int YIndex { get; set; }
-
-            public bool Selected { get; set; }
-
-            public string Text { get; set; }
-
-            public object Value { get; set; }
-
-            public void Render(Graphics g, Rectangle bounds)
-            {
-                if (Parent != null)
-                {
-                    StringFormat format = new StringFormat();
-                    format.Alignment = StringAlignment.Near;
-                    format.LineAlignment = StringAlignment.Center;
-                    SolidBrush textBrush;
-                    if (Selected)
-                    {
-                        SolidBrush backBrush;
-                        backBrush = new SolidBrush(SystemColors.Highlight);
-                        textBrush = new SolidBrush(SystemColors.HighlightText);
-                        g.FillRectangle(backBrush, bounds);
-                    }
-                    else
-                    {
-                        //backBrush = new SolidBrush(SystemColors.Window);
-                        textBrush = new SolidBrush(SystemColors.ControlText);
-                    }
-
-                    g.DrawString("  " + Text, Parent.Font, textBrush, bounds, format);
-                }
-            }
-
-            #endregion
-        }
 
 
         /// <summary>
@@ -302,7 +264,7 @@ namespace Tenor.Mobile.UI
                 throw new NotSupportedException("List is not in grid mode");
             }
 
-            IKListItem item = new KListItem();
+            KListItem item = new KListItem();
             item.Text = text;
             item.Value = value;
             item.XIndex = m_layout == KListLayout.Vertical ? 0 : m_items.Count;
@@ -325,7 +287,7 @@ namespace Tenor.Mobile.UI
                 throw new NotSupportedException("List is in grid mode");
             }
 
-            IKListItem item = new KListItem();
+            KListItem item = new KListItem();
             item.Text = text;
             item.Value = value;
             item.XIndex = x;
@@ -337,7 +299,7 @@ namespace Tenor.Mobile.UI
         /// Adds an item.
         /// </summary>
         /// <param name="item">The item.</param>
-        public void AddItem(IKListItem item)
+        internal void AddItem(KListItem item)
         {
             item.Parent = this;
             item.Selected = false;
@@ -354,7 +316,7 @@ namespace Tenor.Mobile.UI
         /// Removes an item.
         /// </summary>
         /// <param name="item">The item.</param>
-        public void RemoveItem(IKListItem item)
+        public void RemoveItem(KListItem item)
         {
             if (m_items.ContainsKey(item.XIndex) &&
                 m_items[item.XIndex].ContainsKey(item.YIndex))
@@ -377,7 +339,7 @@ namespace Tenor.Mobile.UI
         /// Invalidates the item (when visible).
         /// </summary>
         /// <param name="item">The item.</param>
-        public void Invalidate(IKListItem item)
+        public void Invalidate(KListItem item)
         {
             Rectangle itemBounds = item.Bounds;
             itemBounds.Offset(-m_offset.X, -m_offset.Y);
@@ -495,7 +457,7 @@ namespace Tenor.Mobile.UI
 
                         while (moreY)
                         {
-                            IKListItem item = yEnumerator.Current.Value;
+                            KListItem item = yEnumerator.Current.Value;
                             if (item != null)
                             {
                                 Rectangle itemRect = item.Bounds;
@@ -525,7 +487,14 @@ namespace Tenor.Mobile.UI
                                             }
                                         }
                                     }
-                                    item.Render(m_backBuffer, itemRect);
+
+                                    if (DrawItem == null)
+                                        item.Render(m_backBuffer, itemRect);
+                                    else
+                                    {
+                                        DrawItemEventArgs drawArgs = new DrawItemEventArgs() { Graphics = m_backBuffer, Item = item, Bounds = itemRect };
+                                        OnDrawItem(drawArgs);                                        
+                                    }
                                 }
                                 else
                                 {
@@ -653,7 +622,7 @@ namespace Tenor.Mobile.UI
                 Point selectedIndex = FindIndex(e.X, e.Y);
                 if (selectedIndex != m_selectedIndex)
                 {
-                    IKListItem item = null;
+                    KListItem item = null;
                     if (m_items.ContainsKey(selectedIndex.X) &&
                         m_items[selectedIndex.X].TryGetValue(selectedIndex.Y, out item))
                     {
@@ -877,7 +846,7 @@ namespace Tenor.Mobile.UI
         }
 
         // The items!
-        class ItemList : Dictionary<int, IKListItem>
+        class ItemList : Dictionary<int, KListItem>
         {
         }
         class GridList : Dictionary<int, ItemList>
@@ -898,7 +867,7 @@ namespace Tenor.Mobile.UI
 
         // Motion variables
         Point m_selectedIndex = new Point(-1, -1);
-        IKListItem m_selectedItem = null;
+        KListItem m_selectedItem = null;
         Point m_velocity = new Point(0, 0);
         Point m_mouseDown = new Point(-1, -1);
         Point m_mousePrev = new Point(-1, -1);
@@ -920,6 +889,12 @@ namespace Tenor.Mobile.UI
         {
             scaleFactor = factor;
             base.ScaleControl(factor, specified);
+        }
+
+        protected virtual void OnDrawItem(DrawItemEventArgs e)
+        {
+            if (DrawItem != null)
+                DrawItem(this, e);
         }
     }
 

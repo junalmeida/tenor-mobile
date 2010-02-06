@@ -117,5 +117,44 @@ namespace Tenor.Mobile
             public int right;
             public int bottom;
         }
+
+        [DllImport("coredll")]
+        internal static extern int SHGetFileInfo(string pszPath, int dwFileAttributes, ref SHFILEINFO psfi, int cbFileInfo, SHGFI uFlags);
+       
+        [Flags]
+        internal enum SHGFI
+        {
+            ATTRIBUTES = 0x800,
+            DISPLAYNAME = 0x200,
+            ICON = 0x100,
+            LARGEICON = 0,
+            PIDL = 8,
+            SELECTICON = 0x40000,
+            SMALLICON = 1,
+            SYSICONINDEX = 0x4000,
+            TYPENAME = 0x400,
+            USEFILEATTRIBUTES = 0x10
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal struct SHFILEINFO
+        {
+            internal IntPtr hIcon;
+            internal int iIcon;
+            internal int dwAttributes;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 260)]
+            internal string szDisplayName;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 80)]
+            internal string szTypeName;
+        }
+
+ 
+
+ 
+
+ 
+
+ 
+
     }
 }

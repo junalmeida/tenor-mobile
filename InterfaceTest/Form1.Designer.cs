@@ -74,20 +74,17 @@
             // 
             // menuItem6
             // 
-            this.menuItem6.Text = "20x20";
+            this.menuItem6.Text = "List Files";
             this.menuItem6.Click += new System.EventHandler(this.menuItem6_Click);
             // 
             // kListControl1
             // 
-            this.kListControl1.DrawSeparators = false;
-            this.kListControl1.ItemHeight = 38;
-            this.kListControl1.ItemWidth = 80;
+            this.kListControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.kListControl1.Layout = Tenor.Mobile.UI.KListLayout.Vertical;
-            this.kListControl1.Location = new System.Drawing.Point(17, 12);
-            this.kListControl1.MaxVelocity = 15;
+            this.kListControl1.Location = new System.Drawing.Point(0, 0);
             this.kListControl1.Name = "kListControl1";
             this.kListControl1.SeparatorColor = System.Drawing.SystemColors.InactiveBorder;
-            this.kListControl1.Size = new System.Drawing.Size(201, 253);
+            this.kListControl1.Size = new System.Drawing.Size(240, 268);
             this.kListControl1.TabIndex = 0;
             this.kListControl1.Text = "kListControl1";
             // 
