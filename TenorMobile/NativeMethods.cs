@@ -88,7 +88,10 @@ namespace Tenor.Mobile
             /* TAB CONTROL*/
             TCM_FIRST = 0x1300,
             TCM_SETPADDING = (TCM_FIRST + 43),
-            TCM_SETITEMSIZE = (TCM_FIRST + 41)
+            TCM_SETITEMSIZE = (TCM_FIRST + 41),
+            TCM_GETIMAGELIST = (TCM_FIRST + 2),
+            TCM_SETIMAGELIST = (TCM_FIRST + 3),
+            TCM_SETITEM = (TCM_FIRST + 61)
         }
 
         internal static int MakeLParam(int a, int b)
@@ -117,6 +120,22 @@ namespace Tenor.Mobile
             public int right;
             public int bottom;
         }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal class TCITEM
+        {
+            public int mask;
+            public UInt32 dwState;
+            public UInt32 dwStateMask;
+            public IntPtr pszText;
+            public int cchTextMax;
+            public int iImage;
+            public UInt32 lParam;
+        }
+        internal const int TCIF_IMAGE = 0x0002;
+        internal const int TCIF_TEXT = 0x0001;
+
+
 
         [DllImport("coredll")]
         internal static extern int SHGetFileInfo(string pszPath, int dwFileAttributes, ref SHFILEINFO psfi, int cbFileInfo, SHGFI uFlags);

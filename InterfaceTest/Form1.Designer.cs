@@ -36,7 +36,16 @@
             this.menuItem3 = new System.Windows.Forms.MenuItem();
             this.menuItem4 = new System.Windows.Forms.MenuItem();
             this.menuItem6 = new System.Windows.Forms.MenuItem();
+            this.tabStrip1 = new Tenor.Mobile.UI.TabStrip();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.kListControl1 = new Tenor.Mobile.UI.KListControl();
+            this.domainUpDown1 = new System.Windows.Forms.DomainUpDown();
+            this.hardwareButton1 = new Microsoft.WindowsCE.Forms.HardwareButton();
+            this.messageQueue1 = new System.Messaging.MessageQueue();
+            this.tabStrip1.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
             this.SuspendLayout();
             // 
             // mainMenu1
@@ -77,6 +86,33 @@
             this.menuItem6.Text = "List Files";
             this.menuItem6.Click += new System.EventHandler(this.menuItem6_Click);
             // 
+            // tabStrip1
+            // 
+            this.tabStrip1.Controls.Add(this.tabPage1);
+            this.tabStrip1.Controls.Add(this.tabPage2);
+            this.tabStrip1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabStrip1.Location = new System.Drawing.Point(0, 0);
+            this.tabStrip1.Name = "tabStrip1";
+            this.tabStrip1.SelectedIndex = 0;
+            this.tabStrip1.Size = new System.Drawing.Size(240, 268);
+            this.tabStrip1.TabIndex = 0;
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.kListControl1);
+            this.tabPage1.Location = new System.Drawing.Point(0, 0);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Size = new System.Drawing.Size(240, 245);
+            this.tabPage1.Text = "tabPage1";
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.domainUpDown1);
+            this.tabPage2.Location = new System.Drawing.Point(0, 0);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Size = new System.Drawing.Size(240, 245);
+            this.tabPage2.Text = "tabPage2";
+            // 
             // kListControl1
             // 
             this.kListControl1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -84,9 +120,31 @@
             this.kListControl1.Location = new System.Drawing.Point(0, 0);
             this.kListControl1.Name = "kListControl1";
             this.kListControl1.SeparatorColor = System.Drawing.SystemColors.InactiveBorder;
-            this.kListControl1.Size = new System.Drawing.Size(240, 268);
-            this.kListControl1.TabIndex = 0;
+            this.kListControl1.Size = new System.Drawing.Size(240, 245);
+            this.kListControl1.TabIndex = 1;
             this.kListControl1.Text = "kListControl1";
+            // 
+            // domainUpDown1
+            // 
+            this.domainUpDown1.Items.Add("0");
+            this.domainUpDown1.Items.Add("1");
+            this.domainUpDown1.Items.Add("2");
+            this.domainUpDown1.Items.Add("3");
+            this.domainUpDown1.Items.Add("4");
+            this.domainUpDown1.Items.Add("5");
+            this.domainUpDown1.Items.Add("6");
+            this.domainUpDown1.Items.Add("7");
+            this.domainUpDown1.Items.Add("8");
+            this.domainUpDown1.Items.Add("9");
+            this.domainUpDown1.Location = new System.Drawing.Point(60, 52);
+            this.domainUpDown1.Name = "domainUpDown1";
+            this.domainUpDown1.Size = new System.Drawing.Size(100, 22);
+            this.domainUpDown1.TabIndex = 0;
+            this.domainUpDown1.Text = "domainUpDown1";
+            // 
+            // messageQueue1
+            // 
+            this.messageQueue1.Formatter = new System.Messaging.XmlMessageFormatter(new string[0]);
             // 
             // Form1
             // 
@@ -94,11 +152,14 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(240, 268);
-            this.Controls.Add(this.kListControl1);
+            this.Controls.Add(this.tabStrip1);
             this.Menu = this.mainMenu1;
             this.MinimizeBox = false;
             this.Name = "Form1";
             this.Text = "Form1";
+            this.tabStrip1.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage2.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -111,7 +172,13 @@
         private System.Windows.Forms.MenuItem menuItem4;
         private System.Windows.Forms.MenuItem menuItem5;
         private System.Windows.Forms.MenuItem menuItem6;
+        private Tenor.Mobile.UI.TabStrip tabStrip1;
+        private System.Windows.Forms.TabPage tabPage1;
         private Tenor.Mobile.UI.KListControl kListControl1;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.DomainUpDown domainUpDown1;
+        private Microsoft.WindowsCE.Forms.HardwareButton hardwareButton1;
+        private System.Messaging.MessageQueue messageQueue1;
     }
 }
 
