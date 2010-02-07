@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using System.IO;
+using Tenor.Mobile.Diagnostics;
 
 namespace InterfaceTest
 {
@@ -44,9 +45,9 @@ namespace InterfaceTest
         {
             kListControl1.Clear();
             kListControl1.Layout = Tenor.Mobile.UI.KListLayout.Vertical;
-            for (int i = 0; i <= 30; i++)
+            foreach (Window w in Window.GetWindows())
             {
-                kListControl1.AddItem("Item " + i.ToString(), i);
+                kListControl1.AddItem(w.Text + " (" + w.ClassName +  ") " + w.Visible.ToString(), w);
             }
 
         }
@@ -55,9 +56,9 @@ namespace InterfaceTest
         {
             kListControl1.Clear();
             kListControl1.Layout = Tenor.Mobile.UI.KListLayout.Vertical;
-            for (int i = 0; i <= 5; i++)
+            foreach (Process p in Process.GetProcesses())
             {
-                kListControl1.AddItem("Item " + i.ToString(), i);
+                kListControl1.AddItem(p.FileName, p);
             }
         }
 

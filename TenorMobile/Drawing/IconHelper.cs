@@ -8,13 +8,27 @@ using System.ComponentModel;
 
 namespace Tenor.Mobile.Drawing
 {
+    /// <summary>
+    /// Provides functions to manipulate icons.
+    /// </summary>
     public static class IconHelper
     {
+        /// <summary>
+        /// Extracts an icon from a document or an executable.
+        /// </summary>
+        /// <param name="filename">Full path of a file.</param>
+        /// <returns>An Icon.</returns>
         public static Icon ExtractAssociatedIcon(string filename)
         {
             return ExtractAssociatedIcon(filename, true);
         }
 
+        /// <summary>
+        /// Extracts an icon from a document or an executable.
+        /// </summary>
+        /// <param name="filename">Full path of a file.</param>
+        /// <param name="largeIcon"></param>
+        /// <returns></returns>
         public static Icon ExtractAssociatedIcon(string filename, bool largeIcon)
         {
             NativeMethods.SHFILEINFO psfi = new NativeMethods.SHFILEINFO();

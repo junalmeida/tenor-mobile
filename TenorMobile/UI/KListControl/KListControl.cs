@@ -885,12 +885,22 @@ namespace Tenor.Mobile.UI
 
 
         SizeF scaleFactor = new SizeF(1, 1);
+
+        /// <summary>
+        /// Raises the ScaleControl event.
+        /// </summary>
+        /// <param name="factor"></param>
+        /// <param name="specified"></param>
         protected override void ScaleControl(SizeF factor, BoundsSpecified specified)
         {
             scaleFactor = factor;
             base.ScaleControl(factor, specified);
         }
 
+        /// <summary>
+        /// Raises the DrawItem element for each item on this list.
+        /// </summary>
+        /// <param name="e"></param>
         protected virtual void OnDrawItem(DrawItemEventArgs e)
         {
             if (DrawItem != null)

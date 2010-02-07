@@ -189,7 +189,7 @@ namespace Tenor.Mobile.UI
         }
 
 
-        public void ApplyTabImages()
+        private void ApplyTabImages()
         {
 //            if (!Extensions.IsDesignMode(this))
 //            {
