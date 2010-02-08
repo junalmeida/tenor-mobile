@@ -9,6 +9,11 @@ namespace Tenor.Mobile
 {
     internal static class NativeMethods
     {
+
+        [DllImport("coredll.dll", SetLastError = false)]
+        internal static extern int GetLastError();
+
+
         [Flags()]
         internal enum SWP
         {
@@ -85,6 +90,9 @@ namespace Tenor.Mobile
         {
             /* WINDOW */
             WM_PAINT = 0x000F,
+            WM_SETTEXT = 0x000C,
+            WM_GETTEXT = 0x000D,
+            WM_GETTEXTLENGTH = 0x000E,
             /* TAB CONTROL*/
             TCM_FIRST = 0x1300,
             TCM_SETPADDING = (TCM_FIRST + 43),
@@ -167,13 +175,12 @@ namespace Tenor.Mobile
             internal string szTypeName;
         }
 
- 
 
- 
+        [DllImport("coredll.dll", SetLastError = true)]
+        internal static extern IntPtr SendMessageTimeout(IntPtr hWnd, WMSG Msg, IntPtr wParam, string lParam, uint fuFlags, uint uTimeout, ref IntPtr lpdwResult);
 
+        [DllImport("coredll.dll", SetLastError = true)]
+        internal static extern IntPtr SendMessageTimeout(IntPtr hWnd, WMSG Msg, int wParam, StringBuilder lParam, uint fuFlags, uint uTimeout, ref IntPtr lpdwResult);
  
-
- 
-
     }
 }

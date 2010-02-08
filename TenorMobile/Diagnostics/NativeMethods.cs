@@ -8,12 +8,16 @@ namespace Tenor.Mobile.Diagnostics
 {
     internal static class NativeMethods
     {
-        internal const int TH32CS_SNAPPROCESS = 0x00000002;
-        internal const int TH32CS_SNAPMODULE = 8;
+        internal enum TH32CS
+        {
+            SNAPPROCESS = 0x40000002,
+            SNAPMODULE = 8
+        }
+
  
 
-        [DllImport("toolhelp.dll")]
-        internal static extern IntPtr CreateToolhelp32Snapshot(uint flags, uint processid);
+        [DllImport("toolhelp.dll", SetLastError=true)]
+        internal static extern IntPtr CreateToolhelp32Snapshot(TH32CS flags, uint processid);
         [DllImport("toolhelp.dll")]
         internal static extern int CloseToolhelp32Snapshot(IntPtr handle);
         [DllImport("toolhelp.dll")]
@@ -298,7 +302,10 @@ LPDWORD lpdwProcessId );
         internal static string GetWindowText(IntPtr handle)
         {
             StringBuilder sb = new StringBuilder(255);
-            GetWindowText(handle, sb, sb.Capacity);
+            IntPtr outPointer = IntPtr.Zero;
+            Tenor.Mobile.NativeMethods.SendMessageTimeout(handle, Tenor.Mobile.NativeMethods.WMSG.WM_GETTEXT, sb.Capacity, sb, 0, 500, ref outPointer);
+
+            //GetWindowText(handle, sb, sb.Capacity);
             return sb.ToString().Trim();
         }
 

@@ -82,10 +82,11 @@ namespace Tenor.Mobile.Diagnostics
         public static Process[] GetProcesses()
         {
             List<Process> list = new List<Process>();
-            IntPtr handle = NativeMethods.CreateToolhelp32Snapshot(NativeMethods.TH32CS_SNAPPROCESS, 0);
+            IntPtr handle = NativeMethods.CreateToolhelp32Snapshot(NativeMethods.TH32CS.SNAPPROCESS, 0);
             if (((int)handle) <= 0)
             {
-                throw new Exception("Unable to create snapshot");
+                int error = Tenor.Mobile.NativeMethods.GetLastError();
+                throw new Exception(string.Format("Unable to create snapshot. Error {0}.", error));
             }
             try
             {
@@ -129,7 +130,7 @@ namespace Tenor.Mobile.Diagnostics
         private static string[] GetModules(uint processID)
         {
             List<string> list = new List<string>();
-            IntPtr handle = NativeMethods.CreateToolhelp32Snapshot(NativeMethods.TH32CS_SNAPMODULE, processID);
+            IntPtr handle = NativeMethods.CreateToolhelp32Snapshot(NativeMethods.TH32CS.SNAPMODULE, processID);
             if (handle.ToInt32() <= 0)
             {
                 throw new Exception("Unable to create snapshot");
