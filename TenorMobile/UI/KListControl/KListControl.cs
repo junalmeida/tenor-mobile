@@ -214,8 +214,8 @@ namespace Tenor.Mobile.UI
 
         private Size GetItemSize()
         {
-            int width = Bounds.Width;
-            int height = Bounds.Height;
+            int width = this.Width;
+            int height = this.Height;
 
             if (Layout == KListLayout.Vertical || Layout == KListLayout.Grid)
             {
@@ -343,7 +343,7 @@ namespace Tenor.Mobile.UI
         {
             Rectangle itemBounds = item.Bounds;
             itemBounds.Offset(-m_offset.X, -m_offset.Y);
-            if (Bounds.IntersectsWith(itemBounds))
+            if (new Rectangle(0,0, this.Width, this.Height).IntersectsWith(itemBounds))
             {
                 Invalidate(itemBounds);
             }
@@ -434,7 +434,7 @@ namespace Tenor.Mobile.UI
             {
                 m_backBuffer.Clear(BackColor);
 
-                Point startIndex = FindIndex(Bounds.Left, Bounds.Top);
+                Point startIndex = FindIndex(0, 0);//Bounds.Left, Bounds.Top);
 
                 GridList.Enumerator xEnumerator = m_items.GetEnumerator();
                 bool moreX = xEnumerator.MoveNext();
@@ -462,7 +462,7 @@ namespace Tenor.Mobile.UI
                             {
                                 Rectangle itemRect = item.Bounds;
                                 itemRect.Offset(-m_offset.X, -m_offset.Y);
-                                if (Bounds.IntersectsWith(itemRect))
+                                if (new Rectangle(0, 0, this.Width, this.Height).IntersectsWith(itemRect))
                                 {
                                     if (this.DrawSeparators)
                                     {
@@ -514,15 +514,15 @@ namespace Tenor.Mobile.UI
                     {
 
                         int itemsTotalHeight = this.Count * GetItemSize().Height;
-                        int scrollHeight = (Bounds.Height * 100) / itemsTotalHeight; // percentage
+                        int scrollHeight = (this.Height * 100) / itemsTotalHeight; // percentage
 
                         if (scrollHeight < 100)
                         {
                             int scrollWidth = Convert.ToInt32(scrollSize * scaleFactor.Width);
-                            scrollHeight = (Bounds.Height * scrollHeight) / 100;
+                            scrollHeight = (this.Height * scrollHeight) / 100;
 
                             int scrollTop = (100 * m_offset.Y) / MaxYOffset;
-                            scrollTop = ((Bounds.Height - scrollHeight) * scrollTop) / 100;
+                            scrollTop = ((this.Height - scrollHeight) * scrollTop) / 100;
 
 
                             Rectangle scroll = new Rectangle(this.Width - (scrollWidth * 2), scrollTop, scrollWidth, scrollHeight);
@@ -533,16 +533,16 @@ namespace Tenor.Mobile.UI
                     if (true && (m_layout == KListLayout.Horizontal || m_layout == KListLayout.Grid))
                     {
                         int itemsTotalWidth = this.m_items.Count * GetItemSize().Width;
-                        int scrollWidth = (Bounds.Width * 100) / itemsTotalWidth; // percentage
+                        int scrollWidth = (this.Width * 100) / itemsTotalWidth; // percentage
 
                         if (scrollWidth < 100)
                         {
                             int scrollHeight = Convert.ToInt32(scrollSize * scaleFactor.Height);
 
-                            scrollWidth = (Bounds.Width * scrollWidth) / 100;
+                            scrollWidth = (this.Width * scrollWidth) / 100;
 
                             int scrollLeft = (100 * m_offset.X) / MaxXOffset;
-                            scrollLeft = ((Bounds.Width - scrollWidth) * scrollLeft) / 100;
+                            scrollLeft = ((this.Width - scrollWidth) * scrollLeft) / 100;
 
 
                             Rectangle scroll = new Rectangle(scrollLeft, this.Height - (scrollHeight * 2), scrollWidth, scrollHeight);
@@ -717,7 +717,7 @@ namespace Tenor.Mobile.UI
         {
             CleanupBackBuffer();
 
-            m_backBufferBitmap = new Bitmap(Bounds.Width, Bounds.Height);
+            m_backBufferBitmap = new Bitmap(this.Width, this.Height);
             m_backBuffer = Graphics.FromImage(m_backBufferBitmap);
         }
 
@@ -769,16 +769,16 @@ namespace Tenor.Mobile.UI
         private Rectangle ItemBounds(int x, int y)
         {
             Size itemSize = GetItemSize();
-            int itemX = Bounds.Left + (itemSize.Width * x);
-            int itemY = Bounds.Top + (itemSize.Height * y);
+            int itemX = (itemSize.Width * x);
+            int itemY = (itemSize.Height * y);
 
             if (m_layout == KListLayout.Vertical)
             {
-                return new Rectangle(Bounds.Left, itemY, Bounds.Width, itemSize.Height);
+                return new Rectangle(0, itemY, this.Width, itemSize.Height);
             }
             else if (m_layout == KListLayout.Horizontal)
             {
-                return new Rectangle(itemX, Bounds.Top, itemSize.Width, Bounds.Height);
+                return new Rectangle(itemX, 0, itemSize.Width, this.Height);
             }
             else
             {
@@ -799,16 +799,16 @@ namespace Tenor.Mobile.UI
 
             if (m_layout == KListLayout.Vertical)
             {
-                index.Y = ((y + m_offset.Y - Bounds.Top) / (itemSize.Height));
+                index.Y = ((y + m_offset.Y) / (itemSize.Height));
             }
             else if (m_layout == KListLayout.Horizontal)
             {
-                index.X = ((x + m_offset.X - Bounds.Left) / (itemSize.Width));
+                index.X = ((x + m_offset.X) / (itemSize.Width));
             }
             else
             {
-                index.X = ((x + m_offset.X - Bounds.Left) / (itemSize.Width));
-                index.Y = ((y + m_offset.Y - Bounds.Top) / (itemSize.Height));
+                index.X = ((x + m_offset.X) / (itemSize.Width));
+                index.Y = ((y + m_offset.Y) / (itemSize.Height));
             }
 
             return index;
@@ -822,7 +822,7 @@ namespace Tenor.Mobile.UI
         {
             get
             {
-                return Math.Max(((m_items.Count * GetItemSize().Width)) - Bounds.Width, 0);
+                return Math.Max(((m_items.Count * GetItemSize().Width)) - this.Width, 0);
             }
         }
 
@@ -836,7 +836,7 @@ namespace Tenor.Mobile.UI
             {
                 if (m_items.Count > 0)
                 {
-                    return Math.Max(((m_items[0].Count * GetItemSize().Height)) - Bounds.Height, 0);
+                    return Math.Max(((m_items[0].Count * GetItemSize().Height)) - this.Height, 0);
                 }
                 else
                 {

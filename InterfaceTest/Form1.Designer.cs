@@ -38,8 +38,8 @@
             this.menuItem6 = new System.Windows.Forms.MenuItem();
             this.tabStrip1 = new Tenor.Mobile.UI.TabStrip();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.kListControl1 = new Tenor.Mobile.UI.KListControl();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
             this.domainUpDown1 = new System.Windows.Forms.DomainUpDown();
             this.hardwareButton1 = new Microsoft.WindowsCE.Forms.HardwareButton();
             this.messageQueue1 = new System.Messaging.MessageQueue();
@@ -105,24 +105,22 @@
             this.tabPage1.Size = new System.Drawing.Size(240, 245);
             this.tabPage1.Text = "tabPage1";
             // 
+            // kListControl1
+            // 
+            this.kListControl1.Layout = Tenor.Mobile.UI.KListLayout.Vertical;
+            this.kListControl1.Location = new System.Drawing.Point(0, 84);
+            this.kListControl1.Name = "kListControl1";
+            this.kListControl1.SeparatorColor = System.Drawing.SystemColors.InactiveBorder;
+            this.kListControl1.Size = new System.Drawing.Size(240, 161);
+            this.kListControl1.TabIndex = 1;
+            // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.domainUpDown1);
             this.tabPage2.Location = new System.Drawing.Point(0, 0);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(240, 245);
+            this.tabPage2.Size = new System.Drawing.Size(192, 74);
             this.tabPage2.Text = "tabPage2";
-            // 
-            // kListControl1
-            // 
-            this.kListControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.kListControl1.Layout = Tenor.Mobile.UI.KListLayout.Vertical;
-            this.kListControl1.Location = new System.Drawing.Point(0, 0);
-            this.kListControl1.Name = "kListControl1";
-            this.kListControl1.SeparatorColor = System.Drawing.SystemColors.InactiveBorder;
-            this.kListControl1.Size = new System.Drawing.Size(240, 245);
-            this.kListControl1.TabIndex = 1;
-            this.kListControl1.Text = "kListControl1";
             // 
             // domainUpDown1
             // 
