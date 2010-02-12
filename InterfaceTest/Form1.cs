@@ -28,7 +28,15 @@ namespace InterfaceTest
             {
                 kListControl1.AddItem("Item " + i.ToString(), i);
             }
+            Tenor.Mobile.UI.Notification.ShowMessage("Test", this.Text, true, this.Icon, new EventHandler(test));
         }
+
+        private void test(object sender, EventArgs e)
+        {
+            Tenor.Mobile.UI.Notification.ShowMessage("OK", this.Text, false, this.Icon);
+        }
+
+
 
         private void menuItem3_Click(object sender, EventArgs e)
         {

@@ -1,0 +1,22 @@
+using System;
+using System.Collections.Generic;
+using System.Text;
+
+namespace Tenor.Mobile.UI
+{
+  internal class SpinnerClickEventArgs : EventArgs
+  {
+    private bool forward;
+
+    public SpinnerClickEventArgs(bool forward)
+    {
+      this.forward = forward;
+    }
+
+    // Returns true if the > spinner button is clicked
+    // Returns false if the < spinner button is clicked
+    public bool Forward { get { return forward; } }
+  }
+
+  internal delegate void SpinnerClickEventHandler(object sender, SpinnerClickEventArgs e);
+}

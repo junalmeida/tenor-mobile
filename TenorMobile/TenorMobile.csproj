@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{1CD6CB52-3A64-4EFB-8C29-39DA26C8D9E3}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -48,6 +48,7 @@
     <DocumentationFile>..\Release\Tenor.Mobile.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Microsoft.WindowsCE.Forms" />
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -63,11 +64,20 @@
     <Compile Include="Drawing\IconHelper.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\Service.cs" />
     <Compile Include="UI\Extensions.cs" />
     <Compile Include="UI\KListControl\IKListItem.cs" />
     <Compile Include="UI\KListControl\KListControl.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="UI\Notification\Notification.cs" />
+    <Compile Include="UI\Notification\NotificationMessageWindow.cs" />
+    <Compile Include="UI\Notification\NotificationSoftKey.cs" />
+    <Compile Include="UI\Notification\NotificationWithSoftKeys.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="UI\Notification\SHNOTIFICATIONDATA.cs" />
+    <Compile Include="UI\Notification\SpinnerClickEventHandler.cs" />
     <Compile Include="UI\TabStrip\TabStrip.cs">
       <SubType>Component</SubType>
     </Compile>

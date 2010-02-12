@@ -181,6 +181,41 @@ namespace Tenor.Mobile
 
         [DllImport("coredll.dll", SetLastError = true)]
         internal static extern IntPtr SendMessageTimeout(IntPtr hWnd, WMSG Msg, int wParam, StringBuilder lParam, uint fuFlags, uint uTimeout, ref IntPtr lpdwResult);
- 
+
+
+        [DllImport("coredll.dll", EntryPoint = "GetMessageW", SetLastError = true)]
+        internal static extern bool GetMessage(out MSG lpMsg, IntPtr hWnd, uint wMsgFilterMin, uint wMsgFilterMax);
+        [DllImport("coredll.dll", EntryPoint = "TranslateMessage", SetLastError = true)]
+        internal static extern bool TranslateMessage(out MSG lpMsg);
+
+        [DllImport("coredll.dll", EntryPoint = "DispatchMessage", SetLastError = true)]
+        internal static extern bool DispatchMessage(ref MSG lpMsg);
+
+        internal struct MSG
+        {
+            public IntPtr hwnd;
+            public int message;
+            public IntPtr wParam;
+            public IntPtr lParam;
+            public int time;
+            public int pt_x;
+            public int pt_y;
+        }
+
+        /// <summary>
+        /// Defines a message filter interface.
+        /// </summary>
+        /// <remarks>This interface allows an application to capture a message before it is dispatched to a control or form.
+        /// <para>A class that implements the IMessageFilter interface can be added to the application's message pump to filter out a message or perform other operations before the message is dispatched to a form or control. To add the message filter to an application's message pump, use the <see cref="M:OpenNETCF.Windows.Forms.ApplicationEx.AddMessageFilter(OpenNETCF.Windows.Forms.IMessageFilter)"/> method in the <see cref="T:OpenNETCF.Windows.Forms.ApplicationEx"/> class.</para></remarks>
+        internal interface IMessageFilter
+        {
+            /// <summary>
+            /// Filters out a message before it is dispatched.
+            /// </summary>
+            /// <param name="m">The message to be dispatched. You cannot modify this message.</param>
+            /// <returns>true to filter the message and stop it from being dispatched; false to allow the message to continue to the next filter or control.</returns>
+            bool PreFilterMessage(ref Microsoft.WindowsCE.Forms.Message m);
+        }
+
     }
 }
