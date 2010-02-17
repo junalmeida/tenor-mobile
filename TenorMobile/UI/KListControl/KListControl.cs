@@ -703,12 +703,31 @@ namespace Tenor.Mobile.UI
                 Capture = false;
                 m_velocity.X = 0;
                 m_velocity.Y = 0;
-                m_offset.X = 0;
-                m_offset.Y = 0;
+
+                
 
                 foreach (var i in m_items)
                     foreach (var j in i.Value)
                         j.Value.Bounds = ItemBounds(j.Value.XIndex, j.Value.YIndex);
+
+
+                if (m_selectedItem != null)
+                {
+                    if ((-m_offset.X) + m_selectedItem.Bounds.Right > this.Width)
+                        m_offset.X = m_selectedItem.Bounds.X - (this.Width - m_selectedItem.Bounds.Width);
+                    if ((-m_offset.Y) + m_selectedItem.Bounds.Bottom  > this.Height)
+                        m_offset.Y = m_selectedItem.Bounds.Y - (this.Height - m_selectedItem.Bounds.Height);
+
+                    if (m_offset.X > MaxXOffset)
+                        m_offset.X = MaxXOffset;
+                    if (m_offset.Y > MaxYOffset)
+                        m_offset.Y = MaxYOffset;
+                }
+                else
+                {
+                    m_offset.X = 0;
+                    m_offset.Y = 0;
+                }
 
 
                 Invalidate();

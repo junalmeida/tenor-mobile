@@ -108,11 +108,12 @@
             // 
             // kListControl1
             // 
+            this.kListControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.kListControl1.Layout = Tenor.Mobile.UI.KListLayout.Vertical;
-            this.kListControl1.Location = new System.Drawing.Point(0, 84);
+            this.kListControl1.Location = new System.Drawing.Point(0, 0);
             this.kListControl1.Name = "kListControl1";
             this.kListControl1.SeparatorColor = System.Drawing.SystemColors.InactiveBorder;
-            this.kListControl1.Size = new System.Drawing.Size(240, 161);
+            this.kListControl1.Size = new System.Drawing.Size(240, 245);
             this.kListControl1.TabIndex = 1;
             // 
             // tabPage2
