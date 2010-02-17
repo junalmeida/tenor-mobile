@@ -36,10 +36,21 @@ namespace Tenor.Mobile.UI
         /// </summary>
         public int YIndex { get; internal set; }
 
+        private bool selected;
         /// <summary>
         /// Indicates whether this item is selected.
         /// </summary>
-        public bool Selected { get; internal set; }
+        public bool Selected
+        {
+            get
+            {
+                return selected;
+            }
+            internal set
+            {
+                selected = value;
+            }
+        }
 
         /// <summary>
         /// Gets the text of this item.

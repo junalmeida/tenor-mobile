@@ -25,6 +25,16 @@ namespace Tenor.Mobile.UI
             set { drawSeparators = value; }
         }
 
+
+        /// <summary>
+        /// Controls whether to draw the scrollbar.
+        /// </summary>
+        public bool DrawScrollbar
+        {
+            get;
+            set;
+        }
+
         /// <summary>
         /// Gets or sets the color of the separators.
         /// </summary>
@@ -44,6 +54,7 @@ namespace Tenor.Mobile.UI
             m_timer.Interval = 10;
             m_timer.Tick += new EventHandler(m_timer_Tick);
             SeparatorColor = SystemColors.InactiveBorder;
+            DrawScrollbar = true;
 
         }
 
@@ -433,6 +444,9 @@ namespace Tenor.Mobile.UI
             if (m_backBuffer != null)
             {
                 m_backBuffer.Clear(BackColor);
+                
+                base.OnPaint(new PaintEventArgs(m_backBuffer, e.ClipRectangle));
+
 
                 Point startIndex = FindIndex(0, 0);//Bounds.Left, Bounds.Top);
 
@@ -508,52 +522,56 @@ namespace Tenor.Mobile.UI
 
                     moreX = xEnumerator.MoveNext();
 
-                    int scrollSize = 3;
-
-                    if (true && (m_layout == KListLayout.Vertical || m_layout == KListLayout.Grid))
+                    if (DrawScrollbar)
                     {
+                        int scrollSize = 3;
 
-                        int itemsTotalHeight = this.Count * GetItemSize().Height;
-                        int scrollHeight = (this.Height * 100) / itemsTotalHeight; // percentage
-
-                        if (scrollHeight < 100)
+                        if (true && (m_layout == KListLayout.Vertical || m_layout == KListLayout.Grid))
                         {
-                            int scrollWidth = Convert.ToInt32(scrollSize * scaleFactor.Width);
-                            scrollHeight = (this.Height * scrollHeight) / 100;
 
-                            int scrollTop = (100 * m_offset.Y) / MaxYOffset;
-                            scrollTop = ((this.Height - scrollHeight) * scrollTop) / 100;
+                            int itemsTotalHeight = this.Count * GetItemSize().Height;
+                            int scrollHeight = (this.Height * 100) / itemsTotalHeight; // percentage
+
+                            if (scrollHeight < 100)
+                            {
+                                int scrollWidth = Convert.ToInt32(scrollSize * scaleFactor.Width);
+                                scrollHeight = (this.Height * scrollHeight) / 100;
+
+                                int scrollTop = (100 * m_offset.Y) / MaxYOffset;
+                                scrollTop = ((this.Height - scrollHeight) * scrollTop) / 100;
 
 
-                            Rectangle scroll = new Rectangle(this.Width - (scrollWidth * 2), scrollTop, scrollWidth, scrollHeight);
-                            SolidBrush brush = new SolidBrush(SystemColors.ScrollBar);
-                            m_backBuffer.FillRectangle(brush, scroll);
+                                Rectangle scroll = new Rectangle(this.Width - (scrollWidth * 2), scrollTop, scrollWidth, scrollHeight);
+                                SolidBrush brush = new SolidBrush(SystemColors.ScrollBar);
+                                m_backBuffer.FillRectangle(brush, scroll);
+                            }
                         }
-                    }
-                    if (true && (m_layout == KListLayout.Horizontal || m_layout == KListLayout.Grid))
-                    {
-                        int itemsTotalWidth = this.m_items.Count * GetItemSize().Width;
-                        int scrollWidth = (this.Width * 100) / itemsTotalWidth; // percentage
-
-                        if (scrollWidth < 100)
+                        if (true && (m_layout == KListLayout.Horizontal || m_layout == KListLayout.Grid))
                         {
-                            int scrollHeight = Convert.ToInt32(scrollSize * scaleFactor.Height);
+                            int itemsTotalWidth = this.m_items.Count * GetItemSize().Width;
+                            int scrollWidth = (this.Width * 100) / itemsTotalWidth; // percentage
 
-                            scrollWidth = (this.Width * scrollWidth) / 100;
+                            if (scrollWidth < 100)
+                            {
+                                int scrollHeight = Convert.ToInt32(scrollSize * scaleFactor.Height);
 
-                            int scrollLeft = (100 * m_offset.X) / MaxXOffset;
-                            scrollLeft = ((this.Width - scrollWidth) * scrollLeft) / 100;
+                                scrollWidth = (this.Width * scrollWidth) / 100;
+
+                                int scrollLeft = (100 * m_offset.X) / MaxXOffset;
+                                scrollLeft = ((this.Width - scrollWidth) * scrollLeft) / 100;
 
 
-                            Rectangle scroll = new Rectangle(scrollLeft, this.Height - (scrollHeight * 2), scrollWidth, scrollHeight);
-                            SolidBrush brush = new SolidBrush(SystemColors.ScrollBar);
-                            m_backBuffer.FillRectangle(brush, scroll);
+                                Rectangle scroll = new Rectangle(scrollLeft, this.Height - (scrollHeight * 2), scrollWidth, scrollHeight);
+                                SolidBrush brush = new SolidBrush(SystemColors.ScrollBar);
+                                m_backBuffer.FillRectangle(brush, scroll);
+                            }
                         }
                     }
                 }
 
 
                 e.Graphics.DrawImage(m_backBufferBitmap, 0, 0);
+
             }
             else
             {
@@ -602,6 +620,7 @@ namespace Tenor.Mobile.UI
             }
         }
 
+
         /// <summary>
         /// Called when the user releases a mouse button.
         /// </summary>
@@ -620,36 +639,7 @@ namespace Tenor.Mobile.UI
             {
                 // Yes, so select that item.
                 Point selectedIndex = FindIndex(e.X, e.Y);
-                if (selectedIndex != m_selectedIndex)
-                {
-                    KListItem item = null;
-                    if (m_items.ContainsKey(selectedIndex.X) &&
-                        m_items[selectedIndex.X].TryGetValue(selectedIndex.Y, out item))
-                    {
-                        if (m_selectedItem != null)
-                        {
-                            m_selectedItem.Selected = false;
-                        }
-                        m_selectedIndex = selectedIndex;
-                        m_selectedItem = item;
-                        m_selectedItem.Selected = true;
-
-                        if (SelectedItemChanged != null)
-                        {
-                            SelectedItemChanged(this, new EventArgs());
-                        }
-                    }
-                }
-                else
-                {
-                    if (SelectedItemClicked != null)
-                    {
-                        SelectedItemClicked(this, new EventArgs());
-                    }
-                }
-
-                m_velocity.X = 0;
-                m_velocity.Y = 0;
+                SelectItem(selectedIndex.X, selectedIndex.Y);
             }
             else
             {
@@ -663,6 +653,38 @@ namespace Tenor.Mobile.UI
         }
 
         /// <summary>
+        /// Selects an item.
+        /// </summary>
+        /// <param name="selectedIndex">The X and Y index</param>
+        public void SelectItem(int xIndex, int yIndex)
+        {
+            Point selectedIndex = new Point(xIndex, yIndex);
+            if (selectedIndex != m_selectedIndex)
+            {
+                KListItem item = null;
+                if (m_items.ContainsKey(selectedIndex.X) &&
+                    m_items[selectedIndex.X].TryGetValue(selectedIndex.Y, out item))
+                {
+                    if (m_selectedItem != null)
+                    {
+                        m_selectedItem.Selected = false;
+                    }
+                    m_selectedIndex = selectedIndex;
+                    m_selectedItem = item;
+                    m_selectedItem.Selected = true;
+
+                    if (SelectedItemChanged != null)
+                    {
+                        SelectedItemChanged(this, new EventArgs());
+                    }
+                }
+            }
+
+            m_velocity.X = 0;
+            m_velocity.Y = 0;
+        }
+
+        /// <summary>
         /// Resets the drawing of the list.
         /// </summary>
         private void Reset()
@@ -670,12 +692,14 @@ namespace Tenor.Mobile.UI
             if (!m_updating)
             {
                 m_timer.Enabled = false;
+                /*
                 if (m_selectedItem != null)
                 {
                     m_selectedItem.Selected = false;
                     m_selectedItem = null;
                 }
                 m_selectedIndex = new Point(-1, -1);
+                 */
                 Capture = false;
                 m_velocity.X = 0;
                 m_velocity.Y = 0;
@@ -688,11 +712,6 @@ namespace Tenor.Mobile.UI
 
 
                 Invalidate();
-
-                if (SelectedItemChanged != null)
-                {
-                    SelectedItemChanged(this, new EventArgs());
-                }
             }
         }
 

@@ -18,6 +18,8 @@ namespace InterfaceTest
             InitializeComponent();
 
             kListControl1.DrawSeparators = true;
+            kListControl1.AddItem("Select an option", "");
+            kListControl1.SelectItem(0, 0);
         }
 
         private void menuItem2_Click(object sender, EventArgs e)
@@ -28,6 +30,7 @@ namespace InterfaceTest
             {
                 kListControl1.AddItem("Item " + i.ToString(), i);
             }
+            kListControl1.SelectItem(0, 0);
             Tenor.Mobile.UI.Notification.ShowMessage("Test", this.Text, true, this.Icon, new EventHandler(test));
         }
 
