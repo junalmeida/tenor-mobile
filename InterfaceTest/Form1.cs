@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.IO;
 using Tenor.Mobile.Diagnostics;
+using Tenor.Mobile.Drawing;
 
 namespace InterfaceTest
 {
@@ -123,7 +124,12 @@ namespace InterfaceTest
             g.DrawString("  " + ff.file.Name, kListControl1.Font, textBrush, r, format);
             r.Y += 14;
             g.DrawString("  " + ff.file.CreationTime.ToString(), kListControl1.Font, textBrush, r, format);
-            
+
+
+            Rectangle rect = new Rectangle(e.Bounds.X, e.Bounds.Bottom - 2, Convert.ToInt32(e.Bounds.Width / 2), 2);
+            GradientFill.Fill(g, rect, SystemColors.Window, SystemColors.Control, GradientFill.FillDirection.LeftToRight);
+            rect.Offset(rect.Width, 0);
+            GradientFill.Fill(g, rect, SystemColors.Control, SystemColors.Window, GradientFill.FillDirection.LeftToRight);
         }
 
         private void tabStrip1_SelectedIndexChanged(object sender, EventArgs e)

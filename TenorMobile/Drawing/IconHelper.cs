@@ -31,9 +31,9 @@ namespace Tenor.Mobile.Drawing
         /// <returns></returns>
         public static Icon ExtractAssociatedIcon(string filename, bool largeIcon)
         {
-            NativeMethods.SHFILEINFO psfi = new NativeMethods.SHFILEINFO();
-            if (NativeMethods.SHGetFileInfo(
-                filename, 0, ref psfi, Marshal.SizeOf(psfi), NativeMethods.SHGFI.ICON | (largeIcon ? NativeMethods.SHGFI.LARGEICON : NativeMethods.SHGFI.SMALLICON)) == 0)
+            Tenor.Mobile.NativeMethods.SHFILEINFO psfi = new Tenor.Mobile.NativeMethods.SHFILEINFO();
+            if (Tenor.Mobile.NativeMethods.SHGetFileInfo(
+                filename, 0, ref psfi, Marshal.SizeOf(psfi), Tenor.Mobile.NativeMethods.SHGFI.ICON | (largeIcon ? Tenor.Mobile.NativeMethods.SHGFI.LARGEICON : Tenor.Mobile.NativeMethods.SHGFI.SMALLICON)) == 0)
             {
                 throw new Win32Exception(Marshal.GetLastWin32Error());
             }
