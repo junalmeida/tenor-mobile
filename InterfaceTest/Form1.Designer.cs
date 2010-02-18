@@ -43,6 +43,7 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.domainUpDown1 = new System.Windows.Forms.DomainUpDown();
             this.hardwareButton1 = new Microsoft.WindowsCE.Forms.HardwareButton();
+            this.notificationWithSoftKeys1 = new Tenor.Mobile.UI.NotificationWithSoftKeys();
             this.messageQueue1 = new System.Messaging.MessageQueue();
             this.tabStrip1.SuspendLayout();
             this.tabPage1.SuspendLayout();
@@ -179,6 +180,7 @@
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.DomainUpDown domainUpDown1;
         private Microsoft.WindowsCE.Forms.HardwareButton hardwareButton1;
+        private Tenor.Mobile.UI.NotificationWithSoftKeys notificationWithSoftKeys1;
         private System.Messaging.MessageQueue messageQueue1;
     }
 }

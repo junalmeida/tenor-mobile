@@ -31,12 +31,17 @@ namespace InterfaceTest
                 kListControl1.AddItem("Item " + i.ToString(), i);
             }
             kListControl1.SelectItem(0, 0);
-            Tenor.Mobile.UI.Notification.ShowMessage("Test", this.Text, true, this.Icon, new EventHandler(test));
+
+            notificationWithSoftKeys1.Icon = this.Icon;
+            notificationWithSoftKeys1.Caption = this.Text;
+            notificationWithSoftKeys1.Text = "Test";
+            notificationWithSoftKeys1.LeftSoftKey.Title = "View";
+            notificationWithSoftKeys1.Visible = true;
         }
 
         private void test(object sender, EventArgs e)
         {
-            Tenor.Mobile.UI.Notification.ShowMessage("OK", this.Text, false, this.Icon);
+            this.Activate();
         }
 
 
