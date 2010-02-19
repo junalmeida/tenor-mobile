@@ -153,7 +153,56 @@ namespace Tenor.Mobile.UI
             {
                 return m_selectedItem;
             }
+            set
+            {
+                if (value != null)
+                {
+                    SelectItem(value.XIndex, value.YIndex);
+                }
+                else
+                {
+                    if (m_selectedItem != null)
+                    {
+                        m_selectedItem.Selected = false;
+                    } 
+                    m_selectedItem = null;
+                    m_selectedIndex = new Point(-1, -1);
+                }
+                Invalidate();
+            }
         }
+
+        /// <summary>
+        /// Selects an item.
+        /// </summary>
+        private void SelectItem(int xIndex, int yIndex)
+        {
+            Point selectedIndex = new Point(xIndex, yIndex);
+            if (selectedIndex != m_selectedIndex)
+            {
+                KListItem item = null;
+                if (m_items.ContainsKey(selectedIndex.X) &&
+                    m_items[selectedIndex.X].TryGetValue(selectedIndex.Y, out item))
+                {
+                    if (m_selectedItem != null)
+                    {
+                        m_selectedItem.Selected = false;
+                    }
+                    m_selectedIndex = selectedIndex;
+                    m_selectedItem = item;
+                    m_selectedItem.Selected = true;
+
+                    if (SelectedItemChanged != null)
+                    {
+                        SelectedItemChanged(this, new EventArgs());
+                    }
+                }
+            }
+
+            m_velocity.X = 0;
+            m_velocity.Y = 0;
+        }
+
 
         /// <summary>
         /// Gets the item count.
@@ -676,37 +725,7 @@ namespace Tenor.Mobile.UI
             }
         }
 
-        /// <summary>
-        /// Selects an item.
-        /// </summary>
-        /// <param name="selectedIndex">The X and Y index</param>
-        public void SelectItem(int xIndex, int yIndex)
-        {
-            Point selectedIndex = new Point(xIndex, yIndex);
-            if (selectedIndex != m_selectedIndex)
-            {
-                KListItem item = null;
-                if (m_items.ContainsKey(selectedIndex.X) &&
-                    m_items[selectedIndex.X].TryGetValue(selectedIndex.Y, out item))
-                {
-                    if (m_selectedItem != null)
-                    {
-                        m_selectedItem.Selected = false;
-                    }
-                    m_selectedIndex = selectedIndex;
-                    m_selectedItem = item;
-                    m_selectedItem.Selected = true;
 
-                    if (SelectedItemChanged != null)
-                    {
-                        SelectedItemChanged(this, new EventArgs());
-                    }
-                }
-            }
-
-            m_velocity.X = 0;
-            m_velocity.Y = 0;
-        }
 
         /// <summary>
         /// Resets the drawing of the list.
@@ -735,26 +754,31 @@ namespace Tenor.Mobile.UI
                         j.Value.Bounds = ItemBounds(j.Value.XIndex, j.Value.YIndex);
 
 
-                if (m_selectedItem != null)
-                {
-                    if ((-m_offset.X) + m_selectedItem.Bounds.Right > this.Width)
-                        m_offset.X = m_selectedItem.Bounds.X - (this.Width - m_selectedItem.Bounds.Width);
-                    if ((-m_offset.Y) + m_selectedItem.Bounds.Bottom  > this.Height)
-                        m_offset.Y = m_selectedItem.Bounds.Y - (this.Height - m_selectedItem.Bounds.Height);
-
-                    if (m_offset.X > MaxXOffset)
-                        m_offset.X = MaxXOffset;
-                    if (m_offset.Y > MaxYOffset)
-                        m_offset.Y = MaxYOffset;
-                }
-                else
-                {
-                    m_offset.X = 0;
-                    m_offset.Y = 0;
-                }
+                EnsureVisible();
 
 
                 Invalidate();
+            }
+        }
+
+        public void EnsureVisible()
+        {
+            if (m_selectedItem != null)
+            {
+                if ((-m_offset.X) + m_selectedItem.Bounds.Right > this.Width)
+                    m_offset.X = m_selectedItem.Bounds.X - (this.Width - m_selectedItem.Bounds.Width);
+                if ((-m_offset.Y) + m_selectedItem.Bounds.Bottom > this.Height)
+                    m_offset.Y = m_selectedItem.Bounds.Y - (this.Height - m_selectedItem.Bounds.Height);
+
+                if (m_offset.X > MaxXOffset)
+                    m_offset.X = MaxXOffset;
+                if (m_offset.Y > MaxYOffset)
+                    m_offset.Y = MaxYOffset;
+            }
+            else
+            {
+                m_offset.X = 0;
+                m_offset.Y = 0;
             }
         }
 

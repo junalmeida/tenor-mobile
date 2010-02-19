@@ -88,5 +88,12 @@ namespace Tenor.Mobile.Drawing
             int nWidth,
             int nHeight);
 
+
+        [DllImport("coredll")]
+        internal static extern int DrawText(IntPtr hdc, string lpStr, int nCount, ref Tenor.Mobile.NativeMethods.RECT lpRect, int wFormat);
+        internal const int DT_CALCRECT = 0x00000400;
+        internal const int DT_WORDBREAK = 0x00000010;
+
+
     }
 }

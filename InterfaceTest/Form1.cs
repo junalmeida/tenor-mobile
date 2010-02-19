@@ -20,7 +20,7 @@ namespace InterfaceTest
 
             kListControl1.DrawSeparators = true;
             kListControl1.AddItem("Select an option", "");
-            kListControl1.SelectItem(0, 0);
+            kListControl1.SelectedItem = kListControl1[0];
         }
 
         private void menuItem2_Click(object sender, EventArgs e)
@@ -33,7 +33,7 @@ namespace InterfaceTest
                 int size = r.Next(25, 70);
                 kListControl1.AddItem("Item " + i.ToString(), i, size);
             }
-            kListControl1.SelectItem(0, 0);
+            kListControl1.SelectedItem = kListControl1[0];
 
             notificationWithSoftKeys1.Icon = this.Icon;
             notificationWithSoftKeys1.Caption = this.Text;
