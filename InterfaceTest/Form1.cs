@@ -25,11 +25,13 @@ namespace InterfaceTest
 
         private void menuItem2_Click(object sender, EventArgs e)
         {
+            Random r = new Random();
             kListControl1.Clear();
             kListControl1.Layout = Tenor.Mobile.UI.KListLayout.Vertical;
             for (int i = 0; i <= 10; i++)
             {
-                kListControl1.AddItem("Item " + i.ToString(), i);
+                int size = r.Next(25, 70);
+                kListControl1.AddItem("Item " + i.ToString(), i, size);
             }
             kListControl1.SelectItem(0, 0);
 
@@ -38,6 +40,8 @@ namespace InterfaceTest
             notificationWithSoftKeys1.Text = "Test";
             notificationWithSoftKeys1.LeftSoftKey.Title = "View";
             notificationWithSoftKeys1.Visible = true;
+
+
         }
 
         private void test(object sender, EventArgs e)
@@ -49,11 +53,13 @@ namespace InterfaceTest
 
         private void menuItem3_Click(object sender, EventArgs e)
         {
+            Random r = new Random();
             kListControl1.Clear();
             kListControl1.Layout = Tenor.Mobile.UI.KListLayout.Horizontal;
             for (int i = 0; i <= 20; i++)
             {
-                kListControl1.AddItem("Item " + i.ToString(), i);
+                int size = r.Next(25, 70);
+                kListControl1.AddItem("Item " + i.ToString(), i, size);
             }
 
         }
@@ -117,7 +123,9 @@ namespace InterfaceTest
             }
 
             FF ff = (FF)e.Item.Value;
-            g.DrawIcon(ff.icon, e.Bounds.X + 1, e.Bounds.Y + 1);
+            Rectangle iconRect = new Rectangle(e.Bounds.X + 1, e.Bounds.Y + 1, ff.icon.Width, ff.icon.Height);
+            RoundedRectangle.Fill(g, new Pen(SystemColors.ControlDark), SystemColors.ControlDark, iconRect, new Size(8, 8));
+            g.DrawIcon(ff.icon, iconRect.X, iconRect.Y);
             Rectangle r = e.Bounds;
             r.X += 32;
 

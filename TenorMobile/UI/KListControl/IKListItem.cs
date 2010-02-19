@@ -36,6 +36,11 @@ namespace Tenor.Mobile.UI
         /// </summary>
         public int YIndex { get; internal set; }
 
+        private int width = 0;
+        private int height = 0;
+        public int Width { get { return width; } set { width = value; } }
+        public int Height { get { return height; } set { height = value; } }
+
         private bool selected;
         /// <summary>
         /// Indicates whether this item is selected.

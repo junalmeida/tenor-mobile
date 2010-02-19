@@ -128,7 +128,7 @@ namespace Tenor.Mobile.UI
         // RE-play physical alerts on an update
         SHNF_ALERTONUPDATE = 0x00000200
     }
-
+#pragma warning disable
     internal struct NMSHN
     {
         public IntPtr hwndFrom;
@@ -139,4 +139,5 @@ namespace Tenor.Mobile.UI
         public int union1;
         public int union2;
     }
+#pragma warning restore
 }

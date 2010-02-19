@@ -132,16 +132,16 @@ namespace Tenor.Mobile.UI
             }
         }
 
-        /// <summary>
-        /// The selected index.
-        /// </summary>
-        public Point SelectedIndex
-        {
-            get
-            {
-                return m_selectedIndex;
-            }
-        }
+        ///// <summary>
+        ///// The selected index.
+        ///// </summary>
+        //public Point SelectedIndex
+        //{
+        //    get
+        //    {
+        //        return m_selectedIndex;
+        //    }
+        //}
 
         /// <summary>
         /// Gets the selected item.
@@ -191,7 +191,7 @@ namespace Tenor.Mobile.UI
         /// Gets or sets the height of items in the control.
         /// </summary>
         /// <value>The height of the items.</value>
-        public int ItemHeight
+        public int DefaultItemHeight
         {
             get
             {
@@ -210,7 +210,7 @@ namespace Tenor.Mobile.UI
         /// Gets or sets the height of items in the control.
         /// </summary>
         /// <value>The height of the items.</value>
-        public int ItemWidth
+        public int DefaultItemWidth
         {
             get
             {
@@ -223,25 +223,25 @@ namespace Tenor.Mobile.UI
             }
         }
 
-        private Size GetItemSize()
-        {
-            int width = this.Width;
-            int height = this.Height;
+        //private Size GetItemSize()
+        //{
+        //    int width = this.Width;
+        //    int height = this.Height;
 
-            if (Layout == KListLayout.Vertical || Layout == KListLayout.Grid)
-            {
-                // In vertical mode, we just use the full bounds, other modes use m_itemWidth.
-                height = Convert.ToInt32(ItemHeight * scaleFactor.Height);
-            }
+        //    if (Layout == KListLayout.Vertical || Layout == KListLayout.Grid)
+        //    {
+        //        // In vertical mode, we just use the full bounds, other modes use m_itemWidth.
+        //        height = Convert.ToInt32(ItemHeight * scaleFactor.Height);
+        //    }
 
-            if (Layout == KListLayout.Horizontal || Layout == KListLayout.Grid)
-            {
-                // In horizontal mode, we just use the full bounds, other modes use m_itemHeight.
-                width = Convert.ToInt32(ItemWidth * scaleFactor.Width);
-            }
+        //    if (Layout == KListLayout.Horizontal || Layout == KListLayout.Grid)
+        //    {
+        //        // In horizontal mode, we just use the full bounds, other modes use m_itemHeight.
+        //        width = Convert.ToInt32(ItemWidth * scaleFactor.Width);
+        //    }
 
-            return new Size(width, height);
-        }
+        //    return new Size(width, height);
+        //}
 
 
         /// <summary>
@@ -270,6 +270,16 @@ namespace Tenor.Mobile.UI
         /// <param name="value">A value related to the item.</param>
         public void AddItem(string text, object value)
         {
+            AddItem(text, value, 0);
+        }
+
+        /// <summary>
+        /// Adds an item.
+        /// </summary>
+        /// <param name="text">The text for the item.</param>
+        /// <param name="value">A value related to the item.</param>
+        public void AddItem(string text, object value, int size)
+        {
             if (m_layout == KListLayout.Grid)
             {
                 throw new NotSupportedException("List is not in grid mode");
@@ -281,6 +291,14 @@ namespace Tenor.Mobile.UI
             item.XIndex = m_layout == KListLayout.Vertical ? 0 : m_items.Count;
             item.YIndex = m_layout == KListLayout.Horizontal ? 0 :
                 m_items.ContainsKey(0) ? m_items[0].Count : 0;
+
+            if (m_layout == KListLayout.Vertical || m_layout == KListLayout.Grid)
+                item.Height = size;
+            if (m_layout == KListLayout.Horizontal || m_layout == KListLayout.Grid)
+                item.Width = size;
+
+
+
             AddItem(item);
         }
 
@@ -318,8 +336,8 @@ namespace Tenor.Mobile.UI
             {
                 m_items.Add(item.XIndex, new ItemList());
             }
-            item.Bounds = ItemBounds(item.XIndex, item.YIndex);
             m_items[item.XIndex].Add(item.YIndex, item);
+            item.Bounds = ItemBounds(item.XIndex, item.YIndex);
             Reset();
         }
 
@@ -343,6 +361,8 @@ namespace Tenor.Mobile.UI
         public void Clear()
         {
             m_items.Clear();
+            m_selectedItem = null;
+            m_selectedIndex = new Point(-1, -1);
             Reset();
         }
 
@@ -447,12 +467,11 @@ namespace Tenor.Mobile.UI
                 
                 base.OnPaint(new PaintEventArgs(m_backBuffer, e.ClipRectangle));
 
-
-                Point startIndex = FindIndex(0, 0);//Bounds.Left, Bounds.Top);
+                KListItem startItem = FindItem(0, 0);
 
                 GridList.Enumerator xEnumerator = m_items.GetEnumerator();
                 bool moreX = xEnumerator.MoveNext();
-                while (moreX && xEnumerator.Current.Key < startIndex.X)
+                while (moreX && xEnumerator.Current.Key < startItem.XIndex)
                 {
                     moreX = xEnumerator.MoveNext();
                 }
@@ -464,7 +483,7 @@ namespace Tenor.Mobile.UI
                     {
                         ItemList.Enumerator yEnumerator = yList.GetEnumerator();
                         bool moreY = yEnumerator.MoveNext();
-                        while (moreY && yEnumerator.Current.Key < startIndex.Y)
+                        while (moreY && yEnumerator.Current.Key < startItem.YIndex)
                         {
                             moreY = yEnumerator.MoveNext();
                         }
@@ -526,11 +545,12 @@ namespace Tenor.Mobile.UI
                     {
                         int scrollSize = 3;
 
-                        if (true && (m_layout == KListLayout.Vertical || m_layout == KListLayout.Grid))
+                        if ((m_layout == KListLayout.Vertical || m_layout == KListLayout.Grid) && MaxYOffset > 0)
                         {
 
-                            int itemsTotalHeight = this.Count * GetItemSize().Height;
-                            int scrollHeight = (this.Height * 100) / itemsTotalHeight; // percentage
+
+
+                            int scrollHeight = (this.Height * 100) / MaxYOffset; // percentage
 
                             if (scrollHeight < 100)
                             {
@@ -546,10 +566,9 @@ namespace Tenor.Mobile.UI
                                 m_backBuffer.FillRectangle(brush, scroll);
                             }
                         }
-                        if (true && (m_layout == KListLayout.Horizontal || m_layout == KListLayout.Grid))
+                        if ((m_layout == KListLayout.Horizontal || m_layout == KListLayout.Grid) && MaxXOffset > 0)
                         {
-                            int itemsTotalWidth = this.m_items.Count * GetItemSize().Width;
-                            int scrollWidth = (this.Width * 100) / itemsTotalWidth; // percentage
+                            int scrollWidth = (this.Width * 100) / MaxXOffset; // percentage
 
                             if (scrollWidth < 100)
                             {
@@ -628,28 +647,33 @@ namespace Tenor.Mobile.UI
         {
             base.OnMouseUp(e);
 
-            Size itemSize = GetItemSize();
-            // Did the click end on the same item it started on?
-            bool sameX = Math.Abs(e.X - m_mouseDown.X) < itemSize.Width;
-            bool sameY = Math.Abs(e.Y - m_mouseDown.Y) < itemSize.Height;
-
-            if ((m_layout == KListLayout.Vertical && sameY) ||
-                (m_layout == KListLayout.Horizontal && sameX) ||
-                (m_layout == KListLayout.Grid && sameX && sameY))
+            KListItem item = FindItem(m_mouseDown.X, m_mouseDown.Y);
+            if (item != null)
             {
-                // Yes, so select that item.
-                Point selectedIndex = FindIndex(e.X, e.Y);
-                SelectItem(selectedIndex.X, selectedIndex.Y);
-            }
-            else
-            {
-                m_timer.Enabled = true;
-            }
+                Size itemSize = item.Bounds.Size;
+                // Did the click end on the same item it started on?
+                bool sameX = Math.Abs(e.X - m_mouseDown.X) < itemSize.Width;
+                bool sameY = Math.Abs(e.Y - m_mouseDown.Y) < itemSize.Height;
 
-            m_mouseDown.Y = -1;
-            Capture = false;
+                if ((m_layout == KListLayout.Vertical && sameY) ||
+                    (m_layout == KListLayout.Horizontal && sameX) ||
+                    (m_layout == KListLayout.Grid && sameX && sameY))
+                {
+                    // Yes, so select that item.
+                    //Point selectedIndex = FindIndex(e.X, e.Y);
+                    //SelectItem(selectedIndex.X, selectedIndex.Y);
+                    SelectItem(item.XIndex, item.YIndex);
+                }
+                else
+                {
+                    m_timer.Enabled = true;
+                }
 
-            Invalidate();
+                m_mouseDown.Y = -1;
+                Capture = false;
+
+                Invalidate();
+            }
         }
 
         /// <summary>
@@ -801,28 +825,74 @@ namespace Tenor.Mobile.UI
         /// <summary>
         /// Finds the bounds for the specified item.
         /// </summary>
-        /// <param name="x">The item x index.</param>
-        /// <param name="y">The item y index.</param>
+        /// <param name="xIndex">The item x index.</param>
+        /// <param name="yIndex">The item y index.</param>
         /// <returns>The item bounds.</returns>
-        private Rectangle ItemBounds(int x, int y)
+        private Rectangle ItemBounds(int xIndex, int yIndex)
         {
-            Size itemSize = GetItemSize();
-            int itemX = (itemSize.Width * x);
-            int itemY = (itemSize.Height * y);
+            KListItem item = this[xIndex, yIndex];
+            int itemX = 0;//(itemSize.Width * xIndex);
+            int itemY = 0;//(itemSize.Height * yIndex);
 
             if (m_layout == KListLayout.Vertical)
             {
+                Size itemSize = new Size(this.Width, (item.Height > 0 ? item.Height : DefaultItemHeight));
+                itemY = (yIndex > 0 ? this[xIndex, yIndex - 1].Bounds.Bottom : 0);
                 return new Rectangle(0, itemY, this.Width, itemSize.Height);
             }
             else if (m_layout == KListLayout.Horizontal)
             {
+                Size itemSize = new Size((item.Width > 0 ? item.Width : DefaultItemWidth), this.Height);
+                itemX = (xIndex > 0 ? this[xIndex - 1, yIndex].Bounds.Right : 0);
                 return new Rectangle(itemX, 0, itemSize.Width, this.Height);
             }
             else
             {
+                Size itemSize = new Size((item.Width > 0 ? item.Width : DefaultItemWidth), (item.Height > 0 ? item.Height : DefaultItemHeight));
+                itemX = (xIndex > 0 ? this[xIndex, yIndex].Bounds.Right : 0);
+                itemY = (yIndex > 0 ? this[xIndex, yIndex].Bounds.Bottom : 0);
                 return new Rectangle(itemX, itemY, itemSize.Width, itemSize.Height);
             }
         }
+
+        ///// <summary>
+        ///// Finds the index for the specified y offset.
+        ///// </summary>
+        ///// <param name="x">The x offset.</param>
+        ///// <param name="y">The y offset.</param>
+        ///// <returns></returns>
+        //private Point FindIndex(int x, int y)
+        //{
+        //    for (int i = 0; i < m_items.Count; i++)
+        //        for (int j = 0; i < m_items[i].Count; j++)
+        //        {
+        //            Rectangle itemBounds = m_items[i][j].Bounds;
+        //            itemBounds.Offset(-m_offset.X, -m_offset.Y);
+        //            if (itemBounds.Contains(x,y))
+                       
+        //        }
+
+
+        //    Size itemSize = GetItemSize();
+        //    Point index = new Point(0, 0);
+
+        //    if (m_layout == KListLayout.Vertical)
+        //    {
+        //        index.Y = ((y + m_offset.Y) / (itemSize.Height));
+        //    }
+        //    else if (m_layout == KListLayout.Horizontal)
+        //    {
+        //        index.X = ((x + m_offset.X) / (itemSize.Width));
+        //    }
+        //    else
+        //    {
+        //        index.X = ((x + m_offset.X) / (itemSize.Width));
+        //        index.Y = ((y + m_offset.Y) / (itemSize.Height));
+        //    }
+
+        //    return index;
+        //}
+
 
         /// <summary>
         /// Finds the index for the specified y offset.
@@ -830,26 +900,19 @@ namespace Tenor.Mobile.UI
         /// <param name="x">The x offset.</param>
         /// <param name="y">The y offset.</param>
         /// <returns></returns>
-        private Point FindIndex(int x, int y)
+        private KListItem FindItem(int x, int y)
         {
-            Size itemSize = GetItemSize();
-            Point index = new Point(0, 0);
-
-            if (m_layout == KListLayout.Vertical)
-            {
-                index.Y = ((y + m_offset.Y) / (itemSize.Height));
-            }
-            else if (m_layout == KListLayout.Horizontal)
-            {
-                index.X = ((x + m_offset.X) / (itemSize.Width));
-            }
-            else
-            {
-                index.X = ((x + m_offset.X) / (itemSize.Width));
-                index.Y = ((y + m_offset.Y) / (itemSize.Height));
-            }
-
-            return index;
+            for (int i = 0; i < m_items.Count; i++)
+                for (int j = 0; j < m_items[i].Count; j++)
+                {
+                    Rectangle itemBounds = m_items[i][j].Bounds;
+                    itemBounds.Offset(-m_offset.X, -m_offset.Y);
+                    if (itemBounds.Contains(x, y))
+                        return m_items[i][j];
+                }
+            return null;
+            //Point p = FindIndex(x, y);
+            //return this[x, y];
         }
 
         /// <summary>
@@ -860,7 +923,10 @@ namespace Tenor.Mobile.UI
         {
             get
             {
-                return Math.Max(((m_items.Count * GetItemSize().Width)) - this.Width, 0);
+                if (m_items.Count > 0)
+                    return Math.Max(m_items[m_items.Count - 1][0].Bounds.Right - this.Width, 0);
+                else
+                    return 0;
             }
         }
 
@@ -873,13 +939,9 @@ namespace Tenor.Mobile.UI
             get
             {
                 if (m_items.Count > 0)
-                {
-                    return Math.Max(((m_items[0].Count * GetItemSize().Height)) - this.Height, 0);
-                }
+                    return Math.Max(m_items[0][m_items[0].Count - 1].Bounds.Bottom - this.Height, 0);
                 else
-                {
                     return 0;
-                }
             }
         }
 

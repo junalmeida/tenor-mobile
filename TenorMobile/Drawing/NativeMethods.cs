@@ -10,7 +10,7 @@ namespace Tenor.Mobile.Drawing
 
     internal sealed class NativeMethods
     {
-        public struct TRIVERTEX
+        internal struct TRIVERTEX
         {
             public int x;
             public int y;
@@ -35,7 +35,7 @@ namespace Tenor.Mobile.Drawing
                 this.Alpha = (ushort)(alpha << 8);
             }
         }
-        public struct GRADIENT_RECT
+        internal struct GRADIENT_RECT
         {
             public uint UpperLeft;
             public uint LowerRight;
@@ -48,7 +48,7 @@ namespace Tenor.Mobile.Drawing
 
 
         [DllImport("coredll.dll", SetLastError = true, EntryPoint = "GradientFill")]
-        public extern static bool GradientFill(
+        internal extern static bool GradientFill(
             IntPtr hdc,
             TRIVERTEX[] pVertex,
             uint dwNumVertex,
@@ -56,8 +56,37 @@ namespace Tenor.Mobile.Drawing
             uint dwNumMesh,
             uint dwMode);
 
-        public const int GRADIENT_FILL_RECT_H = 0x00000000;
-        public const int GRADIENT_FILL_RECT_V = 0x00000001;
+        internal const int GRADIENT_FILL_RECT_H = 0x00000000;
+        internal const int GRADIENT_FILL_RECT_V = 0x00000001;
+
+
+
+
+        internal const int PS_SOLID = 0;
+        internal const int PS_DASH = 1;
+
+        [DllImport("coredll.dll")]
+        internal static extern IntPtr CreatePen(int fnPenStyle, int nWidth, uint crColor);
+
+        [DllImport("coredll.dll")]
+        internal static extern int SetBrushOrgEx(IntPtr hdc, int nXOrg, int nYOrg, ref Point lppt);
+        [DllImport("coredll.dll")]
+        internal static extern IntPtr CreateSolidBrush(uint color);
+        [DllImport("coredll.dll")]
+        internal static extern IntPtr SelectObject(IntPtr hdc, IntPtr hgdiobject);
+
+        [DllImport("coredll.dll")]
+        internal static extern bool DeleteObject(IntPtr hgdiobject);
+
+        [DllImport("coredll.dll")]
+        internal static extern bool RoundRect(
+            IntPtr hdc,
+            int nLeftRect,
+            int nTopRect,
+            int nRightRect,
+            int nBottomRect,
+            int nWidth,
+            int nHeight);
 
     }
 }
