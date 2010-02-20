@@ -45,6 +45,7 @@
             this.hardwareButton1 = new Microsoft.WindowsCE.Forms.HardwareButton();
             this.notificationWithSoftKeys1 = new Tenor.Mobile.UI.NotificationWithSoftKeys();
             this.messageQueue1 = new System.Messaging.MessageQueue();
+            this.menuItem7 = new System.Windows.Forms.MenuItem();
             this.tabStrip1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -53,6 +54,7 @@
             // mainMenu1
             // 
             this.mainMenu1.MenuItems.Add(this.menuItem1);
+            this.mainMenu1.MenuItems.Add(this.menuItem7);
             // 
             // menuItem1
             // 
@@ -147,6 +149,11 @@
             // 
             this.messageQueue1.Formatter = new System.Messaging.XmlMessageFormatter(new string[0]);
             // 
+            // menuItem7
+            // 
+            this.menuItem7.Text = "Add";
+            this.menuItem7.Click += new System.EventHandler(this.menuItem7_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -182,6 +189,7 @@
         private Microsoft.WindowsCE.Forms.HardwareButton hardwareButton1;
         private Tenor.Mobile.UI.NotificationWithSoftKeys notificationWithSoftKeys1;
         private System.Messaging.MessageQueue messageQueue1;
+        private System.Windows.Forms.MenuItem menuItem7;
     }
 }
 

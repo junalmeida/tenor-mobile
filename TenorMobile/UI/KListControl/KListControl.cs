@@ -597,9 +597,7 @@ namespace Tenor.Mobile.UI
                         if ((m_layout == KListLayout.Vertical || m_layout == KListLayout.Grid) && MaxYOffset > 0)
                         {
 
-
-
-                            int scrollHeight = (this.Height * 100) / MaxYOffset; // percentage
+                            int scrollHeight = (this.Height * 100) / (MaxYOffset + this.Height); // percentage
 
                             if (scrollHeight < 100)
                             {
@@ -617,7 +615,7 @@ namespace Tenor.Mobile.UI
                         }
                         if ((m_layout == KListLayout.Horizontal || m_layout == KListLayout.Grid) && MaxXOffset > 0)
                         {
-                            int scrollWidth = (this.Width * 100) / MaxXOffset; // percentage
+                            int scrollWidth = (this.Width * 100) / (MaxXOffset + this.Width); // percentage
 
                             if (scrollWidth < 100)
                             {
@@ -761,14 +759,26 @@ namespace Tenor.Mobile.UI
             }
         }
 
+        /// <summary>
+        /// Ensures that the selected item is visible. If there's no item selected, it moves the scroll to top.
+        /// </summary>
         public void EnsureVisible()
         {
-            if (m_selectedItem != null)
+            EnsureVisible(m_selectedItem);
+        }
+
+        /// <summary>
+        /// Ensures that the item is visible.
+        /// </summary>
+        /// <param name="item">A KListItem to make visible.</param>
+        public void EnsureVisible(KListItem item)
+        {
+            if (item != null)
             {
-                if ((-m_offset.X) + m_selectedItem.Bounds.Right > this.Width)
-                    m_offset.X = m_selectedItem.Bounds.X - (this.Width - m_selectedItem.Bounds.Width);
-                if ((-m_offset.Y) + m_selectedItem.Bounds.Bottom > this.Height)
-                    m_offset.Y = m_selectedItem.Bounds.Y - (this.Height - m_selectedItem.Bounds.Height);
+                if ((-m_offset.X) + item.Bounds.Right > this.Width)
+                    m_offset.X = item.Bounds.X - (this.Width - item.Bounds.Width);
+                if ((-m_offset.Y) + item.Bounds.Bottom > this.Height)
+                    m_offset.Y = item.Bounds.Y - (this.Height - item.Bounds.Height);
 
                 if (m_offset.X > MaxXOffset)
                     m_offset.X = MaxXOffset;
@@ -781,6 +791,7 @@ namespace Tenor.Mobile.UI
                 m_offset.Y = 0;
             }
         }
+
 
         /// <summary>
         /// Cleans up the background paint buffer.

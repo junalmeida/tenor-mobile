@@ -144,5 +144,10 @@ namespace InterfaceTest
         {
 
         }
+
+        private void menuItem7_Click(object sender, EventArgs e)
+        {
+            kListControl1.AddItem("Teste " + kListControl1.Count.ToString(), null);
+        }
     }
 }
