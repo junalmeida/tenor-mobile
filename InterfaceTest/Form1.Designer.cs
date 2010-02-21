@@ -37,6 +37,7 @@
             this.menuItem3 = new System.Windows.Forms.MenuItem();
             this.menuItem4 = new System.Windows.Forms.MenuItem();
             this.menuItem6 = new System.Windows.Forms.MenuItem();
+            this.menuItem7 = new System.Windows.Forms.MenuItem();
             this.tabStrip1 = new Tenor.Mobile.UI.TabStrip();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.kListControl1 = new Tenor.Mobile.UI.KListControl();
@@ -45,7 +46,6 @@
             this.hardwareButton1 = new Microsoft.WindowsCE.Forms.HardwareButton();
             this.notificationWithSoftKeys1 = new Tenor.Mobile.UI.NotificationWithSoftKeys();
             this.messageQueue1 = new System.Messaging.MessageQueue();
-            this.menuItem7 = new System.Windows.Forms.MenuItem();
             this.tabStrip1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -90,6 +90,11 @@
             this.menuItem6.Text = "List Files";
             this.menuItem6.Click += new System.EventHandler(this.menuItem6_Click);
             // 
+            // menuItem7
+            // 
+            this.menuItem7.Text = "Add";
+            this.menuItem7.Click += new System.EventHandler(this.menuItem7_Click);
+            // 
             // tabStrip1
             // 
             this.tabStrip1.Controls.Add(this.tabPage1);
@@ -111,6 +116,8 @@
             // 
             // kListControl1
             // 
+            this.kListControl1.DefaultItemHeight = 38;
+            this.kListControl1.DefaultItemWidth = 80;
             this.kListControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.kListControl1.Layout = Tenor.Mobile.UI.KListLayout.Vertical;
             this.kListControl1.Location = new System.Drawing.Point(0, 0);
@@ -118,6 +125,7 @@
             this.kListControl1.SeparatorColor = System.Drawing.SystemColors.InactiveBorder;
             this.kListControl1.Size = new System.Drawing.Size(240, 245);
             this.kListControl1.TabIndex = 1;
+            this.kListControl1.Resize += new System.EventHandler(this.kListControl1_Resize);
             // 
             // tabPage2
             // 
@@ -148,11 +156,6 @@
             // messageQueue1
             // 
             this.messageQueue1.Formatter = new System.Messaging.XmlMessageFormatter(new string[0]);
-            // 
-            // menuItem7
-            // 
-            this.menuItem7.Text = "Add";
-            this.menuItem7.Click += new System.EventHandler(this.menuItem7_Click);
             // 
             // Form1
             // 

@@ -41,8 +41,11 @@ namespace InterfaceTest
             notificationWithSoftKeys1.LeftSoftKey.Title = "View";
             notificationWithSoftKeys1.Visible = true;
             notificationWithSoftKeys1.AvoidBubble = true;
+            Tenor.Mobile.Device.Leds.Vibrate(500);
 
         }
+
+  
 
         private void test(object sender, EventArgs e)
         {
@@ -166,6 +169,15 @@ namespace InterfaceTest
         void notificationWithSoftKeys1_SpinnerClick(object sender, Tenor.Mobile.UI.SpinnerClickEventArgs e)
         {
             
+        }
+
+        private void kListControl1_Resize(object sender, EventArgs e)
+        {
+            if (kListControl1.Count > 0)
+            {
+                kListControl1.SelectedItem = null;
+                kListControl1.EnsureVisible(kListControl1[kListControl1.Count - 1]);
+            }
         }
     }
 }

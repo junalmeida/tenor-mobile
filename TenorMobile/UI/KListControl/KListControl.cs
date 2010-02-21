@@ -785,19 +785,25 @@ namespace Tenor.Mobile.UI
             {
                 if ((-m_offset.X) + item.Bounds.Right > this.Width)
                     m_offset.X = item.Bounds.X - (this.Width - item.Bounds.Width);
+                if ((-m_offset.X) + item.Bounds.X < 0)
+                    m_offset.X = item.Bounds.X;
+
                 if ((-m_offset.Y) + item.Bounds.Bottom > this.Height)
                     m_offset.Y = item.Bounds.Y - (this.Height - item.Bounds.Height);
+                if ((-m_offset.Y) + item.Bounds.Y < 0)
+                    m_offset.Y = item.Bounds.Y;
 
-                if (m_offset.X > MaxXOffset)
-                    m_offset.X = MaxXOffset;
-                if (m_offset.Y > MaxYOffset)
-                    m_offset.Y = MaxYOffset;
             }
             else
             {
-                m_offset.X = 0;
-                m_offset.Y = 0;
+                //do we need to reset offset?
+                //m_offset.X = 0;
+                //m_offset.Y = 0;
             }
+            if (m_offset.X > MaxXOffset)
+                m_offset.X = MaxXOffset;
+            if (m_offset.Y > MaxYOffset)
+                m_offset.Y = MaxYOffset;
         }
 
 
@@ -1037,6 +1043,8 @@ namespace Tenor.Mobile.UI
         protected override void ScaleControl(SizeF factor, BoundsSpecified specified)
         {
             scaleFactor = factor;
+            itemHeight *= Convert.ToInt32(factor.Height);
+            itemWidth *= Convert.ToInt32(factor.Width);
             base.ScaleControl(factor, specified);
         }
 
