@@ -41,7 +41,7 @@ namespace Tenor.Mobile.UI
         private SHNOTIFICATIONDATA m_data;
         private Icon mIcon = null;
         private bool mVisible = false;
-        private bool mCreated = false;
+        internal bool mCreated = false;
 #endif
 
         private NotificationSoftKey mLeftSoftKey = new NotificationSoftKey(SoftKeyType.Hide);
@@ -201,6 +201,68 @@ namespace Tenor.Mobile.UI
 		[DefaultValue(false),
 		Description("Gets or sets a value indicating whether the notification is of urgent importance.")]
 #endif
+        /// <summary>
+        /// Don't display the notification bubble when it's initially added;
+        /// the icon will display for the duration then it will go straight into the tray.
+        /// The user can view the icon / see the bubble by opening the tray.
+        /// </summary>
+        public bool AvoidBubble
+        {
+            get
+            {
+                return (m_data.grfFlags & SHNF.STRAIGHTTOTRAY) != 0;
+            }
+            set
+            {
+                if (value)
+                {
+                    m_data.grfFlags |= SHNF.STRAIGHTTOTRAY;
+                }
+                else
+                {
+                    m_data.grfFlags ^= (m_data.grfFlags & SHNF.STRAIGHTTOTRAY);
+                }
+
+                if (mCreated)
+                {
+                    SHNotificationUpdate(SHNUM.FLAGS, ref m_data);
+                }
+            }
+        }
+
+
+        /// <summary>
+        /// Force the notification to be silent and not vibrate, regardless of Settings. Added for Windows Mobile 2003.
+        /// </summary>
+        public bool Silent
+        {
+            get
+            {
+                return (m_data.grfFlags & SHNF.SILENT) != 0;
+            }
+            set
+            {
+                if (value)
+                {
+                    m_data.grfFlags |= SHNF.SILENT;
+                }
+                else
+                {
+                    m_data.grfFlags ^= (m_data.grfFlags & SHNF.SILENT);
+                }
+
+                if (mCreated)
+                {
+                    SHNotificationUpdate(SHNUM.FLAGS, ref m_data);
+                }
+            }
+        }
+
+
+
+        /// <summary>
+        /// Critical information - highlights the border and title of the bubble.
+        /// </summary>
         public bool Critical
         {
             get
@@ -229,7 +291,6 @@ namespace Tenor.Mobile.UI
         /// Gets or sets the current native icon handle for the message balloon on the title bar.
         /// </summary>
 #if !DESIGN
-
         public Icon Icon
         {
             get
@@ -407,12 +468,12 @@ namespace Tenor.Mobile.UI
         {
             get
             {
-                return mVisible;
+                return mCreated;
             }
             set
             {
 #if !DESIGN
-                if (mVisible != value)
+                if (mCreated != value)
                 {
                     RebuildSoftKeys();
                     mVisible = value;
@@ -431,6 +492,7 @@ namespace Tenor.Mobile.UI
 #endif
             }
         }
+
 
         /// <summary>
         /// Occurs when a message balloon is displayed or hidden.

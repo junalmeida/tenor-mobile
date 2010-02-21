@@ -49,6 +49,8 @@ namespace Tenor.Mobile.UI
                             case SHNN.NAVPREV:
                                 n.OnSpinnerClick(new SpinnerClickEventArgs(false));
                                 break;
+                            default:
+                                break;
                         }
                     }
                     break;
@@ -64,9 +66,17 @@ namespace Tenor.Mobile.UI
 
                             NotificationWithSoftKeys z = (NotificationWithSoftKeys)m_notifications[id];
                             if (index == 0)
+                            {
+                                if (z.LeftSoftKey.Type == SoftKeyType.Dismiss)
+                                    z.mCreated = false;
                                 z.OnLeftSoftKeyClick(EventArgs.Empty);
+                            }
                             else
+                            {
+                                if (z.RightSoftKey.Type == SoftKeyType.Dismiss)
+                                    z.mCreated = false;
                                 z.OnRightSoftKeyClick(EventArgs.Empty);
+                            }
                         }
                     }
                     break;

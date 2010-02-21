@@ -104,12 +104,21 @@ namespace Tenor.Mobile.UI
         /// Occurs when the selected item changes.
         /// </summary>
         public event EventHandler SelectedItemChanged;
+        protected virtual void OnSelectedItemChanged(EventArgs e)
+        {
+            if (SelectedItemChanged != null)
+                SelectedItemChanged(this, e);
+        }
 
         /// <summary>
         /// Occurs when the selected item is clicked on (after already being selected).
         /// </summary>
         public event EventHandler SelectedItemClicked;
-
+        protected virtual void OnSelectedItemClicked(EventArgs e)
+        {
+            if (SelectedItemClicked != null)
+                SelectedItemClicked(this, e);
+        }
         /// <summary>
         /// Gets the <see cref="KListItem"/> at the specified index.
         /// </summary>
@@ -192,10 +201,7 @@ namespace Tenor.Mobile.UI
                     m_selectedItem = item;
                     m_selectedItem.Selected = true;
 
-                    if (SelectedItemChanged != null)
-                    {
-                        SelectedItemChanged(this, new EventArgs());
-                    }
+                    OnSelectedItemChanged(new EventArgs());
                 }
             }
 
@@ -709,6 +715,8 @@ namespace Tenor.Mobile.UI
                     // Yes, so select that item.
                     //Point selectedIndex = FindIndex(e.X, e.Y);
                     //SelectItem(selectedIndex.X, selectedIndex.Y);
+                    if (item == m_selectedItem)
+                        OnSelectedItemClicked(new EventArgs());
                     SelectItem(item.XIndex, item.YIndex);
                 }
                 else

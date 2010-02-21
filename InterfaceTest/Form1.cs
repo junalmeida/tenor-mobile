@@ -40,7 +40,7 @@ namespace InterfaceTest
             notificationWithSoftKeys1.Text = "Test";
             notificationWithSoftKeys1.LeftSoftKey.Title = "View";
             notificationWithSoftKeys1.Visible = true;
-
+            notificationWithSoftKeys1.AvoidBubble = true;
 
         }
 
@@ -148,6 +148,24 @@ namespace InterfaceTest
         private void menuItem7_Click(object sender, EventArgs e)
         {
             kListControl1.AddItem("Teste " + kListControl1.Count.ToString(), null);
+
+            if (!notificationWithSoftKeys1.Visible)
+            {
+                notificationWithSoftKeys1.Icon = this.Icon;
+                notificationWithSoftKeys1.Caption = this.Text + "\t1 of 2";
+                notificationWithSoftKeys1.Text = "Test";
+                notificationWithSoftKeys1.LeftSoftKey.Title = "View";
+                notificationWithSoftKeys1.AvoidBubble = true;
+                notificationWithSoftKeys1.InitialDuration = 0;
+                notificationWithSoftKeys1.Spinners = true;
+                notificationWithSoftKeys1.SpinnerClick += new Tenor.Mobile.UI.SpinnerClickEventHandler(notificationWithSoftKeys1_SpinnerClick);
+                notificationWithSoftKeys1.Visible = true;
+            }
+        }
+
+        void notificationWithSoftKeys1_SpinnerClick(object sender, Tenor.Mobile.UI.SpinnerClickEventArgs e)
+        {
+            
         }
     }
 }
