@@ -36,7 +36,6 @@ namespace Tenor.Mobile.UI
         private static NotificationMessageWindow msgwnd;
         private static Dictionary<int, NotificationWithSoftKeys> notifications;
         private static int id = 1;
-        private static Guid clsid = Guid.NewGuid();
 
         private SHNOTIFICATIONDATA m_data;
         private Icon mIcon = null;
@@ -71,7 +70,7 @@ namespace Tenor.Mobile.UI
             else
                 m_data.cbStruct = Marshal.SizeOf(m_data) - 32; // "hide" the 20 bytes that were added to this struct in WM5.0    
 
-            m_data.clsid = clsid;
+            m_data.clsid = Guid.NewGuid();
             m_data.dwID = id;
             m_data.hwndSink = msgwnd.Hwnd;
             m_data.csDuration = 10;
@@ -93,6 +92,23 @@ namespace Tenor.Mobile.UI
 
             base.Dispose(disposing);
         }
+
+
+        /// <summary>
+        /// Gets or sets the guid used to managed the notification event.
+        /// </summary>
+        public Guid NotificationId
+        {
+            get
+            {
+                return m_data.clsid;
+            }
+            set
+            {
+                m_data.clsid = value;
+            }
+        }
+
 
         // Fill out the SOFTKEYNOTIFY structure to create the notification soft key type specified
         // within 'data'.
@@ -485,7 +501,7 @@ namespace Tenor.Mobile.UI
                     }
                     else
                     {
-                        int hresult = SHNotificationRemove(ref clsid, m_data.dwID);
+                        int hresult = SHNotificationRemove(ref m_data.clsid, m_data.dwID);
                         mCreated = false;
                     }
                 }

@@ -153,6 +153,10 @@
             this.domainUpDown1.TabIndex = 0;
             this.domainUpDown1.Text = "domainUpDown1";
             // 
+            // notificationWithSoftKeys1
+            // 
+            this.notificationWithSoftKeys1.NotificationId = new System.Guid("a877d65f-239c-47a7-9304-0d347f580408");
+            // 
             // messageQueue1
             // 
             this.messageQueue1.Formatter = new System.Messaging.XmlMessageFormatter(new string[0]);

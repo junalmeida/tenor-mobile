@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{1CD6CB52-3A64-4EFB-8C29-39DA26C8D9E3}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -59,6 +59,7 @@
   <ItemGroup>
     <Compile Include="Device\Leds.cs" />
     <Compile Include="Device\NativeMethods.cs" />
+    <Compile Include="Device\Notifications.cs" />
     <Compile Include="Diagnostics\NativeMethods.cs" />
     <Compile Include="Diagnostics\Process.cs">
     </Compile>

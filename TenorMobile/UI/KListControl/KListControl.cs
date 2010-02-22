@@ -141,17 +141,6 @@ namespace Tenor.Mobile.UI
             }
         }
 
-        ///// <summary>
-        ///// The selected index.
-        ///// </summary>
-        //public Point SelectedIndex
-        //{
-        //    get
-        //    {
-        //        return m_selectedIndex;
-        //    }
-        //}
-
         /// <summary>
         /// Gets the selected item.
         /// </summary>

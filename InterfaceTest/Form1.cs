@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.IO;
 using Tenor.Mobile.Diagnostics;
 using Tenor.Mobile.Drawing;
+using Tenor.Mobile.Device;
 
 namespace InterfaceTest
 {
@@ -17,6 +18,14 @@ namespace InterfaceTest
         public Form1()
         {
             InitializeComponent();
+
+            Guid g = new Guid("b877d65f-239c-47a7-9304-0d347f580408");
+            if (!Notification.Exists(g))
+            {
+                Notification not = Notification.Create(g);
+                not.Text = "Test";
+            }
+
 
             kListControl1.DrawSeparators = true;
             kListControl1.AddItem("Select an option", "");
@@ -39,9 +48,9 @@ namespace InterfaceTest
             notificationWithSoftKeys1.Caption = this.Text;
             notificationWithSoftKeys1.Text = "Test";
             notificationWithSoftKeys1.LeftSoftKey.Title = "View";
+            //notificationWithSoftKeys1.AvoidBubble = true;
             notificationWithSoftKeys1.Visible = true;
-            notificationWithSoftKeys1.AvoidBubble = true;
-            Tenor.Mobile.Device.Leds.Vibrate(500);
+            //Tenor.Mobile.Device.Leds.Vibrate(500);
 
         }
 
