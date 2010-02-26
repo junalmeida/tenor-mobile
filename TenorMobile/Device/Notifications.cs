@@ -40,16 +40,8 @@ namespace Tenor.Mobile.Device
             if (Exists(id))
                 throw new InvalidOperationException("The given key already exists.");
 
-            RegistryKey key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("ControlPanel\\Notifications", true);
-            try
-            {
-                key.CreateSubKey(id.ToString("B")).Close();
-                return new Notification(id);
-            }
-            finally
-            {
-                key.Close();
-            }
+            Microsoft.Win32.Registry.CurrentUser.CreateSubKey("ControlPanel\\Notifications\\" + id.ToString("B")).Close();
+            return new Notification(id);
         }
 
         /// <summary>

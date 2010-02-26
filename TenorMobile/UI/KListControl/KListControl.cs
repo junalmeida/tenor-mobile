@@ -816,9 +816,11 @@ namespace Tenor.Mobile.UI
         private void CreateBackBuffer()
         {
             CleanupBackBuffer();
-
-            m_backBufferBitmap = new Bitmap(this.Width, this.Height);
-            m_backBuffer = Graphics.FromImage(m_backBufferBitmap);
+            if (this.Width > 0 && this.Height > 0)
+            {
+                m_backBufferBitmap = new Bitmap(this.Width, this.Height);
+                m_backBuffer = Graphics.FromImage(m_backBufferBitmap);
+            }
         }
 
         /// <summary>
