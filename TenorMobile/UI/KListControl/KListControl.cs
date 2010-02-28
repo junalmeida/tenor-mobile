@@ -179,9 +179,11 @@ namespace Tenor.Mobile.UI
             if (selectedIndex != m_selectedIndex)
             {
                 KListItem item = null;
-                if (m_items.ContainsKey(selectedIndex.X) &&
-                    m_items[selectedIndex.X].TryGetValue(selectedIndex.Y, out item))
+                if (m_items.Count > selectedIndex.X &&
+                    m_items[selectedIndex.X].Count > selectedIndex.Y)
                 {
+                    item = m_items[selectedIndex.X][selectedIndex.Y];
+
                     if (m_selectedItem != null)
                     {
                         m_selectedItem.Selected = false;
@@ -334,7 +336,7 @@ namespace Tenor.Mobile.UI
             item.Value = value;
             item.XIndex = m_layout == KListLayout.Vertical ? 0 : m_items.Count;
             item.YIndex = m_layout == KListLayout.Horizontal ? 0 :
-                m_items.ContainsKey(0) ? m_items[0].Count : 0;
+                m_items.Count > 0 ? m_items[0].Count : 0;
 
             if (m_layout == KListLayout.Vertical || m_layout == KListLayout.Grid)
                 item.Height = size;
@@ -353,7 +355,7 @@ namespace Tenor.Mobile.UI
         /// <param name="y">The y position.</param>
         /// <param name="text">The text for the item.</param>
         /// <param name="value">A value related to the item.</param>
-        public void AddItem(int x, int y, string text, object value)
+        private void AddItem(int x, int y, string text, object value)
         {
             if (m_layout != KListLayout.Grid)
             {
@@ -376,11 +378,11 @@ namespace Tenor.Mobile.UI
         {
             item.Parent = this;
             item.Selected = false;
-            if (!m_items.ContainsKey(item.XIndex))
+            if (m_items.Count <= item.XIndex)
             {
-                m_items.Add(item.XIndex, new ItemList());
+                m_items.Add(new List<KListItem>());
             }
-            m_items[item.XIndex].Add(item.YIndex, item);
+            m_items[item.XIndex].Add(item);
             item.Bounds = ItemBounds(item.XIndex, item.YIndex);
             Reset();
         }
@@ -391,10 +393,10 @@ namespace Tenor.Mobile.UI
         /// <param name="item">The item.</param>
         public void RemoveItem(KListItem item)
         {
-            if (m_items.ContainsKey(item.XIndex) &&
-                m_items[item.XIndex].ContainsKey(item.YIndex))
+            if (m_items.Count > item.XIndex &&
+                m_items[item.XIndex].Count > item.YIndex)
             {
-                m_items[item.XIndex].Remove(item.YIndex);
+                m_items[item.XIndex].RemoveAt(item.YIndex);
             }
             Reset();
         }
@@ -513,28 +515,32 @@ namespace Tenor.Mobile.UI
 
                 KListItem startItem = FindItem(0, 0);
 
-                GridList.Enumerator xEnumerator = m_items.GetEnumerator();
+                List<List<KListItem>>.Enumerator xEnumerator = m_items.GetEnumerator();
                 bool moreX = xEnumerator.MoveNext();
-                while (moreX && xEnumerator.Current.Key < startItem.XIndex)
+                int i = 0;
+                while (moreX && i < startItem.XIndex)
                 {
                     moreX = xEnumerator.MoveNext();
+                    i++;
                 }
 
                 while (moreX)
                 {
-                    ItemList yList = xEnumerator.Current.Value;
+                    List<KListItem> yList = xEnumerator.Current;
                     if (yList != null)
                     {
-                        ItemList.Enumerator yEnumerator = yList.GetEnumerator();
+                        List<KListItem>.Enumerator yEnumerator = yList.GetEnumerator();
                         bool moreY = yEnumerator.MoveNext();
-                        while (moreY && yEnumerator.Current.Key < startItem.YIndex)
+                        int j = 0;
+                        while (moreY && j < startItem.YIndex)
                         {
                             moreY = yEnumerator.MoveNext();
+                            j++;
                         }
 
                         while (moreY)
                         {
-                            KListItem item = yEnumerator.Current.Value;
+                            KListItem item = yEnumerator.Current;
                             if (item != null)
                             {
                                 Rectangle itemRect = item.Bounds;
@@ -742,12 +748,20 @@ namespace Tenor.Mobile.UI
                 m_velocity.X = 0;
                 m_velocity.Y = 0;
 
-                
+
+                int xIndex = 0, yIndex = 0;
 
                 foreach (var i in m_items)
-                    foreach (var j in i.Value)
-                        j.Value.Bounds = ItemBounds(j.Value.XIndex, j.Value.YIndex);
+                {
+                    foreach (var j in i)
+                    {
+                        j.XIndex = xIndex; j.YIndex = yIndex;
+                        j.Bounds = ItemBounds(j.XIndex, j.YIndex);
 
+                        yIndex++;
+                    }
+                    xIndex++;
+                }
 
                 EnsureVisible();
 
@@ -985,16 +999,7 @@ namespace Tenor.Mobile.UI
             }
         }
 
-        // The items!
-        class ItemList : Dictionary<int, KListItem>
-        {
-        }
-        class GridList : Dictionary<int, ItemList>
-        {
-        }
-        GridList m_items = new GridList();
-
-
+        List<List<KListItem>> m_items = new List<List<KListItem>>();
 
         // Properties
         int m_maxVelocity = 15;
@@ -1020,7 +1025,7 @@ namespace Tenor.Mobile.UI
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return m_items[0].Values.GetEnumerator();
+            return m_items[0].GetEnumerator();
         }
 
 
@@ -1047,6 +1052,24 @@ namespace Tenor.Mobile.UI
         {
             if (DrawItem != null)
                 DrawItem(this, e);
+        }
+
+        /// <summary>
+        /// Sorts the current list items.
+        /// </summary>
+        /// <param name="comparer"></param>
+        public virtual void Sort(Comparison<KListItem> comparer)
+        {
+            if (Layout == KListLayout.Vertical)
+            {
+                if (m_items.Count > 0 && m_items[0].Count > 1)
+                {
+                    m_items[0].Sort(comparer);
+                    Reset();
+                }
+            }
+            else
+                throw new NotImplementedException();
         }
     }
 
