@@ -15,6 +15,9 @@ namespace InterfaceTest
 {
     public partial class Form1 : Form
     {
+        Tenor.Mobile.Location.Cell cell;
+
+
         public Form1()
         {
             InitializeComponent();
@@ -30,6 +33,21 @@ namespace InterfaceTest
             kListControl1.DrawSeparators = true;
             kListControl1.AddItem("Select an option", "");
             kListControl1.SelectedItem = kListControl1[0];
+
+
+            cell = new Tenor.Mobile.Location.Cell(true);
+            cell.LocationChanged += new EventHandler(cell_TowerChanged);
+        }
+
+        void cell_TowerChanged(object sender, EventArgs e)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new System.Threading.ThreadStart(delegate() {
+                    textBox1.Text = string.Format("{0} | {1}", cell.Latitude, cell.Longitude);
+                    textBox2.Text = new Tenor.Mobile.Location.Geolocation(cell.Latitude.Value, cell.Longitude.Value).ToString();
+                }));
+            }
         }
 
         private void menuItem2_Click(object sender, EventArgs e)

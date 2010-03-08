@@ -69,6 +69,8 @@
     <Compile Include="Drawing\NativeMethods.cs" />
     <Compile Include="Drawing\RoundedRectangle.cs" />
     <Compile Include="Drawing\Strings.cs" />
+    <Compile Include="Location\Cell.cs" />
+    <Compile Include="Location\Geolocation.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="Network\Connection.cs">
     </Compile>
@@ -92,7 +94,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ClassDiagram1.cd" />
     <None Include="tenorframework.snk" />
     <None Include="UI\DesignTimeAttributes.xmta" />
   </ItemGroup>

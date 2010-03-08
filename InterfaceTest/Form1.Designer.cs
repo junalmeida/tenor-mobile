@@ -38,14 +38,16 @@
             this.menuItem4 = new System.Windows.Forms.MenuItem();
             this.menuItem6 = new System.Windows.Forms.MenuItem();
             this.menuItem7 = new System.Windows.Forms.MenuItem();
+            this.hardwareButton1 = new Microsoft.WindowsCE.Forms.HardwareButton();
+            this.messageQueue1 = new System.Messaging.MessageQueue();
             this.tabStrip1 = new Tenor.Mobile.UI.TabStrip();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.kListControl1 = new Tenor.Mobile.UI.KListControl();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.domainUpDown1 = new System.Windows.Forms.DomainUpDown();
-            this.hardwareButton1 = new Microsoft.WindowsCE.Forms.HardwareButton();
             this.notificationWithSoftKeys1 = new Tenor.Mobile.UI.NotificationWithSoftKeys();
-            this.messageQueue1 = new System.Messaging.MessageQueue();
+            this.textBox2 = new System.Windows.Forms.TextBox();
             this.tabStrip1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -95,6 +97,10 @@
             this.menuItem7.Text = "Add";
             this.menuItem7.Click += new System.EventHandler(this.menuItem7_Click);
             // 
+            // messageQueue1
+            // 
+            this.messageQueue1.Formatter = new System.Messaging.XmlMessageFormatter(new string[0]);
+            // 
             // tabStrip1
             // 
             this.tabStrip1.Controls.Add(this.tabPage1);
@@ -129,11 +135,20 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.textBox2);
+            this.tabPage2.Controls.Add(this.textBox1);
             this.tabPage2.Controls.Add(this.domainUpDown1);
             this.tabPage2.Location = new System.Drawing.Point(0, 0);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(192, 74);
+            this.tabPage2.Size = new System.Drawing.Size(240, 245);
             this.tabPage2.Text = "tabPage2";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(18, 108);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(215, 21);
+            this.textBox1.TabIndex = 1;
             // 
             // domainUpDown1
             // 
@@ -157,9 +172,12 @@
             // 
             this.notificationWithSoftKeys1.NotificationId = new System.Guid("a877d65f-239c-47a7-9304-0d347f580408");
             // 
-            // messageQueue1
+            // textBox2
             // 
-            this.messageQueue1.Formatter = new System.Messaging.XmlMessageFormatter(new string[0]);
+            this.textBox2.Location = new System.Drawing.Point(18, 148);
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(215, 21);
+            this.textBox2.TabIndex = 1;
             // 
             // Form1
             // 
@@ -197,6 +215,8 @@
         private Tenor.Mobile.UI.NotificationWithSoftKeys notificationWithSoftKeys1;
         private System.Messaging.MessageQueue messageQueue1;
         private System.Windows.Forms.MenuItem menuItem7;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox textBox2;
     }
 }
 
