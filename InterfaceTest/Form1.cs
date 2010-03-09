@@ -15,7 +15,7 @@ namespace InterfaceTest
 {
     public partial class Form1 : Form
     {
-        Tenor.Mobile.Location.Cell cell;
+        Tenor.Mobile.Location.WorldPosition cell;
 
 
         public Form1()
@@ -35,8 +35,24 @@ namespace InterfaceTest
             kListControl1.SelectedItem = kListControl1[0];
 
 
-            cell = new Tenor.Mobile.Location.Cell(true);
-            cell.LocationChanged += new EventHandler(cell_TowerChanged);
+            cell = new Tenor.Mobile.Location.WorldPosition(true);
+            cell.TowerChanged += new EventHandler(cell_TowerChanged);
+            cell.LocationChanged += new EventHandler(cell_LocationChanged);
+        }
+
+        void cell_LocationChanged(object sender, EventArgs e)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new System.Threading.ThreadStart(delegate()
+                {
+                    textBox1.Text = string.Format("{0}: {1} | {2}", cell.Id, cell.Latitude, cell.Longitude);
+                    if (cell.Latitude.HasValue && cell.Longitude.HasValue)
+                        textBox2.Text = cell.FixType.ToString() + ": " + new Tenor.Mobile.Location.Geolocation(cell.Latitude.Value, cell.Longitude.Value).ToString();
+                    else
+                        textBox2.Text = "Unknown";
+                }));
+            }
         }
 
         void cell_TowerChanged(object sender, EventArgs e)
@@ -44,8 +60,7 @@ namespace InterfaceTest
             if (this.InvokeRequired)
             {
                 this.Invoke(new System.Threading.ThreadStart(delegate() {
-                    textBox1.Text = string.Format("{0} | {1}", cell.Latitude, cell.Longitude);
-                    textBox2.Text = new Tenor.Mobile.Location.Geolocation(cell.Latitude.Value, cell.Longitude.Value).ToString();
+                    textBox1.Text = string.Format("{0}: No fix yet.", cell.Id);
                 }));
             }
         }

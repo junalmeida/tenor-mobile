@@ -6,14 +6,19 @@ using System.Collections.Generic;
 using System.Text;
 using System.Net;
 using System.IO;
+using System.Xml;
 
 namespace Tenor.Mobile.Location
 {
 
     //---Based on code written by Dale Lane
     //---Source: http://dalelane.co.uk/blog/?p=241
-    public class Cell
+    public class WorldPosition
     {
+        private const string GoogleMobileServiceUri = "http://www.google.com/glm/mmap";
+        private const string OpenCellServiceUri = "http://www.opencellid.org/cell/get?key=7e93ae41e81f11b986a6e99adb691997&mcc={0}&mnc={1}&lac={2}&cellid={3}";
+        Gps.Gps gps;
+
         #region Events
         public event EventHandler TowerChanged;
         protected virtual void OnTowerChanged(EventArgs e)
@@ -46,6 +51,13 @@ namespace Tenor.Mobile.Location
         public double? Longitude
         { get; private set; }
 
+        public FixType FixType
+        { get; private set; }
+
+        public int NetworkCode
+        { get; private set; }
+
+
 
         private int pollingInterval;
         /// <summary>
@@ -63,6 +75,9 @@ namespace Tenor.Mobile.Location
             }
         }
 
+        /// <summary>
+        /// Determines whether to poll location from network when using cell id.
+        /// </summary>
         public bool PollLocation { get; set; }
 
         public override string ToString()
@@ -78,22 +93,37 @@ namespace Tenor.Mobile.Location
         Thread getLocation;
         private Timer timer;
         /// <summary>
-        /// Creates an instance off Cell.
+        /// Creates an instance of WorldPosition.
         /// </summary>
-        public Cell()
+        public WorldPosition()
         {
             baseThread = Thread.CurrentThread;
+            try
+            {
+                gps = new Tenor.Mobile.Location.Gps.Gps();
+                gps.Open();
+            }
+            catch { gps = null; }
+
             PollingInterval = 5000;
             PollLocation = false;
+            FixType = FixType.Network;
             timer = new Timer(new TimerCallback(GetCellTowerInfo), null, 500, Timeout.Infinite);
         }
 
+        ~WorldPosition()
+        {
+            if (gps != null && gps.Opened)
+                gps.Close();
+                
+        }
+
         /// <summary>
-        /// Creates an instance off Cell.
+        /// Creates an instance of WorldPosition.
         /// </summary>
-        /// <param name="pollLocation">Indicates that it will try to find latitude and longitude using cell id when it changes.
+        /// <param name="pollLocation">Indicates if it will try to find latitude and longitude when using cell id.
         /// This requires an internet connection.</param>
-        public Cell(bool pollLocation)
+        public WorldPosition(bool pollLocation)
             : this()
         {
             this.PollLocation = pollLocation;
@@ -145,21 +175,62 @@ namespace Tenor.Mobile.Location
             // finished - release the RIL handle
             RIL_Deinitialize(hRil);
 
+
+
+            FixType = FixType.Network;
+            try
+            {
+                if (gps != null && gps.Opened)
+                {
+                    Gps.GpsPosition pos = gps.GetPosition(new TimeSpan(0, 0, 0, 0, PollingInterval));
+                    if (pos != null && pos.LongitudeValid && pos.LatitudeValid)
+                    {
+                        double? latitude = Latitude;
+                        double? longitude = Longitude;
+
+                        Latitude = pos.Latitude;
+                        Longitude = pos.Longitude;
+                        FixType = FixType.Gps;
+
+                        if (!object.Equals(latitude, Latitude) || !object.Equals(longitude, Longitude))
+                            OnLocationChanged(new EventArgs());
+                    }
+                }
+            }
+            catch { }
+
             if (idChanged)
             {
-                if (PollLocation)
+                if (PollLocation && FixType == FixType.Network)
                 {
+                    if (req != null)
+                        Tenor.Mobile.Network.WebRequest.Abort(req);
+
                     if (getLocation != null)
                         getLocation.Abort();
+
                     getLocation = new Thread(new ThreadStart(delegate()
                     {
-                        GetLatLng(CountryCode, 0, AreaCode, Id, false);
+                        double? latitude = Latitude;
+                        double? longitude = Longitude;
+
+                        TranslateCellIdWithGoogle(CountryCode, 0, AreaCode, Id, false);
+                        if (!latitude.HasValue)
+                            TranslateCellIdWithOpenCellId(CountryCode, NetworkCode, AreaCode, Id);
+
                         getLocation = null;
+                        req = null;
+
+                        if (!object.Equals(latitude, Latitude) || !object.Equals(longitude, Longitude))
+                            OnLocationChanged(new EventArgs());
+
                     }));
                     getLocation.Start();
                 }
+
                 OnTowerChanged(new EventArgs());
             }
+
             idChanged = false;
 
             if (PollingInterval > 0)
@@ -193,6 +264,7 @@ namespace Tenor.Mobile.Location
                 Id = Convert.ToInt32(rilCellTowerInfo.dwCellID);
                 AreaCode = Convert.ToInt32(rilCellTowerInfo.dwLocationAreaCode);
                 CountryCode = Convert.ToInt32(rilCellTowerInfo.dwMobileCountryCode);
+                NetworkCode = Convert.ToInt32(rilCellTowerInfo.dwMobileNetworkCode);
                 idChanged = true;
             }
             // notify caller function that we have a result
@@ -280,8 +352,64 @@ namespace Tenor.Mobile.Location
         private static extern IntPtr RIL_Deinitialize(IntPtr hRil);
         #endregion
 
+
         #region GeoLocation
-        private byte[] PostData(int MCC, int MNC, int LAC, int CID,
+        private void TranslateCellIdWithOpenCellId(int MCC, int MNC, int LAC, int CID)
+        {
+            HttpWebResponse res = null;
+            try
+            {
+                string uri = string.Format(OpenCellServiceUri, MCC, MNC, LAC, CID);
+                req = (HttpWebRequest)WebRequest.Create(
+                    new Uri(uri));
+
+                req.Timeout = 50000;
+                req.Method = "GET";
+             
+                res = (HttpWebResponse)req.GetResponse();
+                //StreamReader reader = new StreamReader(res);
+                //string xml = reader.ReadToEnd();
+
+                if (res.StatusCode == HttpStatusCode.OK)
+                {
+                    XmlDocument doc = new XmlDocument();
+                    doc.Load(res.GetResponseStream());
+
+                    Latitude = double.Parse(doc.DocumentElement.FirstChild.Attributes["lat"].Value, System.Globalization.CultureInfo.GetCultureInfo("en-us"));
+                    Longitude = double.Parse(doc.DocumentElement.FirstChild.Attributes["lon"].Value, System.Globalization.CultureInfo.GetCultureInfo("en-us"));
+                }
+                else
+                {
+                    Latitude = null;
+                    Longitude = null;
+                }
+            }
+            catch (Exception)
+            {
+                //Latitude = null;
+                //Longitude = null;
+                Tenor.Mobile.Network.WebRequest.Abort(req);
+            }
+            finally
+            {
+                if (req != null)
+                {
+                    req = null;
+                }
+                if (res != null)
+                {
+                    res.Close();
+                    res = null;
+                }
+            }
+
+
+        }
+
+
+
+        HttpWebRequest req = null;
+        private byte[] PostDataForGoogle(int MCC, int MNC, int LAC, int CID,
                        bool shortCID)
         {
             /* The shortCID parameter follows heuristic experiences:
@@ -359,25 +487,22 @@ namespace Tenor.Mobile.Location
             return pd;
         }
 
-        private void GetLatLng(int MCC, int MNC, int LAC, int CID, bool shortCID)
+        private void TranslateCellIdWithGoogle(int MCC, int MNC, int LAC, int CID, bool shortCID)
         {
-            HttpWebRequest req = null;
             HttpWebResponse res = null;
-
-            double? latitude = Latitude;
-            double? longitude = Longitude;
             try
             {
-                const string url = "http://www.google.com/glm/mmap";
                 req = (HttpWebRequest)WebRequest.Create(
-                    new Uri(url));
+                    new Uri(GoogleMobileServiceUri));
+
+                req.Timeout = 50000;
                 req.Method = "POST";
 
                 //int MCC = Convert.ToInt32(args[0]);
                 //int MNC = Convert.ToInt32(args[1]);
                 //int LAC = Convert.ToInt32(args[2]);
                 //int CID = Convert.ToInt32(args[3]);
-                byte[] pd = PostData(MCC, MNC, LAC, CID,
+                byte[] pd = PostDataForGoogle(MCC, MNC, LAC, CID,
                     shortCID);
 
                 req.ContentLength = pd.Length;
@@ -402,33 +527,36 @@ namespace Tenor.Mobile.Location
                                    (ps[5] << 8) | (ps[6]));
                     if (ret_code == 0)
                     {
-                        latitude = ((double)((ps[7] << 24) | (ps[8] << 16)
+                        Latitude = ((double)((ps[7] << 24) | (ps[8] << 16)
                                      | (ps[9] << 8) | (ps[10]))) / 1000000;
-                        longitude = ((double)((ps[11] << 24) | (ps[12] <<
+                        Longitude = ((double)((ps[11] << 24) | (ps[12] <<
                                      16) | (ps[13] << 8) | (ps[14]))) /
                                      1000000;
                     }
                     else
                     {
-                        latitude = null;
-                        longitude = null;
+                        Latitude = null;
+                        Longitude = null;
                     }
                 }
                 else
                 {
-                    latitude = null;
-                    longitude = null;
+                    Latitude = null;
+                    Longitude = null;
                 }
             }
             catch (Exception)
             {
-                //Latitude = null;
-                //Longitude = null;
+                Latitude = null;
+                Longitude = null;
+                Tenor.Mobile.Network.WebRequest.Abort(req);
             }
             finally
             {
                 if (req != null)
+                {
                     req = null;
+                }
                 if (res != null)
                 {
                     res.Close();
@@ -436,14 +564,21 @@ namespace Tenor.Mobile.Location
                 }
             }
 
-            if (!object.Equals(latitude, Latitude) || !object.Equals(longitude, Longitude))
-            {
-                Latitude = latitude; Longitude = longitude;
-                OnLocationChanged(new EventArgs());
-            }
         }
         #endregion
     }
 
+
+    public enum FixType
+    {
+        /// <summary>
+        /// The last position cames from the internet.
+        /// </summary>
+        Network,
+        /// <summary>
+        /// The last position cames from the gps anthenna.
+        /// </summary>
+        Gps
+    }
 
 }

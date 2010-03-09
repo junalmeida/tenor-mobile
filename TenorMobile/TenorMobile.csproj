@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{1CD6CB52-3A64-4EFB-8C29-39DA26C8D9E3}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -69,11 +69,19 @@
     <Compile Include="Drawing\NativeMethods.cs" />
     <Compile Include="Drawing\RoundedRectangle.cs" />
     <Compile Include="Drawing\Strings.cs" />
-    <Compile Include="Location\Cell.cs" />
+    <Compile Include="Location\Gps\DegreesMinutesSeconds.cs" />
+    <Compile Include="Location\Gps\DeviceStateChangedEventArgs.cs" />
+    <Compile Include="Location\Gps\GPS.cs" />
+    <Compile Include="Location\Gps\GpsDeviceState.cs" />
+    <Compile Include="Location\Gps\GpsPosition.cs" />
+    <Compile Include="Location\Gps\LocationChangedEventArgs.cs" />
+    <Compile Include="Location\Gps\Utils.cs" />
+    <Compile Include="Location\WorldPosition.cs" />
     <Compile Include="Location\Geolocation.cs" />
     <Compile Include="NativeMethods.cs" />
     <Compile Include="Network\Connection.cs">
     </Compile>
+    <Compile Include="Network\WebRequest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\Service.cs" />
     <Compile Include="UI\Extensions.cs" />
