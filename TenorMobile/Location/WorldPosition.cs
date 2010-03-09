@@ -178,6 +178,8 @@ namespace Tenor.Mobile.Location
 
 
             FixType = FixType.Network;
+            double? latitude = Latitude;
+            double? longitude = Longitude;
             try
             {
                 if (gps != null && gps.Opened)
@@ -185,19 +187,16 @@ namespace Tenor.Mobile.Location
                     Gps.GpsPosition pos = gps.GetPosition(new TimeSpan(0, 0, 0, 0, PollingInterval));
                     if (pos != null && pos.LongitudeValid && pos.LatitudeValid)
                     {
-                        double? latitude = Latitude;
-                        double? longitude = Longitude;
 
                         Latitude = pos.Latitude;
                         Longitude = pos.Longitude;
                         FixType = FixType.Gps;
-
-                        if (!object.Equals(latitude, Latitude) || !object.Equals(longitude, Longitude))
-                            OnLocationChanged(new EventArgs());
                     }
                 }
             }
             catch { }
+            if (!object.Equals(latitude, Latitude) || !object.Equals(longitude, Longitude))
+                OnLocationChanged(new EventArgs());
 
             if (idChanged)
             {
@@ -211,8 +210,8 @@ namespace Tenor.Mobile.Location
 
                     getLocation = new Thread(new ThreadStart(delegate()
                     {
-                        double? latitude = Latitude;
-                        double? longitude = Longitude;
+                        latitude = Latitude;
+                        longitude = Longitude;
 
                         TranslateCellIdWithGoogle(CountryCode, 0, AreaCode, Id, false);
                         if (!latitude.HasValue)
