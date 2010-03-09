@@ -44,10 +44,10 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.kListControl1 = new Tenor.Mobile.UI.KListControl();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.textBox2 = new System.Windows.Forms.TextBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.domainUpDown1 = new System.Windows.Forms.DomainUpDown();
             this.notificationWithSoftKeys1 = new Tenor.Mobile.UI.NotificationWithSoftKeys();
-            this.textBox2 = new System.Windows.Forms.TextBox();
             this.tabStrip1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -143,11 +143,20 @@
             this.tabPage2.Size = new System.Drawing.Size(240, 245);
             this.tabPage2.Text = "tabPage2";
             // 
+            // textBox2
+            // 
+            this.textBox2.Location = new System.Drawing.Point(18, 148);
+            this.textBox2.Multiline = true;
+            this.textBox2.Name = "textBox2";
+            this.textBox2.Size = new System.Drawing.Size(215, 68);
+            this.textBox2.TabIndex = 1;
+            // 
             // textBox1
             // 
-            this.textBox1.Location = new System.Drawing.Point(18, 108);
+            this.textBox1.Location = new System.Drawing.Point(18, 80);
+            this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(215, 21);
+            this.textBox1.Size = new System.Drawing.Size(215, 49);
             this.textBox1.TabIndex = 1;
             // 
             // domainUpDown1
@@ -171,13 +180,6 @@
             // notificationWithSoftKeys1
             // 
             this.notificationWithSoftKeys1.NotificationId = new System.Guid("a877d65f-239c-47a7-9304-0d347f580408");
-            // 
-            // textBox2
-            // 
-            this.textBox2.Location = new System.Drawing.Point(18, 148);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(215, 21);
-            this.textBox2.TabIndex = 1;
             // 
             // Form1
             // 

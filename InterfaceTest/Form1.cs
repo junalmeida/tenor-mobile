@@ -44,14 +44,12 @@ namespace InterfaceTest
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new System.Threading.ThreadStart(delegate()
+                try
                 {
-                    textBox1.Text = string.Format("{0}: {1} | {2}", cell.Id, cell.Latitude, cell.Longitude);
-                    if (cell.Latitude.HasValue && cell.Longitude.HasValue)
-                        textBox2.Text = cell.FixType.ToString() + ": " + new Tenor.Mobile.Location.Geolocation(cell.Latitude.Value, cell.Longitude.Value).ToString();
-                    else
-                        textBox2.Text = "Unknown";
-                }));
+                    this.Invoke(new System.Threading.ThreadStart(UpdateCellInfo));
+                }
+                catch (ObjectDisposedException)
+                { }
             }
         }
 
@@ -59,9 +57,27 @@ namespace InterfaceTest
         {
             if (this.InvokeRequired)
             {
-                this.Invoke(new System.Threading.ThreadStart(delegate() {
-                    textBox1.Text = string.Format("{0}: No fix yet.", cell.Id);
-                }));
+                try
+                {
+                    this.Invoke(new System.Threading.ThreadStart(UpdateCellInfo));
+                }
+                catch (ObjectDisposedException)
+                { }
+            }
+        }
+
+        private void UpdateCellInfo()
+        {
+            if (cell.Latitude.HasValue)
+            {
+                textBox1.Text = string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-us"),
+                    "{0}: {1}, {2}", cell.Id, cell.Latitude, cell.Longitude);
+                textBox2.Text = string.Format("{0}: {1}", cell.FixType.ToString(), cell.GetGeoLocation().ToString());
+            }
+            else
+            {
+                textBox1.Text = string.Format("{0}: No fix yet.", cell.Id);
+                textBox2.Text = "Unknown";
             }
         }
 
