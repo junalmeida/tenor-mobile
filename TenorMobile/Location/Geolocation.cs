@@ -77,9 +77,11 @@ new Uri(string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-us")
             }
         }
 
-        private static List<Geolocation> cache = new List<Geolocation>();
+        private static List<Geolocation> cache = null;
         public static Geolocation Get(double latitude, double longitude)
         {
+            if (cache == null)
+                cache = new List<Geolocation>();
             Geolocation geo = new Geolocation(latitude, longitude);
             int i = cache.IndexOf(geo);
             if (i > -1)

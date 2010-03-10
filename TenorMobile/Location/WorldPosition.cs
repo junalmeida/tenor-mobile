@@ -377,11 +377,14 @@ namespace Tenor.Mobile.Location
 
         public void PollCell()
         {
-            if (req != null)
-                Tenor.Mobile.Network.WebRequest.Abort(req);
 
             if (getLocation != null)
-                getLocation.Abort();
+            {
+#if DEBUG
+                System.Diagnostics.Debug.WriteLine("Aborting current polling.");
+#endif
+                getLocation.Abort(); //If we have threadabortexception, it will abort the requests.
+            }
 
             getLocation = new Thread(new ThreadStart(delegate()
             {
@@ -390,18 +393,46 @@ namespace Tenor.Mobile.Location
 
                 try
                 {
-                    bool ok = TranslateCellIdWithGoogle(CountryCode, NetworkCode, AreaCode, Id, false);
-                    if (!ok)
-                        ok = TranslateCellIdWithOpenCellId(CountryCode, NetworkCode, AreaCode, Id);
+                    if (cellCache == null)
+                        cellCache = new List<CellInfo>();
+
+                    CellInfo info = new CellInfo() { MCC = CountryCode, MNC = NetworkCode, LAC = AreaCode, CID = Id };
+                    int index = cellCache.IndexOf(info);
+                    if (index > -1)
+                    {
+                        info = cellCache[index];
+                    }
+                    else
+                    {
+                        bool ok = TranslateCellIdWithGoogle(info, false);
+                        if (!ok)
+                            ok = TranslateCellIdWithOpenCellId(info);
+                        if (ok)
+                            cellCache.Add(info);
+                        else
+                            info = null;
+                        
+                    }
+                    if (info != null)
+                    {
+                        Latitude = info.Lat;
+                        Longitude = info.Lng;
+                        LastFix = DateTime.UtcNow;
+                    }
                 }
+#if DEBUG
                 catch (WebException ex)
                 {
-#if DEBUG
                     System.Diagnostics.Debug.WriteLine(ex.Status.ToString());
-#endif
                 }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine(ex.ToString());
+                }
+#else
+                catch { }
+#endif
                 getLocation = null;
-                req = null;
 
                 if (!object.Equals(latitude, Latitude) || !object.Equals(longitude, Longitude))
                     OnLocationChanged(new EventArgs());
@@ -411,12 +442,19 @@ namespace Tenor.Mobile.Location
         }
 
 
-        private bool TranslateCellIdWithOpenCellId(int MCC, int MNC, int LAC, int CID)
+        private bool TranslateCellIdWithOpenCellId(CellInfo info)
         {
+            HttpWebRequest req = null;
             HttpWebResponse res = null;
             try
             {
-                string uri = string.Format(OpenCellServiceUri, MCC, MNC, LAC, CID);
+                string uri = string.Format(
+                    OpenCellServiceUri, 
+                    info.MCC,
+                    info.MNC, 
+                    info.LAC, 
+                    info.CID);
+
                 req = (HttpWebRequest)WebRequest.Create(
                     new Uri(uri));
 
@@ -432,28 +470,23 @@ namespace Tenor.Mobile.Location
                     XmlDocument doc = new XmlDocument();
                     doc.Load(res.GetResponseStream());
 
-                    Latitude = double.Parse(doc.DocumentElement.FirstChild.Attributes["lat"].Value, System.Globalization.CultureInfo.GetCultureInfo("en-us"));
-                    Longitude = double.Parse(doc.DocumentElement.FirstChild.Attributes["lon"].Value, System.Globalization.CultureInfo.GetCultureInfo("en-us"));
-                    LastFix = DateTime.UtcNow;
+                    info.Lat = double.Parse(doc.DocumentElement.FirstChild.Attributes["lat"].Value, System.Globalization.CultureInfo.GetCultureInfo("en-us"));
+                    info.Lng = double.Parse(doc.DocumentElement.FirstChild.Attributes["lon"].Value, System.Globalization.CultureInfo.GetCultureInfo("en-us"));
                     return true;
                 }
             }
             catch (Exception)
             {
-                lock (this)
-                {
-                    if (req != null)
-                        Tenor.Mobile.Network.WebRequest.Abort(req);
-                }
+                if (req != null)
+                    Tenor.Mobile.Network.WebRequest.Abort(req);
+
                 throw;
             }
             finally
             {
-                lock (this)
-                {
-                    if (req != null)
-                        req = null;
-                }
+                if (req != null)
+                    req = null;
+
                 if (res != null)
                 {
                     res.Close();
@@ -465,8 +498,47 @@ namespace Tenor.Mobile.Location
         }
 
 
+        private class CellInfo
+        {
+            public int MCC { get; set; }
+            public int MNC { get; set; }
+            public int LAC { get; set; }
+            public int CID { get; set; }
+            public double? Lat { get; set; }
+            public double? Lng { get; set; }
 
-        HttpWebRequest req = null;
+
+            public override bool Equals(object obj)
+            {
+                if (object.ReferenceEquals(this, obj))
+                    return true;
+                else if (obj == null)
+                    return false;
+                else if (obj.GetType() != this.GetType())
+                    return false;
+                else
+                {
+                    CellInfo other = (CellInfo)obj;
+                    return
+                        object.Equals(this.MCC, other.MCC) &&
+                        object.Equals(this.MNC, other.MNC) &&
+                        object.Equals(this.LAC, other.LAC) &&
+                        object.Equals(this.CID, other.CID);
+                }
+            }
+            public override int GetHashCode()
+            {
+                int hash = 57;
+                hash = 27 * hash * MCC.GetHashCode();
+                hash = 27 * hash * MNC.GetHashCode();
+                hash = 27 * hash * LAC.GetHashCode();
+                hash = 27 * hash * CID.GetHashCode();
+                return hash;
+            }
+        }
+        private static List<CellInfo> cellCache;
+
+
         private byte[] PostDataForGoogle(int MCC, int MNC, int LAC, int CID,
                        bool shortCID)
         {
@@ -545,9 +617,12 @@ namespace Tenor.Mobile.Location
             return pd;
         }
 
-        private bool TranslateCellIdWithGoogle(int MCC, int MNC, int LAC, int CID, bool shortCID)
+        private bool TranslateCellIdWithGoogle(CellInfo info, bool shortCID)
         {
+
+
             HttpWebResponse res = null;
+            HttpWebRequest req = null;
             try
             {
                 req = (HttpWebRequest)WebRequest.Create(
@@ -556,11 +631,7 @@ namespace Tenor.Mobile.Location
                 req.Timeout = 50000;
                 req.Method = "POST";
 
-                //int MCC = Convert.ToInt32(args[0]);
-                //int MNC = Convert.ToInt32(args[1]);
-                //int LAC = Convert.ToInt32(args[2]);
-                //int CID = Convert.ToInt32(args[3]);
-                byte[] pd = PostDataForGoogle(MCC, MNC, LAC, CID,
+                byte[] pd = PostDataForGoogle(info.MCC, info.MNC, info.LAC, info.CID,
                     shortCID);
 
                 req.ContentLength = pd.Length;
@@ -585,13 +656,12 @@ namespace Tenor.Mobile.Location
                                    (ps[5] << 8) | (ps[6]));
                     if (ret_code == 0)
                     {
-                        Latitude = ((double)((ps[7] << 24) | (ps[8] << 16)
+                        info.Lat = ((double)((ps[7] << 24) | (ps[8] << 16)
                                      | (ps[9] << 8) | (ps[10]))) / 1000000;
-                        Longitude = ((double)((ps[11] << 24) | (ps[12] <<
+                        info.Lng = ((double)((ps[11] << 24) | (ps[12] <<
                                      16) | (ps[13] << 8) | (ps[14]))) /
                                      1000000;
 
-                        LastFix = DateTime.UtcNow;
                         return true;
                     }
                 }
@@ -600,20 +670,18 @@ namespace Tenor.Mobile.Location
             {
                 //Latitude = null;
                 //Longitude = null;
-                lock (this)
-                {
-                    if (req != null)
-                        Tenor.Mobile.Network.WebRequest.Abort(req);
-                }
+
+                if (req != null)
+                    Tenor.Mobile.Network.WebRequest.Abort(req);
+
                 throw;
             }
             finally
             {
-                lock (this)
-                {
-                    if (req != null)
-                        req = null;
-                }
+
+                if (req != null)
+                    req = null;
+
                 if (res != null)
                 {
                     res.Close();
