@@ -14,8 +14,11 @@ namespace Tenor.Mobile.Network
         {
             if (request == null)
                 throw new ArgumentNullException("request");
+
+            System.Reflection.FieldInfo m_response = request.GetType().GetField("m_response", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+
             request.Abort();
-            HttpWebResponse stream = (HttpWebResponse)request.GetType().GetField("m_response", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).GetValue(request);
+            HttpWebResponse stream = (m_response != null ? (HttpWebResponse)m_response.GetValue(request) : null);
             if (stream != null)
             {
                 //HACK: This is necessary to avoid the stream to be fully downloaded on pocketpc.

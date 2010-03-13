@@ -1,5 +1,5 @@
-﻿using System;
-
+﻿#define PROXY
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Net;
@@ -7,10 +7,16 @@ using System.IO;
 
 namespace Tenor.Mobile.Location
 {
+    /// <summary>
+    /// Provides location information based on The Google Geocoding Web Service.
+    /// http://code.google.com/apis/maps/documentation/geocoding/
+    /// </summary>
     public class Geolocation
     {
-        const string key = "ABQIAAAADIubaBFn17TT-9Qlq83q3RRABhB3JDiBIx8yuapGDhWQqPAk6BQAtqQOGWpmfDdTeA1cwPEJwGx9TA";
-        const string baseUrl = "http://maps.google.com/maps/geo?q={0},{1}&output=csv&sensor=true&key={2}";
+
+
+        //const string key = "ABQIAAAADIubaBFn17TT-9Qlq83q3RRABhB3JDiBIx8yuapGDhWQqPAk6BQAtqQOGWpmfDdTeA1cwPEJwGx9TA";
+        const string baseUrl = "http://maps.google.com/maps/api/geocode/csv?latlng={0},{1}&sensor=true&oe=utf-8";
 
         private Geolocation(double latitude, double longitude)
         {
@@ -42,29 +48,131 @@ namespace Tenor.Mobile.Location
         public string Country
         { get; private set; }
 
-        string rawAddress;
-
-        public override string ToString()
+        string[] rawData;
+        private void ParseData(string data)
         {
-            return rawAddress;
+            rawData = data.Split('\n');
+
+            foreach (string s in rawData)
+            {
+                if (s.StartsWith("OK,,") || s.StartsWith("OK,street_address"))
+                {
+                    //the street address.
+                    int pos = s.IndexOf("\"");
+                    int pos2 = s.IndexOf("\"", pos + 1);
+
+                    Address = s.Substring(pos + 1, pos2 - pos - 1).Trim();
+
+                    //if (pos2 == -1)
+                    //    pos2 = s.IndexOf(",", pos);
+                    //if (pos2 == -1)
+                    //    pos2 = s.IndexOf("\"", pos);
+                    //Address = s.Substring(pos + 1, pos2 - (pos + 1)).Trim();
+                }
+                else if (s.StartsWith("OK,locality"))
+                {
+                    //city
+                    int pos = s.IndexOf("\"");
+                    int pos2 = s.IndexOf("\"", pos + 1);
+
+                    string[] values = s.Substring(pos + 1, pos2 - pos - 1).Split(',');
+                    if (values.Length > 0)
+                    {
+                        if (values.Length == 2)
+                            values = values[0].Trim().Split(" -");
+
+                        if (values.Length > 0)
+                            City = values[0].Trim();
+                        if (values.Length > 1 && string.IsNullOrEmpty(Province))
+                            Province = values[1].Trim();
+                    }
+                }
+                else if (s.StartsWith("OK,neighborhood") || s.StartsWith("OK,sublocality"))
+                {
+                    //neighborhood
+                    int pos = s.IndexOf("\"");
+                    int pos2 = s.IndexOf("\"", pos + 1);
+
+                    string[] values = s.Substring(pos + 1, pos2 - pos - 1).Split(',');
+                    if (values.Length > 0)
+                        Neighborhood = values[0].Trim();
+                }
+                else if (string.IsNullOrEmpty(ZipCode) && s.StartsWith("OK,postal_code"))
+                {
+                    //zip
+                    int pos = s.IndexOf("\"");
+                    int pos2 = s.IndexOf("\"", pos + 1);
+
+                    string[] values = s.Substring(pos + 1, pos2 - pos - 1).Split(',');
+                    if (string.IsNullOrEmpty(Neighborhood) && values.Length > 0)
+                    {
+                        Neighborhood = values[0].Trim();
+                    }
+                    foreach (string v in values)
+                    {
+                        foreach (char c in v)
+                        {
+                            if (c >= '0' && c <= '9')
+                            {
+                                ZipCode = v.Trim();
+                                break;
+                            }
+                        }
+                        if (!string.IsNullOrEmpty(ZipCode)) break;
+                    }
+                }
+                else if (string.IsNullOrEmpty(Country) && s.StartsWith("OK,country"))
+                {
+                    string[] values = s.Split(',');
+
+                    if (values.Length > 1)
+                        Country = values[2].Trim();
+                }
+                else if (s.StartsWith("OK,administrative_area_level_1"))
+                {
+                    int pos = s.IndexOf("\"");
+                    int pos2 = s.IndexOf("\"", pos + 1);
+
+                    string[] values = s.Substring(pos + 1, pos2 - pos - 1).Split(',');
+                    if (values.Length > 0)
+                        Province = values[0].Trim();
+                }
+
+            }
+
         }
 
 
-        private void GetAddress()
+        public override string ToString()
+        {
+            return Address;
+        }
+
+
+        private bool GetAddress()
         {
 
             HttpWebRequest req = null;
             try
             {
                 req = (HttpWebRequest)WebRequest.Create(
-new Uri(string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-us")
-          , baseUrl, Latitude, Longitude, key)));
+                    new Uri(string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-us")
+                              , baseUrl, Latitude, Longitude)));
+
+#if PROXY
+                WebProxy proxy = new WebProxy("10.2.108.25", 8080);
+                proxy.Credentials = new NetworkCredential("y3tr", "htc9377I");
+                req.Proxy = proxy;
+#endif
+
                 req.Method = "GET";
 
                 HttpWebResponse res = (HttpWebResponse)req.GetResponse();
                 StreamReader reader = new StreamReader(res.GetResponseStream());
-                rawAddress = reader.ReadToEnd();
+                string rawData = reader.ReadToEnd();
                 reader.Close();
+                ParseData(rawData);
+                return true;
             }
             catch (Exception)
             {
@@ -75,6 +183,7 @@ new Uri(string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-us")
             {
                 req = null;
             }
+            return false;
         }
 
         private static List<Geolocation> cache = null;
@@ -88,7 +197,9 @@ new Uri(string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-us")
                 geo = cache[i];
             else
             {
-                geo.GetAddress();
+                bool got = geo.GetAddress();
+                if (!got)
+                    return null;
                 cache.Add(geo);
                 if (cache.Count > 10)
                     cache.RemoveAt(0);

@@ -5,10 +5,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TenorMobile", "TenorMobile\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "InterfaceTest", "InterfaceTest\InterfaceTest.csproj", "{FA68DC42-1B72-4834-A42C-96AF034883C0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TenorMobile.Test", "TenorMobile.Test\TenorMobile.Test.csproj", "{303A9425-CEA5-4261-BDF8-50BC6337F471}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1B8B4930-A73B-4BFD-A35B-21573D7C60DA}"
+	ProjectSection(SolutionItems) = preProject
+		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
+		TenorMobile.vsmdi = TenorMobile.vsmdi
+	EndProjectSection
+EndProject
 Global
-	GlobalSection(SubversionScc) = preSolution
-		Svn-Managed = True
-		Manager = AnkhSVN - Subversion Support for Visual Studio
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = TenorMobile.vsmdi
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,8 +32,16 @@ Global
 		{FA68DC42-1B72-4834-A42C-96AF034883C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FA68DC42-1B72-4834-A42C-96AF034883C0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{FA68DC42-1B72-4834-A42C-96AF034883C0}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{303A9425-CEA5-4261-BDF8-50BC6337F471}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{303A9425-CEA5-4261-BDF8-50BC6337F471}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{303A9425-CEA5-4261-BDF8-50BC6337F471}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{303A9425-CEA5-4261-BDF8-50BC6337F471}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
 	EndGlobalSection
 EndGlobal
