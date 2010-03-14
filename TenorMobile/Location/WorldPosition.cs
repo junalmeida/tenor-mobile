@@ -66,7 +66,7 @@ namespace Tenor.Mobile.Location
         public DateTime LastFix
         { get; private set; }
 
-
+        
 
         private int pollingInterval;
         /// <summary>
@@ -89,6 +89,15 @@ namespace Tenor.Mobile.Location
         /// </summary>
         public bool PollLocation { get; set; }
 
+        /// <summary>
+        /// Determines whether to use gps to get latitude and longitude
+        /// </summary>
+        public bool UseGps { get; set; }
+
+        /// <summary>
+        /// Returns a string representation of this WorldPosition instance.
+        /// </summary>
+        /// <returns></returns>
         public override string ToString()
         {
             return string.Format("{0}-{1}-{2}", Id, AreaCode, CountryCode);
@@ -109,10 +118,14 @@ namespace Tenor.Mobile.Location
             baseThread = Thread.CurrentThread;
             PollingInterval = 5000;
             PollLocation = false;
+            UseGps = true;
             FixType = FixType.Network;
             timer = new Timer(new TimerCallback(PeriodicPoll), null, 500, Timeout.Infinite);
         }
 
+        /// <summary>
+        /// Finalizes the gps instance.
+        /// </summary>
         ~WorldPosition()
         {
             if (gps != null && gps.Opened)
@@ -131,6 +144,13 @@ namespace Tenor.Mobile.Location
             this.PollLocation = pollLocation;
         }
 
+        public WorldPosition(bool pollLocation, bool useGps)
+            : this()
+        {
+            this.PollLocation = pollLocation;
+            this.UseGps = useGps;
+        }
+
         /// <summary>
         /// Manually poll location.
         /// </summary>
@@ -142,7 +162,16 @@ namespace Tenor.Mobile.Location
         private void PeriodicPoll(object state)
         {
             bool cellChanged = GetCellTowerInfo();
-            PollGps();
+
+            if (UseGps)
+                PollGps();
+            else
+            {
+                FixType = FixType.Network;
+                if (gps != null && gps.Opened)
+                    gps.Close();
+            }
+
             if (cellChanged && PollLocation && FixType == FixType.Network)
                 PollCell();
 

@@ -1,4 +1,4 @@
-﻿#define PROXY
+﻿//#define PROXY
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -79,7 +79,7 @@ namespace Tenor.Mobile.Location
                     if (values.Length > 0)
                     {
                         if (values.Length == 2)
-                            values = values[0].Trim().Split(" -");
+                            values = values[0].Replace(" - ",",").Trim().Split(',');
 
                         if (values.Length > 0)
                             City = values[0].Trim();

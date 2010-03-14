@@ -24,7 +24,7 @@ namespace TenorMobile.Test
             latlngList.Add(new KeyValuePair<double, double>(-22.909667, -43.179656)); //Rio de Janeiro
             latlngList.Add(new KeyValuePair<double, double>(42.983202, -108.627434)); //Wyoming
             latlngList.Add(new KeyValuePair<double, double>(19.404819, -72.367172)); //Haiti, unknown address
-            latlngList.Add(new KeyValuePair<double, double>(18.555136, -72.319565)); //Haiti, unknown address
+            latlngList.Add(new KeyValuePair<double, double>(18.555136, -72.319565)); //Haiti, port-au-prince
             latlngList.Add(new KeyValuePair<double, double>(31.248382, 121.243515)); //Shanghai, China
             latlngList.Add(new KeyValuePair<double, double>(43.665674, -79.40938)); //Toronto, Canada
 
