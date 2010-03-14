@@ -13,6 +13,9 @@ namespace Tenor.Mobile.Location
 
     //---Based on code written by Dale Lane
     //---Source: http://dalelane.co.uk/blog/?p=241
+    /// <summary>
+    /// Provides location services based on cell id and gps information.
+    /// </summary>
     public class WorldPosition
     {
         private const string GoogleMobileServiceUri = "http://www.google.com/glm/mmap";

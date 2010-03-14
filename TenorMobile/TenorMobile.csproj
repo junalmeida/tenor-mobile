@@ -90,8 +90,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="UI\Notification\NotificationMessageWindow.cs" />
-    <Compile Include="UI\Notification\NotificationSoftKey.cs">
-    </Compile>
+    <Compile Include="UI\Notification\NotificationSoftKey.cs" />
     <Compile Include="UI\Notification\NotificationWithSoftKeys.cs">
       <SubType>Component</SubType>
     </Compile>
