@@ -6,6 +6,7 @@ using System.Collections.Generic;
 
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tenor.Mobile.Location;
+using System.Drawing;
 
 namespace TenorMobile.Test
 {
@@ -20,24 +21,39 @@ namespace TenorMobile.Test
         [TestMethod]
         public void GeoCodingTest()
         {
-            List<KeyValuePair<double, double>> latlngList = new List<KeyValuePair<double, double>>();
-            latlngList.Add(new KeyValuePair<double, double>(-22.909667, -43.179656)); //Rio de Janeiro
-            latlngList.Add(new KeyValuePair<double, double>(42.983202, -108.627434)); //Wyoming
-            latlngList.Add(new KeyValuePair<double, double>(19.404819, -72.367172)); //Haiti, unknown address
-            latlngList.Add(new KeyValuePair<double, double>(18.555136, -72.319565)); //Haiti, port-au-prince
-            latlngList.Add(new KeyValuePair<double, double>(31.248382, 121.243515)); //Shanghai, China
-            latlngList.Add(new KeyValuePair<double, double>(43.665674, -79.40938)); //Toronto, Canada
+            List<PointF> latlngList = new List<PointF>();
+            latlngList.Add(new PointF(28.404931F, -131.850588F)); //Water
+
+
+            latlngList.Add(new PointF(-22.909667F, -43.179656F)); //Rio de Janeiro
+            latlngList.Add(new PointF(-22.857696F, -43.373414F)); //Rio de Janeiro
+            latlngList.Add(new PointF(-9.967379F, -67.819979F)); //Acre
+            latlngList.Add(new PointF(-1.295547F, -47.923565F)); //Roraima
+            latlngList.Add(new PointF(42.983202F, -108.627434F)); //Wyoming
+            latlngList.Add(new PointF(19.404819F, -72.367172F)); //Haiti, unknown address
+            latlngList.Add(new PointF(18.555136F, -72.319565F)); //Haiti, port-au-prince
+            latlngList.Add(new PointF(31.248382F, 121.243515F)); //Shanghai, China
+            latlngList.Add(new PointF(43.665674F, -79.40938F)); //Toronto, Canada
+            latlngList.Add(new PointF(45.577742F, -73.739641F)); //Montreal, Canada
+            latlngList.Add(new PointF(45.543064F, -73.640699F)); //Montreal, Canada
+            latlngList.Add(new PointF(45.501098F, -73.565912F)); //Montreal, Canada
+            latlngList.Add(new PointF(45.501745F, -73.567414F)); //Montreal, Canada
 
             List<Geolocation> list = new List<Geolocation>();
-            foreach (KeyValuePair<double, double> latlng in latlngList)
+            foreach (PointF latlng in latlngList)
             {
-                Geolocation loc = Geolocation.Get(latlng.Key, latlng.Value);
-                if (loc == null)
-                    Assert.Inconclusive("Either we don't have network or an error occured");
-                list.Add(loc);
-            }
+                Geolocation loc = Geolocation.Get(latlng.X, latlng.Y);
+                if (latlngList.IndexOf(latlng) == 0)
+                    Assert.IsNull(loc);
+                else 
+                    Assert.IsNotNull(loc);
+                if (loc != null)
+                {
+                    System.Diagnostics.Debug.WriteLine(loc.ToString());
+                    list.Add(loc);
+                }
 
-            
+            }
 
         }
     }
