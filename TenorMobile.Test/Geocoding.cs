@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Tenor.Mobile.Location;
 using System.Drawing;
+using System.Net;
 
 namespace TenorMobile.Test
 {
@@ -14,13 +15,20 @@ namespace TenorMobile.Test
     /// Summary description for UnitTest1
     /// </summary>
     [TestClass]
-    public class Geocoding
+    public class Geocoding 
     {
 
 
         [TestMethod]
         public void GeoCodingTest()
         {
+
+#if PROXY
+            WebProxy proxy = new WebProxy("10.2.108.25", 8080);
+            proxy.Credentials = new NetworkCredential("y3tr", "");
+            System.Net.WebRequest.DefaultWebProxy = proxy;
+#endif
+
             List<PointF> latlngList = new List<PointF>();
             latlngList.Add(new PointF(28.404931F, -131.850588F)); //Water
 

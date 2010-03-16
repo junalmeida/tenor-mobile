@@ -1,5 +1,4 @@
-﻿#define PROXY
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Net;
@@ -25,28 +24,58 @@ namespace Tenor.Mobile.Location
             this.Longitude = longitude;
         }
 
+        /// <summary>
+        /// Gets the latitude position part of this Geolocation instance.
+        /// </summary>
         public double Latitude
         { get; private set; }
 
+        /// <summary>
+        /// Gets the longitude position part of this Geolocation instance.
+        /// </summary>
         public double Longitude
         { get; private set; }
 
+        /// <summary>
+        /// Gets the Neighborhood or sublocality. Usually small city divisions.
+        /// </summary>
         public string Neighborhood
         { get; private set; }
 
+        /// <summary>
+        /// Gets the full formatted address.
+        /// </summary>
         public string Address
         { get; private set; }
 
+        /// <summary>
+        /// Gets the city name.
+        /// </summary>
         public string City
         { get; private set; }
 
+        /// <summary>
+        /// The province or state, usually the first administrative level.
+        /// </summary>
         public string Province
         { get; private set; }
 
+        /// <summary>
+        /// Gets the postal code.
+        /// </summary>
         public string ZipCode
         { get; private set; }
 
+        /// <summary>
+        /// Gets the political country name.
+        /// </summary>
         public string Country
+        { get; private set; }
+
+        /// <summary>
+        /// Gets only the route. Usually, the street name.
+        /// </summary>
+        public string Route
         { get; private set; }
 
 #if DEBUG
@@ -63,6 +92,7 @@ namespace Tenor.Mobile.Location
             }
             else
             {
+                //parses csv
                 string[] rawData = data.Split('\n');
 
                 foreach (string s in rawData)
@@ -193,8 +223,8 @@ namespace Tenor.Mobile.Location
                 case "route":
                     {
                         XmlElement long_name = (XmlElement)el.SelectSingleNode("long_name");
-                        if (Address == null)
-                            Address = long_name.InnerText;
+                        if (Route == null)
+                            Route = long_name.InnerText;
                     }
                     break;
                 case "administrative_area_level_2":
@@ -228,7 +258,9 @@ namespace Tenor.Mobile.Location
             }
         }
 
-
+        /// <summary>
+        /// Return a System.String that represents this Geolocation.
+        /// </summary>
         public override string ToString()
         {
             if (Address != null)
@@ -247,12 +279,6 @@ namespace Tenor.Mobile.Location
                 req = (HttpWebRequest)WebRequest.Create(
                     new Uri(string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-us")
                               , baseUrl, Latitude, Longitude)));
-
-#if PROXY
-                WebProxy proxy = new WebProxy("10.2.108.25", 8080);
-                proxy.Credentials = new NetworkCredential("y3tr", "htc9377I");
-                req.Proxy = proxy;
-#endif
 
                 req.Method = "GET";
 
@@ -289,6 +315,13 @@ namespace Tenor.Mobile.Location
         }
 
         private static List<Geolocation> cache = null;
+        /// <summary>
+        /// Gets an instance of Geolocation based on latitude and longitude values. 
+        /// This will consume the data plan.
+        /// </summary>
+        /// <param name="latitude"></param>
+        /// <param name="longitude"></param>
+        /// <returns></returns>
         public static Geolocation Get(double latitude, double longitude)
         {
             if (cache == null)
@@ -310,7 +343,9 @@ namespace Tenor.Mobile.Location
         }
 
 
-
+        /// <summary>
+        /// Determines whether the speficied object is equal to this instance.
+        /// </summary>
         public override bool Equals(object obj)
         {
             if (object.ReferenceEquals(this, obj))
@@ -325,6 +360,12 @@ namespace Tenor.Mobile.Location
                 return object.Equals(this.Latitude, other.Latitude) && object.Equals(this.Longitude, other.Longitude);
             }
         }
+
+
+        /// <summary>
+        /// Retruns a hash that represents this instance.
+        /// </summary>
+        /// <returns></returns>
         public override int GetHashCode()
         {
             int hash = 57;
