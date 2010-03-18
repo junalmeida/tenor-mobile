@@ -19,6 +19,12 @@ namespace Tenor.Mobile
             messageLoop = false;
         }
 
+        public static void Exit()
+        {
+            NativeMethods.PostQuitMessage(0);
+        }
+
+
         private static ArrayList messageFilters = new ArrayList();
         private static bool process;
         private static NativeMethods.MSG msg;

@@ -191,6 +191,10 @@ namespace Tenor.Mobile
         [DllImport("coredll.dll", EntryPoint = "DispatchMessage", SetLastError = true)]
         internal static extern bool DispatchMessage(ref MSG lpMsg);
 
+        [DllImport("coredll.dll", SetLastError = true)]
+        internal static extern void PostQuitMessage(int nExitCode);
+
+
         internal struct MSG
         {
             public IntPtr hwnd;
