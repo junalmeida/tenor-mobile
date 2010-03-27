@@ -302,10 +302,12 @@ namespace Tenor.Mobile.Location
                 ParseData(xml.ToString());
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 if (req != null)
                     Tenor.Mobile.Network.WebRequest.Abort(req);
+                System.Diagnostics.Trace.Assert(true, "Geocoding error.", ex.Message);
+
             }
             finally
             {
@@ -329,7 +331,10 @@ namespace Tenor.Mobile.Location
             Geolocation geo = new Geolocation(latitude, longitude);
             int i = cache.IndexOf(geo);
             if (i > -1)
+            {
                 geo = cache[i];
+                System.Diagnostics.Trace.Assert(true, "Geocoding from cache.");
+            }
             else
             {
                 bool got = geo.GetAddress();

@@ -1,4 +1,4 @@
-﻿#define PROXY
+﻿//#define PROXY
 
 using System;
 using System.Text;
