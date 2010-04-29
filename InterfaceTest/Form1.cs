@@ -10,6 +10,7 @@ using System.IO;
 using Tenor.Mobile.Diagnostics;
 using Tenor.Mobile.Drawing;
 using Tenor.Mobile.Device;
+using Tenor.Mobile.UI;
 
 namespace InterfaceTest
 {
@@ -28,6 +29,12 @@ namespace InterfaceTest
                 Notification not = Notification.Create(g);
                 not.Text = "Test";
             }
+            Image app = new Bitmap(this.GetType().Assembly.GetManifestResourceStream("InterfaceTest.app.png"));
+            Image help = new Bitmap(this.GetType().Assembly.GetManifestResourceStream("InterfaceTest.help.png"));
+
+            headerStrip2.Tabs.Clear();
+            headerStrip2.Tabs.Add(new HeaderTab("Aplicativos", app));
+            headerStrip2.Tabs.Add(new HeaderTab("Sobre", help));
 
 
             kListControl1.DrawSeparators = true;

@@ -90,6 +90,12 @@
       <Name>TenorMobile</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="app.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="help.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CompactFramework.CSharp.targets" />
   <ProjectExtensions>
     <VisualStudio>

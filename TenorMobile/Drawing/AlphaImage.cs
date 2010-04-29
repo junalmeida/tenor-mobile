@@ -5,6 +5,7 @@ using System.Text;
 using System.Runtime.InteropServices;
 using System.IO;
 using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace Tenor.Mobile.Drawing
 {
@@ -42,6 +43,39 @@ namespace Tenor.Mobile.Drawing
             }
 
             return data;
+        }
+
+        public static void DrawImage(Bitmap image, Graphics g, Rectangle destination)
+        {
+            DrawImage(image, g, Rectangle.Empty, destination, Color.Empty);
+        }
+
+
+        public static void DrawImage(Bitmap image, Graphics g, Rectangle destination, Color key)
+        {
+            DrawImage(image, g, Rectangle.Empty, destination, key);
+        }
+
+        public static void DrawImage(Bitmap image, Graphics g, Rectangle source, Rectangle destination, Color key)
+        {
+            if (image == null)
+                throw new ArgumentNullException("image");
+            if (g == null)
+                throw new ArgumentNullException("g");
+
+
+
+            ImageAttributes attr = new ImageAttributes();
+            if (key.IsEmpty)
+            {
+                key = image.GetPixel(0, 0);
+            }
+            attr.SetColorKey(key, key);
+            if (source.IsEmpty)
+                source = new Rectangle(0, 0, image.Width, image.Height);
+
+            g.DrawImage(image, destination, source.Left, source.Top, source.Width, source.Height, GraphicsUnit.Pixel, attr);
+
         }
 
         public static void DrawImage(Stream src, Graphics destGraphics, Rectangle destRect)

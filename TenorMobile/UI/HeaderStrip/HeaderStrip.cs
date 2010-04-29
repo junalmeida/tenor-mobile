@@ -1,0 +1,201 @@
+﻿using System;
+
+using System.Collections.Generic;
+using System.Text;
+using System.Windows.Forms;
+using System.ComponentModel;
+using System.Drawing;
+
+namespace Tenor.Mobile.UI
+{
+    public class HeaderStrip : Control
+    {
+        public HeaderStrip()
+        {
+        }
+
+
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+        }        
+        
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            Skin.Current.DrawHeaderBackGround(this.Size, e);
+            if (Tabs.Count > 0)
+                Skin.Current.DrawTabs(Tabs, this.Size, e);
+            else if (!string.IsNullOrEmpty(Text))
+                Skin.Current.DrawHeaderText(Text, this.Size, e);
+        }
+
+        /// <summary>
+        /// Gets or sets the Text of this HeaderStrip.
+        /// </summary>
+        public string Text { get; set; }
+
+        private TabsCollection tabs;
+        public TabsCollection Tabs
+        {
+            get
+            {
+                if (tabs == null)
+                    tabs = new TabsCollection(this);
+                return tabs;
+            }
+        }
+
+        #region Events
+
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            foreach (HeaderTab tab in Tabs)
+            {
+
+            }
+            base.OnMouseDown(e);
+        }
+
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                foreach (HeaderTab tab in Tabs)
+                {
+                    if (tab.area.Contains(new Point(e.X, e.Y)))
+                    {
+                        SelectTab(tab);
+                        return;
+                    }
+                }
+            }
+            base.OnMouseUp(e);
+        }
+
+        private void SelectTab(HeaderTab tab)
+        {
+            if (tab.Selected == false)
+            {
+                tab.Selected = true;
+                if (Tenor.Mobile.Device.Leds.HapticFeedback)
+                    Tenor.Mobile.Device.Leds.Vibrate(150);
+                OnSelectedTabChanged(new EventArgs());
+            }
+        }
+
+        public event EventHandler SelectedTabChanged;
+        private void OnSelectedTabChanged(EventArgs eventArgs)
+        {
+            if (SelectedTabChanged != null)
+                SelectedTabChanged(this, eventArgs);
+        }
+
+        public int SelectedIndex
+        {
+            get;
+            internal set;
+        }
+
+        #endregion
+    }
+
+
+    public class HeaderTab
+    {
+        public HeaderTab(string text, Image image)
+        {
+            this.Image = image;
+        }
+
+        public int TabIndex { get { return (collection == null ? -1 : collection.IndexOf(this)); } }
+
+        private bool selected;
+        public bool Selected
+        {
+            get { return selected; }
+            set
+            {
+                selected = value;
+
+                if (collection != null && value)
+                {
+                    foreach (HeaderTab tab in collection)
+                    {
+                        if (tab != this)
+                        {
+                            tab.selected = false;
+                            collection.Control.SelectedIndex = collection.IndexOf(tab);
+                        }
+                    }
+                }
+                Update();
+            }
+        }
+
+        private Image image;
+        public Image Image
+        {
+            get
+            {
+                return image;
+            }
+            set
+            {
+                image = value;
+                Update();
+            }
+        }
+
+
+
+
+        private void Update()
+        {
+            if (collection != null)
+                collection.Control.Invalidate();
+        }
+
+        internal TabsCollection collection = null;
+        internal Rectangle area;
+    }
+
+
+    public class TabsCollection : System.Collections.ObjectModel.Collection<HeaderTab>
+    {
+        
+        internal HeaderStrip Control { get; private set; }
+        internal TabsCollection(HeaderStrip control)
+        {
+            this.Control = control;
+        }
+
+        protected override void InsertItem(int index, HeaderTab item)
+        {
+            base.InsertItem(index, item);
+            item.collection = this;
+            EnsureSelection();
+        }
+
+        protected override void RemoveItem(int index)
+        {
+            base.RemoveItem(index);
+            EnsureSelection();
+        }
+
+        private void EnsureSelection()
+        {
+            bool alreadySelected = false;
+            foreach (HeaderTab tab in this)
+            {
+                if (tab.Selected && !alreadySelected)
+                    alreadySelected = true;
+                else if (tab.Selected)
+                    tab.Selected = false;
+            }
+            if (!alreadySelected && this.Count > 0)
+                this[0].Selected = true;
+                
+            Control.Invalidate();
+        }
+
+    }
+}

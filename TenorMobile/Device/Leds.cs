@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using Microsoft.Win32;
 
 namespace Tenor.Mobile.Device
 {
@@ -40,5 +41,16 @@ namespace Tenor.Mobile.Device
             NativeMethods.NLedSetDevice(NativeMethods.NLED_LEDS.Vibrate, ref info);// Actually sets the device to enable vibration or disable it. the 1 subsection is the DeviceID, in this case and most phone cases this will be device 1, the second subsection is passing the information from the info structure.
         }
 
+
+        public static bool HapticFeedback
+        {
+            get
+            {
+                using (RegistryKey key = Registry.CurrentUser.OpenSubKey("ControlPanel\\TouchVibration"))
+                {
+                    return ((int)key.GetValue("TouchVibrateEnabled", 0)) > 0;
+                }
+            }
+        }
     }
 }

@@ -27,7 +27,8 @@ namespace Tenor.Mobile.Drawing
                 NativeMethods.SetBrushOrgEx(hdc, rectangle.Left, rectangle.Top, ref lppt);
                 NativeMethods.SelectObject(hdc, hpen);
 
-                NativeMethods.SelectObject(hdc, hbrush);
+                if (!color.IsEmpty && !color.Equals(Color.Transparent))
+                    NativeMethods.SelectObject(hdc, hbrush);
 
                 NativeMethods.RoundRect(hdc,
                           rectangle.Left,
