@@ -28,7 +28,7 @@ namespace Tenor.Mobile.UI
         private static Skin CreateSkin()
         {
             Samsung s = new Samsung();
-            s.ScaleFactor = new Size(2, 2);
+            s.ScaleFactor = new Size(1, 1);
             return s;
         }
 

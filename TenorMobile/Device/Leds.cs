@@ -48,7 +48,10 @@ namespace Tenor.Mobile.Device
             {
                 using (RegistryKey key = Registry.CurrentUser.OpenSubKey("ControlPanel\\TouchVibration"))
                 {
-                    return ((int)key.GetValue("TouchVibrateEnabled", 0)) > 0;
+                    if (key == null)
+                        return false;
+                    else
+                        return ((int)key.GetValue("TouchVibrateEnabled", 0)) > 0;
                 }
             }
         }

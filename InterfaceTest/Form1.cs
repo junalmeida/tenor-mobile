@@ -42,9 +42,9 @@ namespace InterfaceTest
             kListControl1.SelectedItem = kListControl1[0];
 
 
-            cell = new Tenor.Mobile.Location.WorldPosition(true);
-            cell.TowerChanged += new EventHandler(cell_TowerChanged);
-            cell.LocationChanged += new EventHandler(cell_LocationChanged);
+            //cell = new Tenor.Mobile.Location.WorldPosition(true);
+            //cell.TowerChanged += new EventHandler(cell_TowerChanged);
+            //cell.LocationChanged += new EventHandler(cell_LocationChanged);
         }
 
         void cell_LocationChanged(object sender, EventArgs e)

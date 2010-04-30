@@ -74,7 +74,10 @@ namespace Tenor.Mobile.UI
                     Rectangle destImg;
                     if (tab.Image.Size.Height > tab.area.Height || tab.Image.Size.Width > tab.area.Width)
                     {
-                        throw new NotImplementedException();
+                        int oX = 8 * ScaleFactor.Width;
+                        int oY = 8 * ScaleFactor.Height;
+
+                        destImg = new Rectangle(tab.area.X + oX, tab.area.Y + oY, tab.area.Width - (oX * 2), tab.area.Height - ((tab.area.Y + oY) * 2));
                     }
                     else 
                     {
