@@ -22,6 +22,9 @@ namespace InterfaceTest
         public Form1()
         {
             InitializeComponent();
+            Skin.Current.ApplyColorsToControl(this);
+            Skin.Current.ApplyColorsToControl(tabPage1);
+            Skin.Current.ApplyColorsToControl(tabPage2);
 
             Guid g = new Guid("b877d65f-239c-47a7-9304-0d347f580408");
             if (!Notification.Exists(g))

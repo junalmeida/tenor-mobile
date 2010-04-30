@@ -27,9 +27,24 @@ namespace Tenor.Mobile.UI
 
         private static Skin CreateSkin()
         {
-            Samsung s = new Samsung();
-            s.ScaleFactor = new Size(1, 1);
-            return s;
+            string oem = (Device.Device.Manufacturer + " " + Device.Device.OemInfo);
+            Skin skin = null;
+            if (oem.ToLower().IndexOf("samsung") > -1)
+                skin = new Samsung();
+            else
+                throw new NotSupportedException(string.Format("Device '{0}' not supported.", oem));
+
+            using (ContainerControl control = new ContainerControl())
+            {
+                SizeF qvga = new SizeF(96F, 96F);
+                control.AutoScaleDimensions = qvga;
+                control.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+
+
+                skin.ScaleFactor = new Size(Convert.ToInt32(control.CurrentAutoScaleDimensions.Width / qvga.Width), Convert.ToInt32(control.CurrentAutoScaleDimensions.Height / qvga.Height));
+            }
+            return skin;
+
         }
 
         protected Size ScaleFactor { get; private set; }
@@ -37,5 +52,26 @@ namespace Tenor.Mobile.UI
         internal abstract void DrawHeaderBackGround(Size controlSize, PaintEventArgs eventArgs);
         internal abstract void DrawHeaderText(string text, Size controlSize, PaintEventArgs e);
         internal abstract void DrawTabs(IList<HeaderTab> tabs, Size size, PaintEventArgs e);
+        public abstract void ApplyColorsToControl(Control control);
+
+        protected Form FindForm(Control control)
+        {
+            if (control == null)
+                return null;
+            else
+            {
+                Form form = control as Form;
+                if (form == null)
+                    return FindForm(control.Parent);
+                else
+                    return form;
+            }
+        }
+
+        internal abstract void DrawListItemBackground(Graphics g, Rectangle bounds, int index, bool selected);
+
+        internal abstract Color ControlBackColor
+        { get; }
+        
     }
 }

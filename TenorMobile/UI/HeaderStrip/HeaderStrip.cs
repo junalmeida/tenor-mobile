@@ -14,6 +14,11 @@ namespace Tenor.Mobile.UI
         {
         }
 
+        protected override void OnParentChanged(EventArgs e)
+        {
+            base.OnParentChanged(e);
+        }
+
 
         protected override void OnPaintBackground(PaintEventArgs e)
         {
@@ -70,14 +75,13 @@ namespace Tenor.Mobile.UI
             }
             base.OnMouseUp(e);
         }
-
+        
         private void SelectTab(HeaderTab tab)
         {
             if (tab.Selected == false)
             {
                 tab.Selected = true;
-                if (Tenor.Mobile.Device.Leds.HapticFeedback)
-                    Tenor.Mobile.Device.Leds.Vibrate(150);
+                Tenor.Mobile.Device.Device.HapticSoft();
                 OnSelectedTabChanged(new EventArgs());
             }
         }
@@ -120,9 +124,12 @@ namespace Tenor.Mobile.UI
                 {
                     foreach (HeaderTab tab in collection)
                     {
-                        if (tab != this)
+                        if (tab != this && tab.selected != false)
                         {
                             tab.selected = false;
+                        }
+                        else if (tab == this)
+                        {
                             collection.Control.SelectedIndex = collection.IndexOf(tab);
                         }
                     }

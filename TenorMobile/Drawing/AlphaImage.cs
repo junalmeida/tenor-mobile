@@ -11,8 +11,6 @@ namespace Tenor.Mobile.Drawing
 {
     public static class AlphaImage
     {
-
-
         /// <summary>
         /// Converts any Stream into an array of bytes.
         /// </summary>
@@ -45,17 +43,25 @@ namespace Tenor.Mobile.Drawing
             return data;
         }
 
+        /// <summary>
+        /// Draws an image with alpha blending.
+        /// </summary>
         public static void DrawImage(Bitmap image, Graphics g, Rectangle destination)
         {
             DrawImage(image, g, Rectangle.Empty, destination, Color.Empty);
         }
 
-
+        /// <summary>
+        /// Draws an image with alpha blending.
+        /// </summary>
         public static void DrawImage(Bitmap image, Graphics g, Rectangle destination, Color key)
         {
             DrawImage(image, g, Rectangle.Empty, destination, key);
         }
 
+        /// <summary>
+        /// Draws an image with alpha blending.
+        /// </summary>
         public static void DrawImage(Bitmap image, Graphics g, Rectangle source, Rectangle destination, Color key)
         {
             if (image == null)
@@ -78,17 +84,17 @@ namespace Tenor.Mobile.Drawing
 
         }
 
+        /// <summary>
+        /// Draws an image with alpha blending.
+        /// </summary>
         public static void DrawImage(Stream src, Graphics destGraphics, Rectangle destRect)
         {
             DrawImage(src, Rectangle.Empty, destGraphics, destRect);
         }
+
         /// <summary>
         /// Draws an image with alpha blending.
         /// </summary>
-        /// <param name="src"></param>
-        /// <param name="srcRect"></param>
-        /// <param name="destGraphics"></param>
-        /// <param name="destRect"></param>
         public static void DrawImage(Stream src, Rectangle srcRect, Graphics destGraphics, Rectangle destRect)
         {
             if (src == null)

@@ -4,56 +4,87 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using Microsoft.Win32;
+using System.Runtime.InteropServices;
 
 namespace Tenor.Mobile.Device
 {
-    public static class Leds
+    public enum LedStatus
     {
-        private static Timer timer;
-        /// <summary>
-        /// Vibrates for a specific time.
-        /// </summary>
-        /// <param name="seconds"></param>
-        public static void Vibrate(int timeout)
+        Off = 0,
+        On,
+        Blink
+    }
+
+    internal static class Leds
+    {
+        class NLED_SETTINGS_INFO
         {
-            if (timer == null)
-                timer = new Timer(new TimerCallback(VibrateOff), null, 0, timeout);
-            Vibrate(true);
+            public uint LedNum;
+            public uint OffOnBlink;
+            public int TotalCycleTime;
+            public int OnTime;
+            public int OffTime;
+            public int MetaCycleOn;
+            public int MetaCycleOff;
         }
 
-        private static void VibrateOff(object state)
+        class NLED_COUNT_INFO
         {
-            timer.Dispose(); timer = null;
-            Vibrate(false);
+            public int cLeds;
         }
 
+        const int NLED_COUNT_INFO_ID = 0;
+        const int NLED_SETTINGS_INFO_ID = 2;
 
-        /// <summary>
-        /// Vibrates forever or disables vibration.
-        /// </summary>
-        /// <param name="state"></param>
-        public static void Vibrate(bool state)
+
+
+        [DllImport("coredll.dll")]
+        private static extern bool NLedGetDeviceInfo(uint nID, NLED_COUNT_INFO pOutput);
+
+        [DllImport("coredll.dll")]
+        private static extern bool NLedSetDevice(uint nID, NLED_SETTINGS_INFO pOutput);
+
+        private static int _ledCount;
+
+        static Leds()
         {
-            NativeMethods.NLED_SETTINGS_INFO info = new NativeMethods.NLED_SETTINGS_INFO();  
-            
-            info.LedNum = 1; //Sets the LED number to be used, this is based on the LED device capabilities but in the case of vibration shouldn't matter.
-            info.OffOnBlink = state ? NativeMethods.OffOnBlink.On : NativeMethods.OffOnBlink.Off;//sets the state of the LED, with vibrate it can only be on or off but a value of 2 for blink can base used in other cases
-            NativeMethods.NLedSetDevice(NativeMethods.NLED_LEDS.Vibrate, ref info);// Actually sets the device to enable vibration or disable it. the 1 subsection is the DeviceID, in this case and most phone cases this will be device 1, the second subsection is passing the information from the info structure.
+            _ledCount = GetLedCount();
         }
 
-
-        public static bool HapticFeedback
+        private static void SetLedStatus(LedStatus status)
         {
-            get
+            NLED_SETTINGS_INFO nsi = new NLED_SETTINGS_INFO();
+            nsi.OffOnBlink = (uint)status;
+            for (int i = 0; i < _ledCount; i++)
             {
-                using (RegistryKey key = Registry.CurrentUser.OpenSubKey("ControlPanel\\TouchVibration"))
-                {
-                    if (key == null)
-                        return false;
-                    else
-                        return ((int)key.GetValue("TouchVibrateEnabled", 0)) > 0;
-                }
+                nsi.LedNum = (uint)i;
+                NLedSetDevice(NLED_SETTINGS_INFO_ID, nsi);
             }
         }
+
+        public static void Vibrate(int millisecondsTimeout)
+        {
+            Thread t = new Thread(new ThreadStart(delegate()
+            {
+                SetLedStatus(LedStatus.On);
+                Thread.Sleep(millisecondsTimeout);
+                SetLedStatus(LedStatus.Off);
+            }));
+            t.Start();
+        }
+
+
+        private static int GetLedCount()
+        {
+            int count = 0;
+            NLED_COUNT_INFO nci = new NLED_COUNT_INFO();
+            if (NLedGetDeviceInfo(NLED_COUNT_INFO_ID, nci))
+            {
+                count = nci.cLeds;
+            }
+            return count;
+        }
+
+
     }
 }

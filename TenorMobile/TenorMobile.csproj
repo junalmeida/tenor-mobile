@@ -57,9 +57,12 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Device\Device.cs" />
     <Compile Include="Device\Leds.cs" />
-    <Compile Include="Device\NativeMethods.cs" />
     <Compile Include="Device\Notifications.cs" />
+    <Compile Include="Device\Samsung\Accelerometer.cs" />
+    <Compile Include="Device\Samsung\Haptics.cs" />
+    <Compile Include="Device\Samsung\Shared.cs" />
     <Compile Include="Diagnostics\NativeMethods.cs" />
     <Compile Include="Diagnostics\Process.cs">
     </Compile>

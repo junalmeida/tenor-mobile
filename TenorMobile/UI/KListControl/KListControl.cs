@@ -14,36 +14,29 @@ namespace Tenor.Mobile.UI
     /// </summary>
     public class KListControl : Control, IEnumerable
     {
-        bool drawSeparators = false;
+
+
+        public bool Skinnable
+        { get; set; }
 
         /// <summary>
         /// Controls whether to draw separators between list items.
         /// </summary>
         public bool DrawSeparators
-        {
-            get { return drawSeparators; }
-            set { drawSeparators = value; }
-        }
+        { get; set; }
 
 
         /// <summary>
         /// Controls whether to draw the scrollbar.
         /// </summary>
         public bool DrawScrollbar
-        {
-            get;
-            set;
-        }
+        { get; set; }
 
         /// <summary>
         /// Gets or sets the color of the separators.
         /// </summary>
         public Color SeparatorColor
-        {
-            get;
-            set;
-        }
-
+        { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="KListControl"/> class.
@@ -54,14 +47,15 @@ namespace Tenor.Mobile.UI
             m_timer.Interval = 10;
             m_timer.Tick += new EventHandler(m_timer_Tick);
             SeparatorColor = SystemColors.InactiveBorder;
+            DrawSeparators = false;
             DrawScrollbar = true;
+            Skinnable = true;
 
         }
 
         void KListControl_Initialize(object sender, EventArgs e)
         {
             CreateBackBuffer();
-
         }
 
         /// <summary>
@@ -509,7 +503,11 @@ namespace Tenor.Mobile.UI
         {
             if (m_backBuffer != null)
             {
-                m_backBuffer.Clear(BackColor);
+                if (Skinnable)
+                    m_backBuffer.Clear(Skin.Current.ControlBackColor);
+                else
+                    m_backBuffer.Clear(BackColor);
+
                 
                 base.OnPaint(new PaintEventArgs(m_backBuffer, e.ClipRectangle));
 
@@ -570,6 +568,9 @@ namespace Tenor.Mobile.UI
                                             }
                                         }
                                     }
+
+                                    if (Skinnable && m_layout == KListLayout.Vertical && !Extensions.IsDesignMode(this))
+                                        Skin.Current.DrawListItemBackground(m_backBuffer, itemRect, item.YIndex, item.Selected);
 
                                     if (DrawItem == null)
                                         item.Render(m_backBuffer, itemRect);
@@ -652,7 +653,7 @@ namespace Tenor.Mobile.UI
         protected override void OnMouseDown(MouseEventArgs e)
         {
             base.OnMouseDown(e);
-
+            Tenor.Mobile.Device.Device.HapticSoft();
             Capture = true;
 
             m_mouseDown.X = e.X;

@@ -77,10 +77,14 @@ namespace Tenor.Mobile.UI
                 SolidBrush textBrush;
                 if (Selected)
                 {
-                    SolidBrush backBrush;
-                    backBrush = new SolidBrush(SystemColors.Highlight);
+                    if (!Parent.Skinnable)
+                    {
+                        SolidBrush backBrush;
+                        backBrush = new SolidBrush(SystemColors.Highlight);
+                        g.FillRectangle(backBrush, bounds);
+                        backBrush.Dispose();
+                    }
                     textBrush = new SolidBrush(SystemColors.HighlightText);
-                    g.FillRectangle(backBrush, bounds);
                 }
                 else
                 {
@@ -89,8 +93,14 @@ namespace Tenor.Mobile.UI
                 }
 
                 g.DrawString("  " + Text, Parent.Font, textBrush, bounds, format);
+
+                textBrush.Dispose();
+                format.Dispose();
             }
         }
+
+
+  
 
         #endregion
     }

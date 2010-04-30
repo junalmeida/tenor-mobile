@@ -41,56 +41,57 @@ namespace Tenor.Mobile.UI
             {
                 SizeF textSize = e.Graphics.MeasureString(text, font);
 
-                e.Graphics.DrawString(text, font, brush, 12 * ScaleFactor.Width , 7 * ScaleFactor.Height);
+                e.Graphics.DrawString(text, font, brush, 12 * ScaleFactor.Width, 7 * ScaleFactor.Height);
             }
-            
+
         }
 
         internal override void DrawTabs(IList<HeaderTab> tabs, Size size, PaintEventArgs e)
         {
-            foreach (HeaderTab tab in tabs)
+            Point offset = new Point(2 * ScaleFactor.Width, 2 * ScaleFactor.Width);
+            int defaultWidth = 46 * ScaleFactor.Width;
+            Size corner = new Size(8 * ScaleFactor.Width, 8 * ScaleFactor.Height);
+
+            Pen penBorder = new Pen(Strings.ToColor(BorderLineColor));
+            try
             {
-                Point offset = new Point(5 * ScaleFactor.Width, 2 * ScaleFactor.Width);
-
-                int defaultWidth = 46 * ScaleFactor.Width;
-                Size corner = new Size(8 * ScaleFactor.Width, 8 * ScaleFactor.Height);
-
-                tab.area = new Rectangle(offset.X + tab.TabIndex * defaultWidth, offset.Y, defaultWidth, size.Height - offset.Y + corner.Height);
-                if (tab.Selected)
+                foreach (HeaderTab tab in tabs)
                 {
-                    using (Pen penBorder = new Pen(Strings.ToColor(BorderLineColor)))
+                    tab.area = new Rectangle(offset.X + tab.TabIndex * defaultWidth, offset.Y, defaultWidth, size.Height - offset.Y + corner.Height);
+                    if (tab.Selected)
                     {
                         Color backColor = Color.Black;
                         RoundedRectangle.Fill(e.Graphics, penBorder, Color.Black, tab.area, corner);
                     }
-                }
-                else
-                {
-                }
-                //draw icon
 
-                if (tab.Image != null)
-                {
-                    Rectangle destImg;
-                    if (tab.Image.Size.Height > tab.area.Height || tab.Image.Size.Width > tab.area.Width)
+                    if (tab.Image != null)
                     {
-                        int oX = 8 * ScaleFactor.Width;
-                        int oY = 8 * ScaleFactor.Height;
+                        //draw icon
+                        Rectangle destImg;
+                        if (tab.Image.Size.Height > tab.area.Height || tab.Image.Size.Width > tab.area.Width)
+                        {
+                            int oX = 8 * ScaleFactor.Width;
+                            int oY = 8 * ScaleFactor.Height;
 
-                        destImg = new Rectangle(tab.area.X + oX, tab.area.Y + oY, tab.area.Width - (oX * 2), tab.area.Height - ((tab.area.Y + oY) * 2));
+                            destImg = new Rectangle(tab.area.X + oX, tab.area.Y + oY, tab.area.Width - (oX * 2), tab.area.Height - ((tab.area.Y + oY) * 2));
+                        }
+                        else
+                        {
+                            destImg = new Rectangle(tab.area.X + (tab.area.Width / 2) - (tab.Image.Width / 2), (tab.area.Height / 2) - (tab.Image.Height / 2), tab.Image.Width, tab.Image.Height);
+                        }
+                        AlphaImage.DrawImage(tab.Image as Bitmap, e.Graphics, destImg);
                     }
-                    else 
+
+                    if (!tab.Selected && (tab.TabIndex == tabs.Count - 1 || !tabs[tab.TabIndex + 1].Selected))
                     {
-                        destImg = new Rectangle(tab.area.X + (tab.area.Width / 2) - (tab.Image.Width / 2), (tab.area.Height / 2) - (tab.Image.Height / 2), tab.Image.Width, tab.Image.Height);
+                        Point sep = new Point(tab.area.Right, offset.Y);
+                        DrawSeparator(e, sep, size.Height - (sep.Y * 2), Orientation.Vertical);
                     }
-                    AlphaImage.DrawImage(tab.Image as Bitmap, e.Graphics, destImg);
                 }
-
-                if (!tab.Selected && (tab.TabIndex == tabs.Count - 1 || !tabs[tab.TabIndex + 1].Selected))
-                {
-                    Point sep = new Point(tab.area.Right, offset.Y);
-                    DrawSeparator(e, sep, size.Height - (sep.Y * 2), Orientation.Vertical);
-                }
+            }
+            finally
+            {
+                penBorder.Dispose();
             }
         }
 
@@ -146,6 +147,60 @@ namespace Tenor.Mobile.UI
             }
 
         }
+
+        private const string SelectedBackColorGradient = "#0069B5";
+        private const string AlternateBackColor = "#101010";
+        private const string SelectedBackColor = "#009AFF";
+        private const string ListSeparatorColor = "#181C18";
+
+        public override void ApplyColorsToControl(Control control)
+        {
+            if (control == null)
+                throw new ArgumentNullException("control");
+
+            control.BackColor = ControlBackColor;
+        }
+
+        internal override Color ControlBackColor
+        {
+            get { return Strings.ToColor("#000000"); }
+        }
+        
+
+
+        internal override void DrawListItemBackground(Graphics g, Rectangle bounds, int index, bool selected)
+        {
+            if (selected)
+            {
+                Color gradT = Strings.ToColor(SelectedBackColorGradient);
+                Color selectedColor = Strings.ToColor(SelectedBackColor);
+                Rectangle gradBounds = new Rectangle(bounds.X, bounds.Y, bounds.Width, 5 * ScaleFactor.Height);
+
+                GradientFill.Fill(g, gradBounds, gradT, selectedColor, GradientFill.FillDirection.TopToBottom);
+                gradBounds = new Rectangle(bounds.X, bounds.Y + gradBounds.Height, bounds.Width, bounds.Height - gradBounds.Height);
+
+                SolidBrush brush = new SolidBrush(selectedColor);
+                g.FillRectangle(brush, gradBounds);
+                brush.Dispose();
+            }
+            else
+            {
+                Color color;
+                if (index % 2 == 0)
+                    color = Strings.ToColor(AlternateBackColor);
+                else
+                    color = ControlBackColor;
+
+                SolidBrush brush = new SolidBrush(color);
+                g.FillRectangle(brush, bounds);
+                brush.Dispose();
+
+                Pen pen = new Pen(Strings.ToColor(ListSeparatorColor));
+                g.DrawLine(pen, bounds.X, bounds.Bottom, bounds.Right, bounds.Bottom);
+                pen.Dispose();
+            }
+        }
+
 
     }
 }
