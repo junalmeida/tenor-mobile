@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
 using Microsoft.Win32;
-using SamsungMobileSdk;
 using System.Threading;
 
 namespace Tenor.Mobile.Device
@@ -52,58 +51,26 @@ namespace Tenor.Mobile.Device
             Leds.Vibrate(timeout);
         }
 
-        public static void HapticSoft()
+        private static IHaptic CreateHaptics()
         {
             if (!HapticFeedback)
-                return;
-
-            try
+                return null;
+            else if (Manufacturer.IndexOf("samsung", StringComparison.InvariantCultureIgnoreCase) > -1)
             {
-                if (Manufacturer.IndexOf("samsung", StringComparison.InvariantCultureIgnoreCase) > -1)
-                {
-
-                    int handle = 0;
-                    if (SamsungMobileSdk.Haptics.Open(ref handle) == SamsungMobileSdk.SmiResultCode.Success)
-                    {
-                        Thread t = new Thread(new ThreadStart(delegate()
-                        {
-                            try
-                            {
-                                SamsungMobileSdk.Haptics.HapticsNote[] _hapticsNotes = new Haptics.HapticsNote[1];
-                                _hapticsNotes[0].magnitude = 255;
-                                _hapticsNotes[0].startingMagnitude = 0;
-                                _hapticsNotes[0].endingMagnitude = 0;
-                                _hapticsNotes[0].duration = 100;
-                                _hapticsNotes[0].endTimeDuration = 0;
-                                _hapticsNotes[0].startTimeDuration = 0;
-                                _hapticsNotes[0].style = Haptics.NoteStyle.Sharp;
-                                _hapticsNotes[0].period = 0;
-
-                                Haptics.PlayNotes(handle, 1, _hapticsNotes, false, null);
-
-                            }
-                            finally
-                            {
-                                SamsungMobileSdk.Haptics.Close(handle);
-                            }
-                        }));
-                        t.Start();
-                    }
-                    else
-                    {
-                        Vibrate(40);
-                    }
-                }
-                else
-                {
-                    Vibrate(40);
-                }
+                return new Samsung.Haptic();
             }
-            catch (Exception ex)
+            else
             {
-                System.Diagnostics.Debug.WriteLine(ex.Message, "VibrateSoft");
-                Vibrate(40);
+                return null;
             }
+        }
+
+
+        public static void HapticSoft()
+        {
+            IHaptic haptic = CreateHaptics();
+            if (haptic != null)
+                haptic.Soft();
         }
 
 
@@ -111,6 +78,7 @@ namespace Tenor.Mobile.Device
         {
             get
             {
+                return false; //since we don't have samsung api key.
                 using (RegistryKey key = Registry.CurrentUser.OpenSubKey("ControlPanel\\TouchVibration"))
                 {
                     if (key == null)
