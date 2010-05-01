@@ -29,10 +29,14 @@ namespace Tenor.Mobile.UI
         {
             string oem = (Device.Device.Manufacturer + " " + Device.Device.OemInfo);
             Skin skin = null;
+#if DEBUG
+            skin = new Samsung();
+#else
             if (oem.ToLower().IndexOf("samsung") > -1)
                 skin = new Samsung();
             else
                 throw new NotSupportedException(string.Format("Device '{0}' not supported.", oem));
+#endif
 
             using (ContainerControl control = new ContainerControl())
             {
@@ -47,11 +51,11 @@ namespace Tenor.Mobile.UI
 
         }
 
-        protected Size ScaleFactor { get; private set; }
+        public Size ScaleFactor { get; private set; }
 
-        internal abstract void DrawHeaderBackGround(Size controlSize, PaintEventArgs eventArgs);
-        internal abstract void DrawHeaderText(string text, Size controlSize, PaintEventArgs e);
-        internal abstract void DrawTabs(IList<HeaderTab> tabs, Size size, PaintEventArgs e);
+        internal abstract void DrawHeaderBackGround(HeaderStrip control, PaintEventArgs eventArgs);
+        internal abstract void DrawHeaderText(HeaderStrip control, PaintEventArgs e);
+        internal abstract void DrawTabs(HeaderStrip control, PaintEventArgs e);
         public abstract void ApplyColorsToControl(Control control);
 
         protected Form FindForm(Control control)

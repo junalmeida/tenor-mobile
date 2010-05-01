@@ -22,15 +22,13 @@ namespace Tenor.Mobile.UI
 
         protected override void OnPaintBackground(PaintEventArgs e)
         {
-        }        
-        
+        }
+
         protected override void OnPaint(PaintEventArgs e)
         {
-            Skin.Current.DrawHeaderBackGround(this.Size, e);
-            if (Tabs.Count > 0)
-                Skin.Current.DrawTabs(Tabs, this.Size, e);
-            else if (!string.IsNullOrEmpty(Text))
-                Skin.Current.DrawHeaderText(Text, this.Size, e);
+            Skin.Current.DrawHeaderBackGround(this, e);
+            Skin.Current.DrawTabs(this, e);
+            Skin.Current.DrawHeaderText(this, e);
         }
 
         /// <summary>
@@ -107,8 +105,12 @@ namespace Tenor.Mobile.UI
     {
         public HeaderTab(string text, Image image)
         {
+            this.Text = text;
             this.Image = image;
         }
+
+        public string Text
+        { get; set; }
 
         public int TabIndex { get { return (collection == null ? -1 : collection.IndexOf(this)); } }
 

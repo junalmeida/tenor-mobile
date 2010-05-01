@@ -503,7 +503,7 @@ namespace Tenor.Mobile.UI
         {
             if (m_backBuffer != null)
             {
-                if (Skinnable)
+                if (Skinnable && !Extensions.IsDesignMode(this))
                     m_backBuffer.Clear(Skin.Current.ControlBackColor);
                 else
                     m_backBuffer.Clear(BackColor);

@@ -23,9 +23,19 @@ namespace Tenor.Mobile.UI
 
         private const string HeaderFontColor = "#FFFFFF";
         private const int HeaderFontSize = 13;
+        private const int HeaderSelectedTabStrip = 14;
+        private const int HeaderSelectedTabStripFontSize = 8;
+        private const string HeaderSelectedTabStripFontColor = "#43CBF5";
+        private const string HeaderSelectedTabStripBorderColor = "#4A5963";
 
-        internal override void DrawHeaderBackGround(Size controlSize, PaintEventArgs eventArgs)
+        internal override void DrawHeaderBackGround(HeaderStrip control, PaintEventArgs eventArgs)
         {
+            Size controlSize = control.Size;
+            if (control.Tabs.Count > 0)
+            {
+                controlSize.Height -= HeaderSelectedTabStrip * ScaleFactor.Height;
+            }
+
             Rectangle rect = new Rectangle(eventArgs.ClipRectangle.X, 0, eventArgs.ClipRectangle.Width, controlSize.Height);
             Color start = Strings.ToColor(HeaderStartColor);
             Color end = Strings.ToColor(HeaderEndColor);
@@ -34,20 +44,31 @@ namespace Tenor.Mobile.UI
             eventArgs.Graphics.DrawLine(new Pen(Strings.ToColor(BorderLineColor)), rect.X, rect.Height - 1, rect.Width, rect.Height - 1);
         }
 
-        internal override void DrawHeaderText(string text, Size controlSize, PaintEventArgs e)
+        internal override void DrawHeaderText(HeaderStrip control, PaintEventArgs e)
         {
-            using (Font font = new Font(FontFamily.GenericSansSerif, HeaderFontSize, FontStyle.Bold))
-            using (Brush brush = new SolidBrush(Strings.ToColor(HeaderFontColor)))
+            if (!string.IsNullOrEmpty(control.Text) && control.Tabs.Count == 0)
             {
-                SizeF textSize = e.Graphics.MeasureString(text, font);
+                using (Font font = new Font(FontFamily.GenericSansSerif, HeaderFontSize, FontStyle.Bold))
+                using (Brush brush = new SolidBrush(Strings.ToColor(HeaderFontColor)))
+                {
+                    SizeF textSize = e.Graphics.MeasureString(control.Text, font);
 
-                e.Graphics.DrawString(text, font, brush, 12 * ScaleFactor.Width, 7 * ScaleFactor.Height);
+                    e.Graphics.DrawString(control.Text, font, brush, 12 * ScaleFactor.Width, 7 * ScaleFactor.Height);
+                }
             }
 
         }
 
-        internal override void DrawTabs(IList<HeaderTab> tabs, Size size, PaintEventArgs e)
+        internal override void DrawTabs(HeaderStrip control, PaintEventArgs e)
         {
+            if (control.Tabs.Count == 0)
+                return;
+            Size size = control.Size;
+            size.Height -= HeaderSelectedTabStrip * ScaleFactor.Height;
+            
+            IList<HeaderTab> tabs = control.Tabs;
+            int bottomHeight = 15 * ScaleFactor.Height;
+
             Point offset = new Point(2 * ScaleFactor.Width, 2 * ScaleFactor.Width);
             int defaultWidth = 46 * ScaleFactor.Width;
             Size corner = new Size(8 * ScaleFactor.Width, 8 * ScaleFactor.Height);
@@ -55,11 +76,13 @@ namespace Tenor.Mobile.UI
             Pen penBorder = new Pen(Strings.ToColor(BorderLineColor));
             try
             {
+                HeaderTab selected = null;
                 foreach (HeaderTab tab in tabs)
                 {
                     tab.area = new Rectangle(offset.X + tab.TabIndex * defaultWidth, offset.Y, defaultWidth, size.Height - offset.Y + corner.Height);
                     if (tab.Selected)
                     {
+                        selected = tab;
                         Color backColor = Color.Black;
                         RoundedRectangle.Fill(e.Graphics, penBorder, Color.Black, tab.area, corner);
                     }
@@ -88,6 +111,22 @@ namespace Tenor.Mobile.UI
                         DrawSeparator(e, sep, size.Height - (sep.Y * 2), Orientation.Vertical);
                     }
                 }
+
+                Font font = new Font(FontFamily.GenericSansSerif, HeaderSelectedTabStripFontSize,FontStyle.Regular);
+                SolidBrush brush = new SolidBrush(ControlBackColor);
+                SolidBrush fBrush = new SolidBrush(Strings.ToColor(HeaderSelectedTabStripFontColor));
+                Rectangle rect = new Rectangle(0, size.Height, control.Width, control.Height - size.Height);
+                e.Graphics.FillRectangle(brush, rect);
+                SizeF textSize = e.Graphics.MeasureString(selected.Text, font);
+
+                Rectangle stringRect = rect;
+                stringRect.X = Convert.ToInt32(selected.area.X + ((selected.area.Width / 2) - (textSize.Width / 2)));
+                if (stringRect.X < 0)
+                    stringRect.X = 2 * ScaleFactor.Width;
+
+                e.Graphics.DrawString(selected.Text, font, fBrush, stringRect);
+                e.Graphics.DrawLine(new Pen(Strings.ToColor(HeaderSelectedTabStripBorderColor)), rect.Left, rect.Bottom - 1, rect.Right, rect.Bottom - 1);
+                brush.Dispose(); fBrush.Dispose(); font.Dispose();
             }
             finally
             {

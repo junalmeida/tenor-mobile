@@ -43,13 +43,13 @@
             this.tabStrip1 = new Tenor.Mobile.UI.TabStrip();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.kListControl1 = new Tenor.Mobile.UI.KListControl();
+            this.headerStrip2 = new Tenor.Mobile.UI.HeaderStrip();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.headerStrip1 = new Tenor.Mobile.UI.HeaderStrip();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.domainUpDown1 = new System.Windows.Forms.DomainUpDown();
             this.notificationWithSoftKeys1 = new Tenor.Mobile.UI.NotificationWithSoftKeys();
-            this.headerStrip2 = new Tenor.Mobile.UI.HeaderStrip();
             this.tabStrip1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -129,12 +129,21 @@
             this.kListControl1.DefaultItemWidth = 80;
             this.kListControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.kListControl1.Layout = Tenor.Mobile.UI.KListLayout.Vertical;
-            this.kListControl1.Location = new System.Drawing.Point(0, 38);
+            this.kListControl1.Location = new System.Drawing.Point(0, 54);
             this.kListControl1.Name = "kListControl1";
             this.kListControl1.SeparatorColor = System.Drawing.SystemColors.InactiveBorder;
-            this.kListControl1.Size = new System.Drawing.Size(240, 207);
+            this.kListControl1.Size = new System.Drawing.Size(240, 191);
             this.kListControl1.TabIndex = 1;
             this.kListControl1.Resize += new System.EventHandler(this.kListControl1_Resize);
+            // 
+            // headerStrip2
+            // 
+            this.headerStrip2.Dock = System.Windows.Forms.DockStyle.Top;
+            this.headerStrip2.Location = new System.Drawing.Point(0, 0);
+            this.headerStrip2.Name = "headerStrip2";
+            this.headerStrip2.Size = new System.Drawing.Size(240, 54);
+            this.headerStrip2.TabIndex = 2;
+            this.headerStrip2.Text = "headerStrip2";
             // 
             // tabPage2
             // 
@@ -144,7 +153,7 @@
             this.tabPage2.Controls.Add(this.domainUpDown1);
             this.tabPage2.Location = new System.Drawing.Point(0, 0);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(240, 245);
+            this.tabPage2.Size = new System.Drawing.Size(192, 74);
             this.tabPage2.Text = "tabPage2";
             // 
             // headerStrip1
@@ -152,7 +161,7 @@
             this.headerStrip1.Dock = System.Windows.Forms.DockStyle.Top;
             this.headerStrip1.Location = new System.Drawing.Point(0, 0);
             this.headerStrip1.Name = "headerStrip1";
-            this.headerStrip1.Size = new System.Drawing.Size(240, 38);
+            this.headerStrip1.Size = new System.Drawing.Size(192, 38);
             this.headerStrip1.TabIndex = 2;
             this.headerStrip1.Text = "Now Playing";
             // 
@@ -193,15 +202,6 @@
             // notificationWithSoftKeys1
             // 
             this.notificationWithSoftKeys1.NotificationId = new System.Guid("a877d65f-239c-47a7-9304-0d347f580408");
-            // 
-            // headerStrip2
-            // 
-            this.headerStrip2.Dock = System.Windows.Forms.DockStyle.Top;
-            this.headerStrip2.Location = new System.Drawing.Point(0, 0);
-            this.headerStrip2.Name = "headerStrip2";
-            this.headerStrip2.Size = new System.Drawing.Size(240, 38);
-            this.headerStrip2.TabIndex = 2;
-            this.headerStrip2.Text = "headerStrip2";
             // 
             // Form1
             // 
