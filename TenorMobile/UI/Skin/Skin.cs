@@ -29,14 +29,13 @@ namespace Tenor.Mobile.UI
         {
             string oem = (Device.Device.Manufacturer + " " + Device.Device.OemInfo);
             Skin skin = null;
-#if DEBUG
-            skin = new Samsung();
-#else
             if (oem.ToLower().IndexOf("samsung") > -1)
                 skin = new Samsung();
             else
-                throw new NotSupportedException(string.Format("Device '{0}' not supported.", oem));
-#endif
+            {
+                //todo: change to generic skin
+                skin = new Samsung();
+            }
 
             using (ContainerControl control = new ContainerControl())
             {

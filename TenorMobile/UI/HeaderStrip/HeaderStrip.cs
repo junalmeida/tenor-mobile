@@ -91,10 +91,18 @@ namespace Tenor.Mobile.UI
                 SelectedTabChanged(this, eventArgs);
         }
 
+        private int selectedIndex;
         public int SelectedIndex
         {
-            get;
-            internal set;
+            get
+            {
+                return selectedIndex;
+            }
+            set
+            {
+                selectedIndex = value;
+                Invalidate();
+            }
         }
 
         #endregion
