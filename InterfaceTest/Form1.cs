@@ -42,6 +42,9 @@ namespace InterfaceTest
 
             kListControl1.DrawSeparators = true;
             kListControl1.AddItem("Select an option", "");
+            for (int i = 0; i < 50; i++)
+                kListControl1.AddItem(i.ToString(), i);
+
             kListControl1.SelectedItem = kListControl1[0];
 
 

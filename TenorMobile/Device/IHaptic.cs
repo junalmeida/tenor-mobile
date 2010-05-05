@@ -4,8 +4,10 @@ using System.Text;
 
 namespace Tenor.Mobile.Device
 {
-    interface IHaptic
+    interface IHaptic 
     {
         void Soft();
+
+        void Soft(uint period);
     }
 }

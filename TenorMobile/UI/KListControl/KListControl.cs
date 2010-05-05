@@ -477,11 +477,26 @@ namespace Tenor.Mobile.UI
                     {
                         m_velocity.X--;
                     }
+
+                    if (m_velocity.Y != 0)
+                    {
+
+                        const double MaxPeriod = 1000;
+                        double speed = (double)Math.Abs(m_velocity.Y);
+
+                        double period = (1D - (speed / MaxVelocity)) * MaxPeriod;
+#if DEBUG
+                        System.Diagnostics.Debug.WriteLine(string.Format("{0}, {1}", speed, period));
+#endif
+                        Device.Device.HapticSoft(Convert.ToUInt32(period) + 100);
+                    }
+
                 }
 
                 if (m_velocity.Y == 0 && m_velocity.X == 0)
                 {
                     m_timer.Enabled = false;
+                    Device.Device.HapticSoft(0);
                 }
 
                 Invalidate();
@@ -1003,7 +1018,7 @@ namespace Tenor.Mobile.UI
         List<List<KListItem>> m_items = new List<List<KListItem>>();
 
         // Properties
-        int m_maxVelocity = 15;
+        int m_maxVelocity = 20;
         KListLayout m_layout = KListLayout.Vertical;
         bool m_updating = false;
 

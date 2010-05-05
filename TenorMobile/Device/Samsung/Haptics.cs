@@ -80,6 +80,9 @@ namespace SamsungMobileSdk
         [DllImport(Shared.SamsungMobileSDKDllName, EntryPoint = "SmiHapticsGetState")]
         public static extern SmiResultCode GetState(int handle, ref HapticsState state);
 
+        [DllImport(Shared.SamsungMobileSDKDllName, EntryPoint = "SmiHapticsSetKey")]
+        public static extern void SetKey(byte[] key, int count);
+
 
         public struct Capabilities
         {

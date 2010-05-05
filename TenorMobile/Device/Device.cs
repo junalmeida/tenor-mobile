@@ -65,20 +65,32 @@ namespace Tenor.Mobile.Device
             }
         }
 
+        private static IHaptic haptic;
 
         public static void HapticSoft()
         {
-            IHaptic haptic = CreateHaptics();
-            if (haptic != null)
-                haptic.Soft();
+            if (haptic == null)
+                haptic = CreateHaptics();
+
+            haptic.Soft();
+
         }
+
+
+        public static void HapticSoft(uint period)
+        {
+            if (haptic == null)
+                haptic = CreateHaptics();
+
+            haptic.Soft(period);
+        }
+
 
 
         public static bool HapticFeedback
         {
             get
             {
-                return false; //since we don't have samsung api key.
                 using (RegistryKey key = Registry.CurrentUser.OpenSubKey("ControlPanel\\TouchVibration"))
                 {
                     if (key == null)
