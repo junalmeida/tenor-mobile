@@ -73,7 +73,13 @@ namespace Tenor.Mobile.UI
 
         internal abstract void DrawListItemBackground(Graphics g, Rectangle bounds, int index, bool selected);
 
-        internal abstract Color ControlBackColor
+        public abstract Color ControlBackColor
+        { get; }
+
+        public abstract Color TextHighLight
+        { get; }
+
+        public abstract Color TextForeColor
         { get; }
         
     }

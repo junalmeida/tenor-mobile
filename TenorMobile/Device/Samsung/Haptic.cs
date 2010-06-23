@@ -14,13 +14,19 @@ namespace Tenor.Mobile.Device.Samsung
         {
             if (handle == 0)
             {
-                byte[] key = Encoding.ASCII.GetBytes("XKNS7KYGREPRY2MATZ7VRFLRSZK74DT2");
-                SamsungMobileSdk.Haptics.SetKey(key, key.Length);
-                SmiResultCode result = SamsungMobileSdk.Haptics.Open(ref handle);
-                if (handle == 0)
+                SmiResultCode result;
+                try
                 {
-                    throw new InvalidOperationException("Cannot open Haptic Hardware: " + result.ToString());
+                    byte[] key = Encoding.ASCII.GetBytes("XKNS7KYGREPRY2MATZ7VRFLRSZK74DT2");
+                    SamsungMobileSdk.Haptics.SetKey(key, key.Length);
+                    result = SamsungMobileSdk.Haptics.Open(ref handle);
                 }
+                catch (Exception ex)
+                {
+                    throw new InvalidOperationException("Cannot open Haptic Hardware, " + ex.Message, ex);
+                }
+                if (handle == 0)
+                    throw new InvalidOperationException("Cannot open Haptic Hardware: " + result.ToString());
             }
         }
 

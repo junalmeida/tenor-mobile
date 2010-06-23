@@ -71,8 +71,8 @@ namespace Tenor.Mobile.Device
         {
             if (haptic == null)
                 haptic = CreateHaptics();
-
-            haptic.Soft();
+            if (haptic != null)
+                haptic.Soft();
 
         }
 

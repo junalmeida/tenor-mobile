@@ -28,6 +28,21 @@ namespace Tenor.Mobile.UI
         private const string HeaderSelectedTabStripFontColor = "#43CBF5";
         private const string HeaderSelectedTabStripBorderColor = "#4A5963";
 
+        public override Color ControlBackColor
+        {
+            get { return Strings.ToColor("#000000"); }
+        }
+
+        public override Color TextForeColor
+        {
+            get { return Strings.ToColor("#FFFFFF"); }
+        }
+
+        public override Color TextHighLight
+        {
+            get { return Strings.ToColor("#FFFFFF"); }
+        }
+
         internal override void DrawHeaderBackGround(HeaderStrip control, PaintEventArgs eventArgs)
         {
             Size controlSize = control.Size;
@@ -200,11 +215,7 @@ namespace Tenor.Mobile.UI
             control.BackColor = ControlBackColor;
         }
 
-        internal override Color ControlBackColor
-        {
-            get { return Strings.ToColor("#000000"); }
-        }
-        
+
 
 
         internal override void DrawListItemBackground(Graphics g, Rectangle bounds, int index, bool selected)
