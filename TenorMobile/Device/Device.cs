@@ -51,13 +51,23 @@ namespace Tenor.Mobile.Device
             Leds.Vibrate(timeout);
         }
 
+        private static bool hapticFailed = false;
         private static IHaptic CreateHaptics()
         {
             if (!HapticFeedback)
                 return null;
             else if (Manufacturer.IndexOf("samsung", StringComparison.InvariantCultureIgnoreCase) > -1)
             {
-                return new Samsung.Haptic();
+                try
+                {
+                    return new Samsung.Haptic();
+                }
+                catch (InvalidOperationException)
+                {
+                    //do we really need to fail silently?
+                    hapticFailed = true;
+                    return null;
+                }
             }
             else
             {
@@ -82,7 +92,8 @@ namespace Tenor.Mobile.Device
             if (haptic == null)
                 haptic = CreateHaptics();
 
-            haptic.Soft(period);
+            if (haptic != null)
+                haptic.Soft(period);
         }
 
 
@@ -91,6 +102,8 @@ namespace Tenor.Mobile.Device
         {
             get
             {
+                if (hapticFailed)
+                    return false;
                 using (RegistryKey key = Registry.CurrentUser.OpenSubKey("ControlPanel\\TouchVibration"))
                 {
                     if (key == null)
