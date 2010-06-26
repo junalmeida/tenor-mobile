@@ -213,6 +213,7 @@ namespace Tenor.Mobile.UI
                 throw new ArgumentNullException("control");
 
             control.BackColor = ControlBackColor;
+            control.ForeColor = TextForeColor;
         }
 
 
