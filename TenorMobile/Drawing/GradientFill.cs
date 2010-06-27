@@ -6,66 +6,81 @@ using System.Drawing;
 
 namespace Tenor.Mobile.Drawing
 {
-
+    /// <summary>
+    /// Hold methods that can draw a GradientFill on WinCE.
+    /// </summary>
     public static class GradientFill
     {
-        // This method wraps the PInvoke to GradientFill.
-        // Parmeters:
-        //  gr - The Graphics object we are filling
-        //  rc - The rectangle to fill
-        //  startColor - The starting color for the fill
-        //  endColor - The ending color for the fill
-        //  fillDir - The direction to fill
-        //
-        // Returns true if the call to GradientFill succeeded; false
-        // otherwise.
+
+        /// <summary>
+        /// This method wraps the PInvoke to GradientFill.
+        /// Returns true if the call to GradientFill succeeded; false
+        /// otherwise.
+        /// </summary>
+        /// <param name="gr">The Graphics object we are filling</param>
+        /// <param name="rc">The rectangle to fill</param>
+        /// <param name="startColor">The starting color for the fill</param>
+        /// <param name="endColor">The ending color for the fill</param>
+        /// <param name="fillDir">The direction to fill</param>
+        /// <returns>Returns true if the call to GradientFill succeeded</returns>
         public static bool Fill(
             Graphics gr,
             Rectangle rc,
             Color startColor, Color endColor,
             FillDirection fillDir)
         {
+            if (Environment.OSVersion.Platform == PlatformID.WinCE)
+            {
 
-            // Initialize the data to be used in the call to GradientFill.
-            NativeMethods.TRIVERTEX[] tva = new NativeMethods.TRIVERTEX[2];
-            tva[0] = new NativeMethods.TRIVERTEX(rc.X, rc.Y, startColor);
-            tva[1] = new NativeMethods.TRIVERTEX(rc.Right, rc.Bottom, endColor);
-            NativeMethods.GRADIENT_RECT[] gra = new NativeMethods.GRADIENT_RECT[] {
+                // Initialize the data to be used in the call to GradientFill.
+                NativeMethods.TRIVERTEX[] tva = new NativeMethods.TRIVERTEX[2];
+                tva[0] = new NativeMethods.TRIVERTEX(rc.X, rc.Y, startColor);
+                tva[1] = new NativeMethods.TRIVERTEX(rc.Right, rc.Bottom, endColor);
+                NativeMethods.GRADIENT_RECT[] gra = new NativeMethods.GRADIENT_RECT[] {
     new NativeMethods.GRADIENT_RECT(0, 1)};
 
-            // Get the hDC from the Graphics object.
-            IntPtr hdc = gr.GetHdc();
+                // Get the hDC from the Graphics object.
+                IntPtr hdc = gr.GetHdc();
 
-            // PInvoke to GradientFill.
-            bool b;
+                // PInvoke to GradientFill.
+                bool b;
 
-            b = NativeMethods.GradientFill(
-                    hdc,
-                    tva,
-                    (uint)tva.Length,
-                    gra,
-                    (uint)gra.Length,
-                    (uint)fillDir);
-            System.Diagnostics.Debug.Assert(b, string.Format(
-                "GradientFill failed: {0}",
-                System.Runtime.InteropServices.Marshal.GetLastWin32Error()));
+                b = NativeMethods.GradientFill(
+                        hdc,
+                        tva,
+                        (uint)tva.Length,
+                        gra,
+                        (uint)gra.Length,
+                        (uint)fillDir);
+                System.Diagnostics.Debug.Assert(b, string.Format(
+                    "GradientFill failed: {0}",
+                    System.Runtime.InteropServices.Marshal.GetLastWin32Error()));
 
-            // Release the hDC from the Graphics object.
-            gr.ReleaseHdc(hdc);
+                // Release the hDC from the Graphics object.
+                gr.ReleaseHdc(hdc);
 
-            return b;
+                return b;
+            }
+            else
+            {
+                using (SolidBrush brush = new SolidBrush(startColor))
+                    gr.FillRectangle(brush, rc);
+                return false;
+            }
         }
 
-        // The direction to the GradientFill will follow
+        /// <summary>
+        /// The direction to the GradientFill will follow
+        /// </summary>
         public enum FillDirection
         {
-            //
-            // The fill goes horizontally
-            //
+            /// <summary>
+            /// The fill goes horizontally
+            /// </summary>
             LeftToRight = NativeMethods.GRADIENT_FILL_RECT_H,
-            //
-            // The fill goes vertically
-            //
+            /// <summary>
+            /// The fill goes vertically
+            /// </summary>
             TopToBottom = NativeMethods.GRADIENT_FILL_RECT_V
         }
     }

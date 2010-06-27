@@ -16,35 +16,44 @@ namespace Tenor.Mobile.Drawing
     Rectangle rectangle,
     Size ellipseSize)
         {
-            var lppt = new Point();
-            var hdc = graphics.GetHdc();
-            var style = border.DashStyle == DashStyle.Solid ? NativeMethods.PS_SOLID : NativeMethods.PS_DASH;
-            var hpen = NativeMethods.CreatePen(style, (int)border.Width, GetColorRef(border.Color));
-            var hbrush = NativeMethods.CreateSolidBrush(GetColorRef(color));
-            try
+            if (Environment.OSVersion.Platform == PlatformID.WinCE)
             {
+                var lppt = new Point();
+                var hdc = graphics.GetHdc();
+                var style = border.DashStyle == DashStyle.Solid ? NativeMethods.PS_SOLID : NativeMethods.PS_DASH;
+                var hpen = NativeMethods.CreatePen(style, (int)border.Width, GetColorRef(border.Color));
+                var hbrush = NativeMethods.CreateSolidBrush(GetColorRef(color));
+                try
+                {
 
-                NativeMethods.SetBrushOrgEx(hdc, rectangle.Left, rectangle.Top, ref lppt);
-                NativeMethods.SelectObject(hdc, hpen);
+                    NativeMethods.SetBrushOrgEx(hdc, rectangle.Left, rectangle.Top, ref lppt);
+                    NativeMethods.SelectObject(hdc, hpen);
 
-                if (!color.IsEmpty && !color.Equals(Color.Transparent))
-                    NativeMethods.SelectObject(hdc, hbrush);
+                    if (!color.IsEmpty && !color.Equals(Color.Transparent))
+                        NativeMethods.SelectObject(hdc, hbrush);
 
-                NativeMethods.RoundRect(hdc,
-                          rectangle.Left,
-                          rectangle.Top,
-                          rectangle.Right,
-                          rectangle.Bottom,
-                          ellipseSize.Width,
-                          ellipseSize.Height);
+                    NativeMethods.RoundRect(hdc,
+                              rectangle.Left,
+                              rectangle.Top,
+                              rectangle.Right,
+                              rectangle.Bottom,
+                              ellipseSize.Width,
+                              ellipseSize.Height);
 
+                }
+                finally
+                {
+                    NativeMethods.SetBrushOrgEx(hdc, lppt.Y, lppt.X, ref lppt);
+                    NativeMethods.DeleteObject(hpen);
+                    NativeMethods.DeleteObject(hbrush);
+                    graphics.ReleaseHdc(hdc);
+                }
             }
-            finally
+            else
             {
-                NativeMethods.SetBrushOrgEx(hdc, lppt.Y, lppt.X, ref lppt);
-                NativeMethods.DeleteObject(hpen);
-                NativeMethods.DeleteObject(hbrush);
-                graphics.ReleaseHdc(hdc);
+                using (SolidBrush brush = new SolidBrush(color))
+                    graphics.FillRectangle(brush, rectangle);
+                graphics.DrawRectangle(border, rectangle);
             }
         }
 
