@@ -36,6 +36,13 @@ namespace Tenor.Mobile.Location
             if (LocationChanged != null)
                 LocationChanged(this, e);
         }
+
+        public event EventHandler Error;
+        protected virtual void OnError(EventArgs e)
+        {
+            if (Error != null)
+                Error(this, e);
+        }
         #endregion
 
         #region Data
@@ -107,7 +114,6 @@ namespace Tenor.Mobile.Location
 
         #endregion
 
-        Thread baseThread;
         Thread getLocation;
         private Timer timer;
         /// <summary>
@@ -115,7 +121,6 @@ namespace Tenor.Mobile.Location
         /// </summary>
         public WorldPosition()
         {
-            baseThread = Thread.CurrentThread;
             PollingInterval = 5000;
             PollLocation = false;
             UseGps = true;
@@ -130,7 +135,11 @@ namespace Tenor.Mobile.Location
         {
             if (gps != null && gps.Opened)
                 gps.Close();
-                
+            if (timer != null)
+            {
+                timer.Dispose();
+                timer = null;
+            }
         }
 
         /// <summary>
@@ -173,7 +182,7 @@ namespace Tenor.Mobile.Location
             }
 
             if (cellChanged && PollLocation && FixType == FixType.Network)
-                PollCell();
+                PollCellInternal();
 
             if (PollingInterval > 0)
             {
@@ -409,17 +418,23 @@ namespace Tenor.Mobile.Location
 
         public void PollCell()
         {
+            GetCellTowerInfo(); //get current cell id before translating it to lat and lng
+            PollCellInternal();
+        }
+
+        private void PollCellInternal()
+        {
 
             if (getLocation != null)
             {
-#if DEBUG
-                System.Diagnostics.Debug.WriteLine("Aborting current polling.");
-#endif
+                System.Diagnostics.Debug.WriteLine("Aborting current polling.", "WorldPosition");
                 getLocation.Abort(); //If we have threadabortexception, it will abort the requests.
             }
 
             getLocation = new Thread(new ThreadStart(delegate()
             {
+                System.Diagnostics.Debug.WriteLine("Polling location...", "WorldPosition");
+                
                 double? latitude = Latitude;
                 double? longitude = Longitude;
 
@@ -452,24 +467,27 @@ namespace Tenor.Mobile.Location
                         LastFix = DateTime.UtcNow;
                     }
                 }
-#if DEBUG
                 catch (WebException ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(ex.Status.ToString());
+                    System.Diagnostics.Debug.WriteLine("WebRequest error: " + ex.Status.ToString(), "WorldPosition");
+                    OnError(new EventArgs());
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine(ex.ToString());
+                    System.Diagnostics.Debug.WriteLine(ex.Message.ToString(), "WorldPosition");
+                    OnError(new EventArgs());
                 }
-#else
-                catch { }
-#endif
+
                 getLocation = null;
 
                 if (!object.Equals(latitude, Latitude) || !object.Equals(longitude, Longitude))
                     OnLocationChanged(new EventArgs());
+                else
+                    System.Diagnostics.Debug.WriteLine("Location unchanged.", "WorldPosition");
 
             }));
+
+            System.Diagnostics.Debug.WriteLine("Go!", "WorldPosition");
             getLocation.Start();
         }
 
