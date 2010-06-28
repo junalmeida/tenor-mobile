@@ -27,10 +27,10 @@ namespace Tenor.Mobile.UI
 
         private static Skin CreateSkin()
         {
+            Skin skin = null;
             if (Environment.OSVersion.Platform == PlatformID.WinCE)
             {
                 string oem = (Device.Device.Manufacturer + " " + Device.Device.OemInfo);
-                Skin skin = null;
                 if (oem.ToLower().IndexOf("samsung") > -1)
                     skin = new Samsung();
                 else
@@ -39,22 +39,23 @@ namespace Tenor.Mobile.UI
                     skin = new Samsung();
                 }
 
-                using (ContainerControl control = new ContainerControl())
-                {
-                    SizeF qvga = new SizeF(96F, 96F);
-                    control.AutoScaleDimensions = qvga;
-                    control.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
-
-
-                    skin.ScaleFactor = new Size(Convert.ToInt32(control.CurrentAutoScaleDimensions.Width / qvga.Width), Convert.ToInt32(control.CurrentAutoScaleDimensions.Height / qvga.Height));
-                }
-                return skin;
             }
             else
             {
                 //For test purposes
-                return new Samsung();
+                skin = new Samsung();
             }
+
+            using (ContainerControl control = new ContainerControl())
+            {
+                SizeF qvga = new SizeF(96F, 96F);
+                control.AutoScaleDimensions = qvga;
+                control.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
+
+
+                skin.ScaleFactor = new Size(Convert.ToInt32(control.CurrentAutoScaleDimensions.Width / qvga.Width), Convert.ToInt32(control.CurrentAutoScaleDimensions.Height / qvga.Height));
+            }
+            return skin;
         }
 
         public Size ScaleFactor { get; private set; }

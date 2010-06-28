@@ -4,9 +4,42 @@ using System.Collections.Generic;
 using System.Text;
 using System.Runtime.InteropServices;
 using System.Drawing;
+using System.IO;
 
 namespace Tenor.Mobile
 {
+    public static class IO
+    {
+        /// <summary>
+        /// Converts any Stream into an array of bytes.
+        /// </summary>
+        /// <param name="stream">The desired stream.</param>
+        /// <returns>An array of bytes.</returns>
+        public static byte[] StreamToBytes(Stream stream)
+        {
+            MemoryStream output = new MemoryStream();
+            int size = 2048;
+            try
+            {
+                size = Convert.ToInt32(stream.Length);
+            }
+            catch { }
+
+            int bytesRead = 0;
+            byte[] buffer = new byte[size];
+            do
+            {
+                bytesRead = stream.Read(buffer, 0, size);
+                if (bytesRead > 0)
+                    output.Write(buffer, 0, bytesRead);
+            } while (bytesRead > 0);
+
+            buffer = output.ToArray();
+            output.Close();
+            return buffer;  
+        }
+    }
+
     internal static class NativeMethods
     {
 

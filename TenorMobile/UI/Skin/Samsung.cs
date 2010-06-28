@@ -117,7 +117,7 @@ namespace Tenor.Mobile.UI
                         {
                             destImg = new Rectangle(tab.area.X + (tab.area.Width / 2) - (tab.Image.Width / 2), (tab.area.Height / 2) - (tab.Image.Height / 2), tab.Image.Width, tab.Image.Height);
                         }
-                        AlphaImage.DrawImage(tab.Image as Bitmap, e.Graphics, destImg);
+                        AlphaImage.DrawImage(e.Graphics, tab.Image, destImg);
                     }
 
                     if (!tab.Selected && (tab.TabIndex == tabs.Count - 1 || !tabs[tab.TabIndex + 1].Selected))
