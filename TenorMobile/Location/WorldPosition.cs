@@ -1,11 +1,9 @@
 ﻿using System;
-using System;
-using System.Threading;
-using System.Runtime.InteropServices;
 using System.Collections.Generic;
-using System.Text;
-using System.Net;
 using System.IO;
+using System.Net;
+using System.Runtime.InteropServices;
+using System.Threading;
 using System.Xml;
 
 namespace Tenor.Mobile.Location

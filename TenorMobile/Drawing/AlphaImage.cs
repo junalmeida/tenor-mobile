@@ -9,36 +9,131 @@ using System.Drawing.Imaging;
 
 namespace Tenor.Mobile.Drawing
 {
-    public static class AlphaImage
+    public class AlphaImage : IDisposable
     {
+        Image image;
+        Tenor.Mobile.Drawing.IImaging.IImage iimage;
+
+        public AlphaImage(Image image)
+        {
+            this.image = image;
+        }
+
+
+        public AlphaImage(Stream data)
+            : this(IO.StreamToBytes(data)) { }
+
+
+        public AlphaImage(byte[] data)
+        {
+            if (Environment.OSVersion.Platform == PlatformID.WinCE)
+            {
+                Tenor.Mobile.Drawing.IImaging.IImagingFactory factory = IImaging.CreateFactory();
+
+                factory.CreateImageFromBuffer(data,
+                    Convert.ToUInt32(data.Length), IImaging.BufferDisposalFlag.BufferDisposalFlagGlobalFree,
+                    out iimage);
+            }
+            else
+            {
+                using (MemoryStream mem = new MemoryStream(data))
+                    image = new Bitmap(mem);
+            }
+        }
+
+
+
+        public int Width
+        {
+            get
+            {
+                return Size.Width;
+            }
+        }
+
+        public int Height
+        {
+            get
+            {
+                return Size.Height;
+            }
+        }
+
+        Size size;
+        public Size Size
+        {
+            get
+            {
+                if (size.IsEmpty)
+                    size = GetSize();
+                return size;
+            }
+        }
+
+        private Size GetSize()
+        {
+            if (image != null)
+                return image.Size;
+            else if (iimage != null)
+            {
+                Tenor.Mobile.Drawing.IImaging.ImageInfo info;
+                iimage.GetImageInfo(out info);
+                return new Size(Convert.ToInt32(info.Width), Convert.ToInt32(info.Height));
+            }
+            else
+                return new Size();
+        }
+
+
+        public void Dispose()
+        {
+            image = null;
+            iimage = null;
+        }
+
  
 
         /// <summary>
         /// Draws an image with alpha blending.
         /// </summary>
-        public static void DrawImage(Graphics g, Image image, Rectangle destination)
+        public void Draw(Graphics g, Rectangle destination)
         {
-            DrawImage(g, image, Rectangle.Empty, destination, Color.Empty);
+            Draw(g, Rectangle.Empty, destination, Color.Empty);
         }
 
         /// <summary>
         /// Draws an image with alpha blending.
         /// </summary>
-        public static void DrawImage(Graphics g, Image image, Rectangle destination, Color key)
+        public void Draw(Graphics g, Rectangle destination, Color key)
         {
-            DrawImage(g, image, Rectangle.Empty, destination, key);
+            Draw(g, Rectangle.Empty, destination, key);
         }
 
         /// <summary>
         /// Draws an image with alpha blending.
         /// </summary>
-        public static void DrawImage(Graphics g, Image image, Rectangle source, Rectangle destination, Color key)
+        public void Draw(Graphics g, Rectangle source, Rectangle destination, Color key)
         {
-            if (image == null)
-                throw new ArgumentNullException("image");
+            if (image != null)
+                DrawImageManaged(g, source, destination, key);
+            else if (iimage != null)
+            {
+                if (!Color.Equals(key, Color.Empty))
+                    throw new NotSupportedException("Color key is not supported with streams.");
+                else if (!Rectangle.Equals(source, Rectangle.Empty))
+                    throw new NotSupportedException("Source rectangle is not supported with streams.");
+                else
+                    DrawImageGdi(g, destination);
+            }
+            else
+                throw new ObjectDisposedException(this.ToString());
+        }
+
+
+        private void DrawImageManaged(Graphics g, Rectangle source, Rectangle destination, Color key)
+        {
             if (g == null)
                 throw new ArgumentNullException("g");
-
 
 
             ImageAttributes attr = new ImageAttributes();
@@ -52,44 +147,33 @@ namespace Tenor.Mobile.Drawing
                 source = new Rectangle(0, 0, image.Width, image.Height);
 
             g.DrawImage(image, destination, source.Left, source.Top, source.Width, source.Height, GraphicsUnit.Pixel, attr);
-
         }
+
+
 
         /// <summary>
         /// Draws an image with alpha blending.
         /// </summary>
-        public static void DrawImage(Graphics g, Stream image, Rectangle destRect)
+        private void DrawImageGdi(Graphics g, Rectangle destination)
         {
-            if (image == null)
-                throw new ArgumentNullException("image");
             if (g == null)
                 throw new ArgumentNullException("g");
-            if (destRect.IsEmpty)
-                throw new ArgumentException("The destination rectangle cannot be empty.", "destRect");
-
-
-            byte[] buffer = IO.StreamToBytes(image);
+            if (destination.IsEmpty)
+                throw new ArgumentException("The destination rectangle cannot be empty.", "destination");
 
             IntPtr hdc = g.GetHdc();
             try
             {
                
-                IImaging.IImagingFactory factory = IImaging.CreateFactory();
-                IImaging.IImage outImage;
-
-                factory.CreateImageFromBuffer(buffer,
-                    Convert.ToUInt32(buffer.Length), IImaging.BufferDisposalFlag.BufferDisposalFlagGlobalFree,
-                    out outImage);
                 Tenor.Mobile.NativeMethods.RECT rect = new Tenor.Mobile.NativeMethods.RECT()
                 {
-                    left = destRect.X,
-                    top = destRect.Y,
-                    right = destRect.Right,
-                    bottom = destRect.Bottom
+                    left = destination.X,
+                    top = destination.Y,
+                    right = destination.Right,
+                    bottom = destination.Bottom
                 };
 
-                outImage.Draw(hdc, ref rect, IntPtr.Zero);
-
+                iimage.Draw(hdc, ref rect, IntPtr.Zero);
             }
             catch
             {
@@ -97,7 +181,6 @@ namespace Tenor.Mobile.Drawing
             }
             finally
             {
-                buffer = null;
                 g.ReleaseHdc(hdc);
             }
 
