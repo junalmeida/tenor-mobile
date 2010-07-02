@@ -449,11 +449,19 @@ namespace Tenor.Mobile.Location
                     }
                     else
                     {
-                        bool ok = TranslateCellIdWithGoogle(info, false);
+                        Exception ex = null;
+                        bool ok = false;
+                        try
+                        {
+                            ok = TranslateCellIdWithGoogle(info, false);
+                        }
+                        catch (Exception ext) { ex = ext; }
                         if (!ok)
                             ok = TranslateCellIdWithOpenCellId(info);
                         if (ok)
                             cellCache.Add(info);
+                        else if (ex != null)
+                            throw ex;
                         else
                             info = null;
                         
