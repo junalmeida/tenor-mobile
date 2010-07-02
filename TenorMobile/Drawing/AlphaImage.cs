@@ -28,11 +28,18 @@ namespace Tenor.Mobile.Drawing
         {
             if (Environment.OSVersion.Platform == PlatformID.WinCE)
             {
-                Tenor.Mobile.Drawing.IImaging.IImagingFactory factory = IImaging.CreateFactory();
+                try
+                {
+                    Tenor.Mobile.Drawing.IImaging.IImagingFactory factory = IImaging.CreateFactory();
 
-                factory.CreateImageFromBuffer(data,
-                    Convert.ToUInt32(data.Length), IImaging.BufferDisposalFlag.BufferDisposalFlagGlobalFree,
-                    out iimage);
+                    factory.CreateImageFromBuffer(data,
+                        Convert.ToUInt32(data.Length), IImaging.BufferDisposalFlag.BufferDisposalFlagNone,
+                        out iimage);
+                }
+                catch (COMException ex)
+                {
+                    throw new ExternalException("Cannot initialize drawing.", ex);
+                }
             }
             else
             {
@@ -164,7 +171,7 @@ namespace Tenor.Mobile.Drawing
             IntPtr hdc = g.GetHdc();
             try
             {
-               
+
                 Tenor.Mobile.NativeMethods.RECT rect = new Tenor.Mobile.NativeMethods.RECT()
                 {
                     left = destination.X,
@@ -174,6 +181,10 @@ namespace Tenor.Mobile.Drawing
                 };
 
                 iimage.Draw(hdc, ref rect, IntPtr.Zero);
+            }
+            catch (COMException ex)
+            {
+                throw new ExternalException("Unable to draw transparent image.", ex);
             }
             catch
             {
@@ -267,7 +278,7 @@ namespace Tenor.Mobile.Drawing
         #region interfejsy
 
         [ComImport, Guid("327ABDA7-072B-11D3-9D7B-0000F81EF32E"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        [ComVisible(true)]
+        [ComVisible(false)]
         public interface IImagingFactory
         {
             uint CreateImageFromStream(IStream stream, out IImage image);
@@ -286,7 +297,7 @@ namespace Tenor.Mobile.Drawing
         }
 
         [ComImport, Guid("327ABDA9-072B-11D3-9D7B-0000F81EF32E"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        [ComVisible(true)]
+        [ComVisible(false)]
         public interface IImage
         {
             uint GetPhysicalDimension(out Size size);
@@ -298,7 +309,7 @@ namespace Tenor.Mobile.Drawing
         }
 
         [ComImport, Guid("327ABDAA-072B-11D3-9D7B-0000F81EF32E"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        [ComVisible(true)]
+        [ComVisible(false)]
         public interface IBitmapImage
         {
             uint GetSize(out Size size);
@@ -310,7 +321,7 @@ namespace Tenor.Mobile.Drawing
         }
 
         [ComImport, Guid("0000000c-0000-0000-C000-000000000046"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        [ComVisible(true)]
+        [ComVisible(false)]
         public interface IStream
         {
             void Read([Out, MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 1)] byte[] pv, int cb, IntPtr pcbRead);
