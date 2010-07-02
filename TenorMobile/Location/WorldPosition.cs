@@ -35,8 +35,8 @@ namespace Tenor.Mobile.Location
                 LocationChanged(this, e);
         }
 
-        public event EventHandler Error;
-        protected virtual void OnError(EventArgs e)
+        public event ErrorEventHandler Error;
+        protected virtual void OnError(ErrorEventArgs e)
         {
             if (Error != null)
                 Error(this, e);
@@ -468,12 +468,12 @@ namespace Tenor.Mobile.Location
                 catch (WebException ex)
                 {
                     System.Diagnostics.Debug.WriteLine("WebRequest error: " + ex.Status.ToString(), "WorldPosition");
-                    OnError(new EventArgs());
+                    OnError(new ErrorEventArgs(ex));
                 }
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine(ex.Message.ToString(), "WorldPosition");
-                    OnError(new EventArgs());
+                    OnError(new ErrorEventArgs(ex));
                 }
 
                 getLocation = null;
@@ -767,4 +767,15 @@ namespace Tenor.Mobile.Location
         Gps
     }
 
+    public delegate void ErrorEventHandler(object sender, ErrorEventArgs e);
+    public sealed class ErrorEventArgs : EventArgs
+    {
+        public ErrorEventArgs(Exception ex)
+        {
+            Error = ex;
+        }
+
+        public Exception Error
+        { get; private set; }
+    }
 }
