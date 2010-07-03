@@ -10,11 +10,11 @@ namespace Tenor.Mobile.Drawing
     public static class RoundedRectangle
     {
         public static void Fill(
-    Graphics graphics,
-    Pen border,
-    Color color,
-    Rectangle rectangle,
-    Size ellipseSize)
+            Graphics graphics,
+            Pen border,
+            Brush brush,
+            Rectangle rectangle,
+            Size ellipseSize)
         {
             if (Environment.OSVersion.Platform == PlatformID.WinCE)
             {
@@ -22,14 +22,32 @@ namespace Tenor.Mobile.Drawing
                 var hdc = graphics.GetHdc();
                 var style = border.DashStyle == DashStyle.Solid ? NativeMethods.PS_SOLID : NativeMethods.PS_DASH;
                 var hpen = NativeMethods.CreatePen(style, (int)border.Width, GetColorRef(border.Color));
-                var hbrush = NativeMethods.CreateSolidBrush(GetColorRef(color));
+
+                IntPtr hbrush = IntPtr.Zero;
+                if (brush is SolidBrush)
+                {
+                    SolidBrush sbrush = (SolidBrush)brush;
+                    if (!sbrush.Color.IsEmpty && !sbrush.Color.Equals(Color.Transparent))
+                        hbrush = NativeMethods.CreateSolidBrush(GetColorRef(sbrush.Color));
+                }
+                else if (brush is TextureBrush)
+                {
+                    TextureBrush tbrush = (TextureBrush)brush;
+                    Bitmap bmp = tbrush.Image as Bitmap;
+                    if (bmp == null)
+                        throw new NotSupportedException("Image of texturebrush is not supported.");
+                    hbrush = NativeMethods.CreatePatternBrush(bmp.GetHbitmap());
+                }
+                else
+                    throw new NotSupportedException(brush.GetType().Name + " is not supported.");
+
                 try
                 {
 
                     NativeMethods.SetBrushOrgEx(hdc, rectangle.Left, rectangle.Top, ref lppt);
                     NativeMethods.SelectObject(hdc, hpen);
 
-                    if (!color.IsEmpty && !color.Equals(Color.Transparent))
+                    if (!IntPtr.Equals(hbrush, IntPtr.Zero))
                         NativeMethods.SelectObject(hdc, hbrush);
 
                     NativeMethods.RoundRect(hdc,
@@ -51,8 +69,7 @@ namespace Tenor.Mobile.Drawing
             }
             else
             {
-                using (SolidBrush brush = new SolidBrush(color))
-                    graphics.FillRectangle(brush, rectangle);
+                graphics.FillRectangle(brush, rectangle);
                 graphics.DrawRectangle(border, rectangle);
             }
         }

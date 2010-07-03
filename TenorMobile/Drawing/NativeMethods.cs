@@ -73,6 +73,10 @@ namespace Tenor.Mobile.Drawing
         [DllImport("coredll.dll")]
         internal static extern IntPtr CreateSolidBrush(uint color);
         [DllImport("coredll.dll")]
+        internal static extern IntPtr CreatePatternBrush(IntPtr hbmp);
+
+
+        [DllImport("coredll.dll")]
         internal static extern IntPtr SelectObject(IntPtr hdc, IntPtr hgdiobject);
 
         [DllImport("coredll.dll")]

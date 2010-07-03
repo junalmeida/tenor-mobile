@@ -98,8 +98,8 @@ namespace Tenor.Mobile.UI
                     if (tab.Selected)
                     {
                         selected = tab;
-                        Color backColor = Color.Black;
-                        RoundedRectangle.Fill(e.Graphics, penBorder, Color.Black, tab.area, corner);
+                        using (SolidBrush backColor = new SolidBrush(Color.Black))
+                            RoundedRectangle.Fill(e.Graphics, penBorder, backColor, tab.area, corner);
                     }
 
                     if (tab.Image != null)

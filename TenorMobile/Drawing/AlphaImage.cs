@@ -184,7 +184,7 @@ namespace Tenor.Mobile.Drawing
             }
             catch (COMException ex)
             {
-                throw new ExternalException("Unable to draw transparent image.", ex);
+                throw new Exception("Unable to draw transparent image.", ex);
             }
             catch
             {
