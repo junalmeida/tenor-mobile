@@ -84,11 +84,18 @@ namespace Tenor.Mobile.UI
         public abstract Color ControlBackColor
         { get; }
 
+        public abstract Color SelectedBackColor
+        { get; }
+
+        public abstract Color AlternateBackColor
+        { get; }
+
         public abstract Color TextHighLight
         { get; }
 
         public abstract Color TextForeColor
         { get; }
-        
+
+
     }
 }

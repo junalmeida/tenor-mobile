@@ -198,7 +198,7 @@ namespace InterfaceTest
 
             FF ff = (FF)e.Item.Value;
             Rectangle iconRect = new Rectangle(e.Bounds.X + 1, e.Bounds.Y + 1, ff.icon.Width, ff.icon.Height);
-            RoundedRectangle.Fill(g, new Pen(SystemColors.ControlDark), SystemColors.ControlDark, iconRect, new Size(8, 8));
+            RoundedRectangle.Fill(g, new Pen(SystemColors.ControlDark), new SolidBrush(SystemColors.ControlDark), iconRect, new Size(8, 8));
             g.DrawIcon(ff.icon, iconRect.X, iconRect.Y);
             Rectangle r = e.Bounds;
             r.X += 32;

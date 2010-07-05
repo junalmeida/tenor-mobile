@@ -43,6 +43,17 @@ namespace Tenor.Mobile.UI
             get { return Strings.ToColor("#FFFFFF"); }
         }
 
+        public override Color SelectedBackColor
+        {
+            get { return Strings.ToColor("#009AFF"); }
+        }
+
+        public override Color AlternateBackColor
+        {
+            get { return Strings.ToColor("#101010"); }
+        }
+
+
         internal override void DrawHeaderBackGround(HeaderStrip control, PaintEventArgs eventArgs)
         {
             Size controlSize = control.Size;
@@ -207,9 +218,9 @@ namespace Tenor.Mobile.UI
         }
 
         private const string SelectedBackColorGradient = "#0069B5";
-        private const string AlternateBackColor = "#101010";
-        private const string SelectedBackColor = "#009AFF";
         private const string ListSeparatorColor = "#181C18";
+
+        
 
         public override void ApplyColorsToControl(Control control)
         {
@@ -228,7 +239,7 @@ namespace Tenor.Mobile.UI
             if (selected)
             {
                 Color gradT = Strings.ToColor(SelectedBackColorGradient);
-                Color selectedColor = Strings.ToColor(SelectedBackColor);
+                Color selectedColor = SelectedBackColor;
                 Rectangle gradBounds = new Rectangle(bounds.X, bounds.Y, bounds.Width, 5 * ScaleFactor.Height);
 
                 GradientFill.Fill(g, gradBounds, gradT, selectedColor, GradientFill.FillDirection.TopToBottom);
@@ -242,7 +253,7 @@ namespace Tenor.Mobile.UI
             {
                 Color color;
                 if (index % 2 == 0)
-                    color = Strings.ToColor(AlternateBackColor);
+                    color = AlternateBackColor;
                 else
                     color = ControlBackColor;
 
