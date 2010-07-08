@@ -17,6 +17,9 @@ namespace Tenor.Mobile.UI
         {
         }
 
+
+
+
         private const string HeaderStartColor = "#394D6B";
         private const string HeaderEndColor = "#213442";
         private const string BorderLineColor = "#4A5963";
@@ -51,6 +54,11 @@ namespace Tenor.Mobile.UI
         public override Color AlternateBackColor
         {
             get { return Strings.ToColor("#101010"); }
+        }
+
+        public override Color TextBackGround
+        {
+            get { return Strings.ToColor("#4A4D52"); }
         }
 
 
@@ -264,6 +272,20 @@ namespace Tenor.Mobile.UI
                 Pen pen = new Pen(Strings.ToColor(ListSeparatorColor));
                 g.DrawLine(pen, bounds.X, bounds.Bottom, bounds.Right, bounds.Bottom);
                 pen.Dispose();
+            }
+        }
+
+
+
+        internal override void DrawTextControlBackground(Graphics g, Rectangle bounds)
+        {
+            using (Pen p = new Pen(this.ControlBackColor))
+            using (SolidBrush brush = new SolidBrush(this.TextBackGround))
+            {
+                g.Clear(ControlBackColor);
+                RoundedRectangle.Fill(g, p, brush, bounds,
+                    new SizeF(9 * ScaleFactor.Width, 9 * ScaleFactor.Height).ToSize()
+                    );
             }
         }
 

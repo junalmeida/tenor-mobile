@@ -46,10 +46,13 @@
             this.headerStrip2 = new Tenor.Mobile.UI.HeaderStrip();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.headerStrip1 = new Tenor.Mobile.UI.HeaderStrip();
-            this.textBox2 = new System.Windows.Forms.TextBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.textBox2 = new Tenor.Mobile.UI.TextControl();
+            this.textBox1 = new Tenor.Mobile.UI.TextControl();
             this.domainUpDown1 = new System.Windows.Forms.DomainUpDown();
             this.notificationWithSoftKeys1 = new Tenor.Mobile.UI.NotificationWithSoftKeys();
+            this.contextMenu1 = new System.Windows.Forms.ContextMenu();
+            this.menuItem8 = new System.Windows.Forms.MenuItem();
+            this.menuItem9 = new System.Windows.Forms.MenuItem();
             this.tabStrip1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -153,7 +156,7 @@
             this.tabPage2.Controls.Add(this.domainUpDown1);
             this.tabPage2.Location = new System.Drawing.Point(0, 0);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Size = new System.Drawing.Size(192, 74);
+            this.tabPage2.Size = new System.Drawing.Size(240, 245);
             this.tabPage2.Text = "tabPage2";
             // 
             // headerStrip1
@@ -161,28 +164,59 @@
             this.headerStrip1.Dock = System.Windows.Forms.DockStyle.Top;
             this.headerStrip1.Location = new System.Drawing.Point(0, 0);
             this.headerStrip1.Name = "headerStrip1";
-            this.headerStrip1.Size = new System.Drawing.Size(192, 38);
+            this.headerStrip1.Size = new System.Drawing.Size(240, 38);
             this.headerStrip1.TabIndex = 2;
             this.headerStrip1.Text = "Now Playing";
             // 
             // textBox2
             // 
+            this.textBox2.AcceptsReturn = false;
+            this.textBox2.AcceptsTab = false;
+            this.textBox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.textBox2.HideSelection = true;
+            this.textBox2.InputMode = Microsoft.WindowsCE.Forms.InputMode.Default;
             this.textBox2.Location = new System.Drawing.Point(18, 148);
+            this.textBox2.MaxLength = 32767;
+            this.textBox2.Modified = false;
             this.textBox2.Multiline = true;
             this.textBox2.Name = "textBox2";
+            this.textBox2.PasswordChar = '\0';
+            this.textBox2.ReadOnly = false;
+            this.textBox2.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.textBox2.SelectedText = "";
+            this.textBox2.SelectionLength = 0;
+            this.textBox2.SelectionStart = 0;
             this.textBox2.Size = new System.Drawing.Size(215, 68);
             this.textBox2.TabIndex = 1;
+            this.textBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+            this.textBox2.WordWrap = true;
             // 
             // textBox1
             // 
+            this.textBox1.AcceptsReturn = false;
+            this.textBox1.AcceptsTab = false;
+            this.textBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.textBox1.HideSelection = true;
+            this.textBox1.InputMode = Microsoft.WindowsCE.Forms.InputMode.Default;
             this.textBox1.Location = new System.Drawing.Point(18, 80);
+            this.textBox1.MaxLength = 32767;
+            this.textBox1.Modified = false;
             this.textBox1.Multiline = true;
             this.textBox1.Name = "textBox1";
+            this.textBox1.PasswordChar = '\0';
+            this.textBox1.ReadOnly = false;
+            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.textBox1.SelectedText = "";
+            this.textBox1.SelectionLength = 0;
+            this.textBox1.SelectionStart = 0;
             this.textBox1.Size = new System.Drawing.Size(215, 49);
             this.textBox1.TabIndex = 1;
+            this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
+            this.textBox1.WordWrap = true;
             // 
             // domainUpDown1
             // 
+            this.domainUpDown1.ContextMenu = this.contextMenu1;
             this.domainUpDown1.Items.Add("0");
             this.domainUpDown1.Items.Add("1");
             this.domainUpDown1.Items.Add("2");
@@ -202,6 +236,19 @@
             // notificationWithSoftKeys1
             // 
             this.notificationWithSoftKeys1.NotificationId = new System.Guid("a877d65f-239c-47a7-9304-0d347f580408");
+            // 
+            // contextMenu1
+            // 
+            this.contextMenu1.MenuItems.Add(this.menuItem8);
+            this.contextMenu1.MenuItems.Add(this.menuItem9);
+            // 
+            // menuItem8
+            // 
+            this.menuItem8.Text = "d";
+            // 
+            // menuItem9
+            // 
+            this.menuItem9.Text = "d";
             // 
             // Form1
             // 
@@ -239,10 +286,13 @@
         private Tenor.Mobile.UI.NotificationWithSoftKeys notificationWithSoftKeys1;
         private System.Messaging.MessageQueue messageQueue1;
         private System.Windows.Forms.MenuItem menuItem7;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.TextBox textBox2;
+        private Tenor.Mobile.UI.TextControl textBox1;
+        private Tenor.Mobile.UI.TextControl textBox2;
         private Tenor.Mobile.UI.HeaderStrip headerStrip1;
         private Tenor.Mobile.UI.HeaderStrip headerStrip2;
+        private System.Windows.Forms.ContextMenu contextMenu1;
+        private System.Windows.Forms.MenuItem menuItem8;
+        private System.Windows.Forms.MenuItem menuItem9;
     }
 }
 
