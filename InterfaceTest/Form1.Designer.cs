@@ -49,10 +49,11 @@
             this.textBox2 = new Tenor.Mobile.UI.TextControl();
             this.textBox1 = new Tenor.Mobile.UI.TextControl();
             this.domainUpDown1 = new System.Windows.Forms.DomainUpDown();
-            this.notificationWithSoftKeys1 = new Tenor.Mobile.UI.NotificationWithSoftKeys();
             this.contextMenu1 = new System.Windows.Forms.ContextMenu();
             this.menuItem8 = new System.Windows.Forms.MenuItem();
             this.menuItem9 = new System.Windows.Forms.MenuItem();
+            this.notificationWithSoftKeys1 = new Tenor.Mobile.UI.NotificationWithSoftKeys();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tabStrip1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -150,6 +151,7 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.pictureBox1);
             this.tabPage2.Controls.Add(this.headerStrip1);
             this.tabPage2.Controls.Add(this.textBox2);
             this.tabPage2.Controls.Add(this.textBox1);
@@ -175,7 +177,7 @@
             this.textBox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.textBox2.HideSelection = true;
             this.textBox2.InputMode = Microsoft.WindowsCE.Forms.InputMode.Default;
-            this.textBox2.Location = new System.Drawing.Point(18, 148);
+            this.textBox2.Location = new System.Drawing.Point(18, 135);
             this.textBox2.MaxLength = 32767;
             this.textBox2.Modified = false;
             this.textBox2.Multiline = true;
@@ -186,7 +188,7 @@
             this.textBox2.SelectedText = "";
             this.textBox2.SelectionLength = 0;
             this.textBox2.SelectionStart = 0;
-            this.textBox2.Size = new System.Drawing.Size(215, 68);
+            this.textBox2.Size = new System.Drawing.Size(215, 32);
             this.textBox2.TabIndex = 1;
             this.textBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
             this.textBox2.WordWrap = true;
@@ -233,10 +235,6 @@
             this.domainUpDown1.TabIndex = 0;
             this.domainUpDown1.Text = "domainUpDown1";
             // 
-            // notificationWithSoftKeys1
-            // 
-            this.notificationWithSoftKeys1.NotificationId = new System.Guid("a877d65f-239c-47a7-9304-0d347f580408");
-            // 
             // contextMenu1
             // 
             this.contextMenu1.MenuItems.Add(this.menuItem8);
@@ -249,6 +247,17 @@
             // menuItem9
             // 
             this.menuItem9.Text = "d";
+            // 
+            // notificationWithSoftKeys1
+            // 
+            this.notificationWithSoftKeys1.NotificationId = new System.Guid("a877d65f-239c-47a7-9304-0d347f580408");
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Location = new System.Drawing.Point(18, 173);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(215, 50);
+            this.pictureBox1.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
             // 
             // Form1
             // 
@@ -293,6 +302,7 @@
         private System.Windows.Forms.ContextMenu contextMenu1;
         private System.Windows.Forms.MenuItem menuItem8;
         private System.Windows.Forms.MenuItem menuItem9;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }
 

@@ -20,8 +20,13 @@ namespace Tenor.Mobile.Drawing
             {
                 var lppt = new Point();
                 var hdc = graphics.GetHdc();
-                var style = border.DashStyle == DashStyle.Solid ? NativeMethods.PS_SOLID : NativeMethods.PS_DASH;
-                var hpen = NativeMethods.CreatePen(style, (int)border.Width, GetColorRef(border.Color));
+
+                IntPtr hpen = IntPtr.Zero;
+                if (border != null && !border.Color.IsEmpty && !Color.Equals(border.Color, Color.Transparent))
+                {
+                    var style = border.DashStyle == DashStyle.Solid ? NativeMethods.PS_SOLID : NativeMethods.PS_DASH;
+                    hpen = NativeMethods.CreatePen(style, (int)border.Width, GetColorRef(border.Color));
+                }
 
                 IntPtr hbrush = IntPtr.Zero;
                 if (brush is SolidBrush)
@@ -45,7 +50,8 @@ namespace Tenor.Mobile.Drawing
                 {
 
                     NativeMethods.SetBrushOrgEx(hdc, rectangle.Left, rectangle.Top, ref lppt);
-                    NativeMethods.SelectObject(hdc, hpen);
+                    if (!IntPtr.Equals(hpen, IntPtr.Zero))
+                        NativeMethods.SelectObject(hdc, hpen);
 
                     if (!IntPtr.Equals(hbrush, IntPtr.Zero))
                         NativeMethods.SelectObject(hdc, hbrush);
@@ -62,8 +68,10 @@ namespace Tenor.Mobile.Drawing
                 finally
                 {
                     NativeMethods.SetBrushOrgEx(hdc, lppt.Y, lppt.X, ref lppt);
-                    NativeMethods.DeleteObject(hpen);
-                    NativeMethods.DeleteObject(hbrush);
+                    if (!IntPtr.Equals(hpen, IntPtr.Zero))
+                        NativeMethods.DeleteObject(hpen);
+                    if (!IntPtr.Equals(hbrush, IntPtr.Zero))
+                        NativeMethods.DeleteObject(hbrush);
                     graphics.ReleaseHdc(hdc);
                 }
             }

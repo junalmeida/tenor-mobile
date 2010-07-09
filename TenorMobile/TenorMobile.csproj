@@ -70,6 +70,7 @@
     </Compile>
     <Compile Include="Diagnostics\Window.cs" />
     <Compile Include="Drawing\AlphaImage.cs" />
+    <Compile Include="Drawing\Arc.cs" />
     <Compile Include="Drawing\GradientFill.cs" />
     <Compile Include="Drawing\IconHelper.cs" />
     <Compile Include="Drawing\NativeMethods.cs" />

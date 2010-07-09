@@ -126,7 +126,7 @@ namespace Tenor.Mobile.UI
         {
             if (input != null)
             {
-                input.Enabled = false;
+                //input.Enabled = false;
             }
         }
 

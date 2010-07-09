@@ -277,15 +277,49 @@ namespace Tenor.Mobile.UI
 
 
 
-        internal override void DrawTextControlBackground(Graphics g, Rectangle bounds)
+        internal override void DrawTextControlBackground(Graphics graphics, Rectangle bounds)
         {
-            using (Pen p = new Pen(this.ControlBackColor))
-            using (SolidBrush brush = new SolidBrush(this.TextBackGround))
+
+            Size ellipse = new SizeF(9 * ScaleFactor.Width, 9 * ScaleFactor.Height).ToSize();
+
+
+            using (Bitmap buffer = new Bitmap(bounds.Width, bounds.Height))
             {
-                g.Clear(ControlBackColor);
-                RoundedRectangle.Fill(g, p, brush, bounds,
-                    new SizeF(9 * ScaleFactor.Width, 9 * ScaleFactor.Height).ToSize()
-                    );
+                using (Graphics g = Graphics.FromImage(buffer))
+                {
+                    g.Clear(TextBackGround);
+
+                    int lineSize = Convert.ToInt32(ScaleFactor.Height);
+                    Color color = Tenor.Mobile.Drawing.Strings.ToColor("#313131");
+                    using (SolidBrush brush = new SolidBrush(color))
+                    using (Pen pen = new Pen(color))
+                    {
+
+                        int radius = Convert.ToInt32(ellipse.Height / 2);
+                        int x = 1;
+                        int y = 1;
+
+                        Point[] arc = Tenor.Mobile.Drawing.Arc.CreateArc(0, -90, 200, radius, 0, 0, lineSize - 1);
+                        g.DrawLines(pen, arc);
+
+                        arc = Tenor.Mobile.Drawing.Arc.CreateArc(0, -90, 200, radius, x, y, lineSize - 1);
+                        g.DrawLines(pen, arc);
+
+                        g.FillRectangle(brush, new Rectangle(arc[0].X, y, bounds.Width - arc[0].X, lineSize));
+                        int middlePoint = Convert.ToInt32((arc.Length - 1) / 2);
+                        g.FillRectangle(brush, new Rectangle(x, arc[middlePoint].Y, lineSize, bounds.Height - arc[middlePoint].Y));
+                    }
+                }
+
+
+                using (Pen p = new Pen(this.ControlBackColor))
+                using (TextureBrush brush = new TextureBrush(buffer))
+                {
+                    graphics.Clear(ControlBackColor);
+                    RoundedRectangle.Fill(graphics, p, brush, bounds,
+                        ellipse
+                        );
+                }
             }
         }
 
