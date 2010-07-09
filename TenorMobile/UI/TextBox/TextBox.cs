@@ -139,6 +139,14 @@ namespace Tenor.Mobile.UI
             }
         }
 
+        public override bool Focused
+        {
+            get
+            {
+                return base.Focused || text.Focused;
+            }
+        }
+
         public override Color BackColor
         {
             get
