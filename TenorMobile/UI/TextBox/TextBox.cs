@@ -27,6 +27,9 @@ namespace Tenor.Mobile.UI
             this.Controls.Add(text);
             text.GotFocus += new EventHandler(text_GotFocus);
             text.LostFocus += new EventHandler(text_LostFocus);
+            text.KeyDown += new KeyEventHandler(text_KeyDown);
+            text.KeyPress += new KeyPressEventHandler(text_KeyPress);
+            text.KeyUp += new KeyEventHandler(text_KeyUp);
             if (!Extensions.IsDesignMode(this))
             {
                 input = new InputPanel();
@@ -35,6 +38,21 @@ namespace Tenor.Mobile.UI
             context = new ContextMenu();
             context.Popup += new EventHandler(context_Popup);
             text.ContextMenu = context;
+        }
+
+        void text_KeyUp(object sender, KeyEventArgs e)
+        {
+            OnKeyUp(e);
+        }
+
+        void text_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            OnKeyPress(e);
+        }
+
+        void text_KeyDown(object sender, KeyEventArgs e)
+        {
+            OnKeyDown(e);
         }
 
         public override ContextMenu ContextMenu
@@ -64,34 +82,30 @@ namespace Tenor.Mobile.UI
             foreach (MenuItem mnu in context.MenuItems)
                 mnu.Dispose();
             context.MenuItems.Clear();
+            if (text.PasswordChar != null)
+                return;
             MenuItem menu = null;
-            if (!text.ReadOnly && text.SelectionLength > 0)
+            menu = new MenuItem()
             {
-                menu = new MenuItem()
-                {
-                    Text = "Cut"
-                };
-                menu.Click += new EventHandler(menuCut_Click);
-                context.MenuItems.Add(menu);
-            }
-            if (text.SelectionLength > 0)
+                Text = "Cut"
+            };
+            menu.Click += new EventHandler(menuCut_Click);
+            context.MenuItems.Add(menu);
+            menu.Enabled = (!text.ReadOnly && text.SelectionLength > 0);
+            menu = new MenuItem()
             {
-                menu = new MenuItem()
-                {
-                    Text = "Copy"
-                };
-                menu.Click += new EventHandler(menuCopy_Click);
-                context.MenuItems.Add(menu);
-            }
-            if (!text.ReadOnly && Clipboard.GetDataObject() != null)
+                Text = "Copy"
+            };
+            menu.Click += new EventHandler(menuCopy_Click);
+            context.MenuItems.Add(menu);
+            menu.Enabled = (text.SelectionLength > 0);
+            menu = new MenuItem()
             {
-                menu = new MenuItem()
-                {
-                    Text = "Paste"
-                };
-                menu.Click += new EventHandler(menuPaste_Click);
-                context.MenuItems.Add(menu);
-            }
+                Text = "Paste"
+            };
+            menu.Click += new EventHandler(menuPaste_Click);
+            context.MenuItems.Add(menu);
+            menu.Enabled = (!text.ReadOnly && Clipboard.GetDataObject() != null);
         }
 
         void menuPaste_Click(object sender, EventArgs e)
@@ -153,10 +167,10 @@ namespace Tenor.Mobile.UI
             {
                 text.Location = new Point(
                     Convert.ToInt32(5 * Tenor.Mobile.UI.Skin.Current.ScaleFactor.Width),
-                    Convert.ToInt32(5 * Tenor.Mobile.UI.Skin.Current.ScaleFactor.Height));
+                    Convert.ToInt32(2 * Tenor.Mobile.UI.Skin.Current.ScaleFactor.Height));
                 text.Size = new SizeF(
                     this.Width - 10 * Tenor.Mobile.UI.Skin.Current.ScaleFactor.Width,
-                    this.Height - 10 * Tenor.Mobile.UI.Skin.Current.ScaleFactor.Height).ToSize();
+                    this.Height - 4 * Tenor.Mobile.UI.Skin.Current.ScaleFactor.Height).ToSize();
             }
         }
 
@@ -166,6 +180,13 @@ namespace Tenor.Mobile.UI
             get;
             set;
         }
+
+        protected override void OnGotFocus(EventArgs e)
+        {
+            base.OnGotFocus(e);
+            text.Focus();
+        }
+
 
         #region TextBox Methods and Properties
 
@@ -363,6 +384,18 @@ namespace Tenor.Mobile.UI
         //     Undoes the last edit operation in the text box.
         public void Undo() { text.Undo(); }
 
+
+        public override string Text
+        {
+            get
+            {
+                return text.Text;
+            }
+            set
+            {
+                text.Text = value;
+            }
+        }
         #endregion
     }
 }
