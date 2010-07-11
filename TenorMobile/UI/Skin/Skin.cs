@@ -80,7 +80,7 @@ namespace Tenor.Mobile.UI
         }
 
         internal abstract void DrawListItemBackground(Graphics g, Rectangle bounds, int index, bool selected);
-        internal abstract void DrawTextControlBackground(Graphics g, Rectangle bounds);
+        internal abstract void DrawTextControlBackground(TextControl control, Graphics g, Rectangle bounds);
 
         public abstract Color ControlBackColor
         { get; }

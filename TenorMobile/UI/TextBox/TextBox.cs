@@ -26,7 +26,6 @@ namespace Tenor.Mobile.UI
             text.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
             this.Controls.Add(text);
             text.GotFocus += new EventHandler(text_GotFocus);
-            text.LostFocus += new EventHandler(text_LostFocus);
             text.KeyDown += new KeyEventHandler(text_KeyDown);
             text.KeyPress += new KeyPressEventHandler(text_KeyPress);
             text.KeyUp += new KeyEventHandler(text_KeyUp);
@@ -82,7 +81,7 @@ namespace Tenor.Mobile.UI
             foreach (MenuItem mnu in context.MenuItems)
                 mnu.Dispose();
             context.MenuItems.Clear();
-            if (text.PasswordChar != null)
+            if (text.PasswordChar != '\0')
                 return;
             MenuItem menu = null;
             menu = new MenuItem()
@@ -110,6 +109,15 @@ namespace Tenor.Mobile.UI
 
         void menuPaste_Click(object sender, EventArgs e)
         {
+            string text = Clipboard.GetDataObject().GetData(System.Windows.Forms.DataFormats.Text) as string;
+            if (!string.IsNullOrEmpty(text))
+            {
+                string current = this.Text;
+                int pos = SelectionStart;
+                this.Text = current.Substring(0, this.SelectionStart) + text + current.Substring(this.SelectionStart + this.SelectionLength);
+                SelectionStart = pos;
+                SelectionLength = text.Length;
+            }
         }
 
         void menuCopy_Click(object sender, EventArgs e)
@@ -120,14 +128,10 @@ namespace Tenor.Mobile.UI
         void menuCut_Click(object sender, EventArgs e)
         {
             menuCopy_Click(sender, e);
-        }
-
-        void text_LostFocus(object sender, EventArgs e)
-        {
-            if (input != null)
-            {
-                //input.Enabled = false;
-            }
+            int pos = SelectionStart;
+            string current = this.Text;
+            this.Text = current.Substring(0, this.SelectionStart) + current.Substring(this.SelectionStart + this.SelectionLength);
+            SelectionStart = pos;
         }
 
         void text_GotFocus(object sender, EventArgs e)
@@ -147,25 +151,13 @@ namespace Tenor.Mobile.UI
             }
         }
 
-        public override Color BackColor
-        {
-            get
-            {
-                return Tenor.Mobile.UI.Skin.Current.ControlBackColor;
-            }
-            set
-            {
-                base.BackColor = Tenor.Mobile.UI.Skin.Current.ControlBackColor;
-            }
-        }
-
         protected override void OnPaintBackground(PaintEventArgs e)
         {
         }
 
         protected override void OnPaint(PaintEventArgs pe)
         {
-            Tenor.Mobile.UI.Skin.Current.DrawTextControlBackground(pe.Graphics, new Rectangle(0, 0, this.Width, this.Height));
+            Tenor.Mobile.UI.Skin.Current.DrawTextControlBackground(this, pe.Graphics, new Rectangle(0, 0, this.Width, this.Height));
         }
 
         protected override void OnResize(EventArgs e)
@@ -179,6 +171,7 @@ namespace Tenor.Mobile.UI
                 text.Size = new SizeF(
                     this.Width - 10 * Tenor.Mobile.UI.Skin.Current.ScaleFactor.Width,
                     this.Height - 4 * Tenor.Mobile.UI.Skin.Current.ScaleFactor.Height).ToSize();
+                text.Top = (this.Height / 2) - (text.Height / 2);
             }
         }
 

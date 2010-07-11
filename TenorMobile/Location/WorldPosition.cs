@@ -436,54 +436,67 @@ namespace Tenor.Mobile.Location
                 double? latitude = Latitude;
                 double? longitude = Longitude;
 
-                try
+#if DEBUG
+                if (Tenor.Mobile.Device.Device.OemInfo.IndexOf("Emulator") > -1)
                 {
-                    if (cellCache == null)
-                        cellCache = new List<CellInfo>();
+                    Latitude = -22.9;
+                    Longitude = -43.2333;
 
-                    CellInfo info = new CellInfo() { MCC = CountryCode, MNC = NetworkCode, LAC = AreaCode, CID = Id };
-                    int index = cellCache.IndexOf(info);
-                    if (index > -1)
+                }
+                else
+                {
+#endif
+
+                    try
                     {
-                        info = cellCache[index];
-                    }
-                    else
-                    {
-                        Exception ex = null;
-                        bool ok = false;
-                        try
+                        if (cellCache == null)
+                            cellCache = new List<CellInfo>();
+
+                        CellInfo info = new CellInfo() { MCC = CountryCode, MNC = NetworkCode, LAC = AreaCode, CID = Id };
+                        int index = cellCache.IndexOf(info);
+                        if (index > -1)
                         {
-                            ok = TranslateCellIdWithGoogle(info, false);
+                            info = cellCache[index];
                         }
-                        catch (Exception ext) { ex = ext; }
-                        if (!ok)
-                            ok = TranslateCellIdWithOpenCellId(info);
-                        if (ok)
-                            cellCache.Add(info);
-                        else if (ex != null)
-                            throw ex;
                         else
-                            info = null;
-                        
-                    }
-                    if (info != null)
-                    {
-                        Latitude = info.Lat;
-                        Longitude = info.Lng;
-                        LastFix = DateTime.UtcNow;
-                    }
-                }
-                catch (WebException ex)
-                {
-                    System.Diagnostics.Debug.WriteLine("WebRequest error: " + ex.Status.ToString(), "WorldPosition");
-                    OnError(new ErrorEventArgs(ex));
-                }
-                catch (Exception ex)
-                {
-                    System.Diagnostics.Debug.WriteLine(ex.Message.ToString(), "WorldPosition");
-                    OnError(new ErrorEventArgs(ex));
-                }
+                        {
+                            Exception ex = null;
+                            bool ok = false;
+                            try
+                            {
+                                ok = TranslateCellIdWithGoogle(info, false);
+                            }
+                            catch (Exception ext) { ex = ext; }
+                            if (!ok)
+                                ok = TranslateCellIdWithOpenCellId(info);
+                            if (ok)
+                                cellCache.Add(info);
+                            else if (ex != null)
+                                throw ex;
+                            else
+                                info = null;
 
+                        }
+                        if (info != null)
+                        {
+                            Latitude = info.Lat;
+                            Longitude = info.Lng;
+                            LastFix = DateTime.UtcNow;
+                        }
+                    }
+                    catch (WebException ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine("WebRequest error: " + ex.Status.ToString(), "WorldPosition");
+                        OnError(new ErrorEventArgs(ex));
+                    }
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine(ex.Message.ToString(), "WorldPosition");
+                        OnError(new ErrorEventArgs(ex));
+                    }
+#if DEBUG
+                }
+#endif
                 getLocation = null;
 
                 if (!object.Equals(latitude, Latitude) || !object.Equals(longitude, Longitude))

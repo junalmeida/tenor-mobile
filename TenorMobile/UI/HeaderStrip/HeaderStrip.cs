@@ -51,10 +51,6 @@ namespace Tenor.Mobile.UI
 
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            foreach (HeaderTab tab in Tabs)
-            {
-
-            }
             base.OnMouseDown(e);
         }
 
@@ -98,7 +94,7 @@ namespace Tenor.Mobile.UI
             {
                 return selectedIndex;
             }
-            set
+            internal set
             {
                 selectedIndex = value;
                 Invalidate();

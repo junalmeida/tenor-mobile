@@ -124,18 +124,17 @@ namespace Tenor.Mobile.UI
                     if (tab.Image != null)
                     {
                         //draw icon
-                        Rectangle destImg;
+                        Rectangle destImg = new Rectangle(0, 0, tab.Image.Width, tab.Image.Height);
                         if (tab.Image.Size.Height > tab.area.Height || tab.Image.Size.Width > tab.area.Width)
                         {
                             int oX = 8 * ScaleFactor.Width;
                             int oY = 8 * ScaleFactor.Height;
 
-                            destImg = new Rectangle(tab.area.X + oX, tab.area.Y + oY, tab.area.Width - (oX * 2), tab.area.Height - ((tab.area.Y + oY) * 2));
+                            int imageSize = tab.area.Height - ((tab.area.Y + oY) * 2);
+                            destImg = new Rectangle(tab.area.X + oX, tab.area.Y + oY, imageSize, imageSize);
                         }
-                        else
-                        {
-                            destImg = new Rectangle(tab.area.X + (tab.area.Width / 2) - (tab.Image.Width / 2), (tab.area.Height / 2) - (tab.Image.Height / 2), tab.Image.Width, tab.Image.Height);
-                        }
+
+                        destImg = new Rectangle(tab.area.X + (tab.area.Width / 2) - (destImg.Width / 2), (tab.area.Height / 2) - (destImg.Height / 2), destImg.Width, destImg.Height);
 
                         using (AlphaImage image = new AlphaImage(tab.Image))
                         {
@@ -277,7 +276,7 @@ namespace Tenor.Mobile.UI
 
 
 
-        internal override void DrawTextControlBackground(Graphics graphics, Rectangle bounds)
+        internal override void DrawTextControlBackground(TextControl control, Graphics graphics, Rectangle bounds)
         {
 
             Size ellipse = new SizeF(9 * ScaleFactor.Width, 9 * ScaleFactor.Height).ToSize();
@@ -312,10 +311,10 @@ namespace Tenor.Mobile.UI
                 }
 
 
-                using (Pen p = new Pen(this.ControlBackColor))
+                using (Pen p = new Pen(control.BackColor))
                 using (TextureBrush brush = new TextureBrush(buffer))
                 {
-                    graphics.Clear(ControlBackColor);
+                    graphics.Clear(control.BackColor);
                     RoundedRectangle.Fill(graphics, p, brush, bounds,
                         ellipse
                         );
