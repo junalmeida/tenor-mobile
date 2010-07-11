@@ -45,6 +45,7 @@
             this.kListControl1 = new Tenor.Mobile.UI.KListControl();
             this.headerStrip2 = new Tenor.Mobile.UI.HeaderStrip();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.headerStrip1 = new Tenor.Mobile.UI.HeaderStrip();
             this.textBox2 = new Tenor.Mobile.UI.TextControl();
             this.textBox1 = new Tenor.Mobile.UI.TextControl();
@@ -53,7 +54,7 @@
             this.menuItem8 = new System.Windows.Forms.MenuItem();
             this.menuItem9 = new System.Windows.Forms.MenuItem();
             this.notificationWithSoftKeys1 = new Tenor.Mobile.UI.NotificationWithSoftKeys();
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.button1 = new System.Windows.Forms.Button();
             this.tabStrip1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -151,6 +152,7 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.button1);
             this.tabPage2.Controls.Add(this.pictureBox1);
             this.tabPage2.Controls.Add(this.headerStrip1);
             this.tabPage2.Controls.Add(this.textBox2);
@@ -160,6 +162,12 @@
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Size = new System.Drawing.Size(240, 245);
             this.tabPage2.Text = "tabPage2";
+            // 
+            // pictureBox1
+            // 
+            this.pictureBox1.Location = new System.Drawing.Point(12, 92);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(215, 129);
             // 
             // headerStrip1
             // 
@@ -177,7 +185,7 @@
             this.textBox2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.textBox2.HideSelection = true;
             this.textBox2.InputMode = Microsoft.WindowsCE.Forms.InputMode.Default;
-            this.textBox2.Location = new System.Drawing.Point(18, 135);
+            this.textBox2.Location = new System.Drawing.Point(7, 66);
             this.textBox2.MaxLength = 32767;
             this.textBox2.Modified = false;
             this.textBox2.Multiline = true;
@@ -188,7 +196,7 @@
             this.textBox2.SelectedText = "";
             this.textBox2.SelectionLength = 0;
             this.textBox2.SelectionStart = 0;
-            this.textBox2.Size = new System.Drawing.Size(215, 32);
+            this.textBox2.Size = new System.Drawing.Size(166, 22);
             this.textBox2.TabIndex = 1;
             this.textBox2.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
             this.textBox2.WordWrap = true;
@@ -200,7 +208,7 @@
             this.textBox1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
             this.textBox1.HideSelection = true;
             this.textBox1.InputMode = Microsoft.WindowsCE.Forms.InputMode.Default;
-            this.textBox1.Location = new System.Drawing.Point(18, 80);
+            this.textBox1.Location = new System.Drawing.Point(18, 43);
             this.textBox1.MaxLength = 32767;
             this.textBox1.Modified = false;
             this.textBox1.Multiline = true;
@@ -211,7 +219,7 @@
             this.textBox1.SelectedText = "";
             this.textBox1.SelectionLength = 0;
             this.textBox1.SelectionStart = 0;
-            this.textBox1.Size = new System.Drawing.Size(215, 49);
+            this.textBox1.Size = new System.Drawing.Size(215, 20);
             this.textBox1.TabIndex = 1;
             this.textBox1.TextAlign = System.Windows.Forms.HorizontalAlignment.Left;
             this.textBox1.WordWrap = true;
@@ -252,12 +260,14 @@
             // 
             this.notificationWithSoftKeys1.NotificationId = new System.Guid("a877d65f-239c-47a7-9304-0d347f580408");
             // 
-            // pictureBox1
+            // button1
             // 
-            this.pictureBox1.Location = new System.Drawing.Point(18, 173);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(215, 50);
-            this.pictureBox1.Paint += new System.Windows.Forms.PaintEventHandler(this.pictureBox1_Paint);
+            this.button1.Location = new System.Drawing.Point(101, 223);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(72, 20);
+            this.button1.TabIndex = 3;
+            this.button1.Text = "button1";
+            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // Form1
             // 
@@ -303,6 +313,7 @@
         private System.Windows.Forms.MenuItem menuItem8;
         private System.Windows.Forms.MenuItem menuItem9;
         private System.Windows.Forms.PictureBox pictureBox1;
+        private System.Windows.Forms.Button button1;
     }
 }
 

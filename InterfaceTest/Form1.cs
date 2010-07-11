@@ -261,43 +261,13 @@ namespace InterfaceTest
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
-            e.Graphics.Clear(Tenor.Mobile.UI.Skin.Current.ControlBackColor);
-            Rectangle bounds = new Rectangle(0, 0, pictureBox1.Width, pictureBox1.Height);
 
-            Size ellipse = new SizeF(9 * factor.Width, 9 * factor.Height).ToSize();
+        }
 
-
-
-            Bitmap buffer = new Bitmap(bounds.Width, bounds.Height);
-            using (Graphics g = Graphics.FromImage(buffer))
-            {
-                g.Clear(Tenor.Mobile.UI.Skin.Current.TextBackGround);
-
-                int lineSize = Convert.ToInt32(factor.Height);
-                Color color = Tenor.Mobile.Drawing.Strings.ToColor("#313131");
-                using (SolidBrush brush = new SolidBrush(color))
-                using (Pen pen = new Pen(color))
-                {
-
-                    int radius = Convert.ToInt32(ellipse.Height / 2);
-                    int x = 1;
-                    int y = 1;
-
-                    Point[] arc = Tenor.Mobile.Drawing.Arc.CreateArc(0, -90, 200, radius, 0, 0, lineSize - 1);
-                    g.DrawLines(pen, arc);
-
-                    arc = Tenor.Mobile.Drawing.Arc.CreateArc(0, -90, 200, radius, x, y, lineSize - 1);
-                    g.DrawLines(pen, arc);
-
-                    g.FillRectangle(brush, new Rectangle(arc[0].X, y, this.Width - arc[0].X, lineSize));
-                    int middlePoint = Convert.ToInt32((arc.Length - 1) / 2);
-                    g.FillRectangle(brush, new Rectangle(x, arc[middlePoint].Y, lineSize, this.Height - arc[middlePoint].Y));
-                }
-            }
-
-            RoundedRectangle.Fill(e.Graphics, null, new TextureBrush(buffer), bounds,
-                ellipse
-                );       
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Image image = Tenor.Mobile.Drawing.GraphicsEx.CopyFromScreen(this.CreateGraphics(), new Rectangle(0, 0, this.Width, this.Height));
+            pictureBox1.Image = image;
         }
     }
 }

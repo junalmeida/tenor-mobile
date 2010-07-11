@@ -216,6 +216,13 @@ namespace Tenor.Mobile.Location
 
             if (hRes != IntPtr.Zero)
             {
+#if DEBUG
+                if (Environment.OSVersion.Platform == PlatformID.WinCE && Tenor.Mobile.Device.Device.OemInfo.IndexOf("Emulator") > 1)
+                {
+                    System.Diagnostics.Debug.WriteLine("Cell tower not available on emulator. Ignored for testing purposes.");
+                    return true;
+                }
+#endif
                 throw new Exception("Cannot connect to GSM chip.");
             }
 
