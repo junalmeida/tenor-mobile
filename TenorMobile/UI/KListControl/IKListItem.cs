@@ -83,13 +83,20 @@ namespace Tenor.Mobile.UI
                         backBrush = new SolidBrush(SystemColors.Highlight);
                         g.FillRectangle(backBrush, bounds);
                         backBrush.Dispose();
+
+                        textBrush = new SolidBrush(SystemColors.HighlightText);
                     }
-                    textBrush = new SolidBrush(SystemColors.HighlightText);
+                    else
+                        textBrush = new SolidBrush(Tenor.Mobile.UI.Skin.Current.TextHighLight);
+        
                 }
                 else
                 {
                     //backBrush = new SolidBrush(SystemColors.Window);
-                    textBrush = new SolidBrush(SystemColors.ControlText);
+                    if (!Parent.Skinnable)
+                        textBrush = new SolidBrush(SystemColors.ControlText);
+                    else
+                        textBrush = new SolidBrush(Tenor.Mobile.UI.Skin.Current.TextForeColor);
                 }
 
                 g.DrawString("  " + Text, Parent.Font, textBrush, bounds, format);

@@ -169,7 +169,7 @@ namespace Tenor.Mobile.UI
 
         // Custom SoftKey menus are supported on Pocket PC devices running
         // Windows Mobile 5.0 or higher.
-        public bool PlatformSupportsCustomSoftKeyButtons
+        public static bool PlatformSupportsCustomSoftKeyButtons
         {
             get
             {
@@ -626,6 +626,53 @@ namespace Tenor.Mobile.UI
         }
 
         #endregion
+
+
+        /// <summary>
+        /// Displays a message balloon with a dismiss button.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="title"></param>
+        /// <param name="text"></param>
+        /// <param name="showTime"></param>
+        /// <param name="icon"></param>
+        public static void Show(Guid id, string title, string text, bool showTime, Icon icon)
+        {
+            if (id == null)
+                id = Guid.NewGuid();
+            if (icon == null)
+                throw new ArgumentNullException("icon");
+
+
+            SHNOTIFICATIONDATA data = new SHNOTIFICATIONDATA()
+            {
+                clsid = id,
+                csDuration = 10,
+                dwID = 1,
+                hicon = icon.Handle,
+                pszTitle = title,
+                pszHTML = text
+            };
+
+
+            if (showTime)
+                data.grfFlags |= SHNF.TITLETIME;
+
+
+            data.leftSoftKey.pszTitle = string.Empty;
+            data.leftSoftKey.skc.grfFlags = (uint)SoftKeyType.Disabled;
+
+            data.rightSoftKey.pszTitle = "Dismiss";
+            data.rightSoftKey.skc.grfFlags = (uint)SoftKeyType.Dismiss;
+
+
+            if (PlatformSupportsCustomSoftKeyButtons)
+                data.cbStruct = Marshal.SizeOf(data);
+            else
+                data.cbStruct = Marshal.SizeOf(data) - 32; // "hide" the 20 bytes that were added to this struct in WM5.0    
+            SHNotificationAdd(ref data);
+        }
+
     }
 
 }
