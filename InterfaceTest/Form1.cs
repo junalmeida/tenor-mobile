@@ -268,6 +268,9 @@ namespace InterfaceTest
         {
             Image image = Tenor.Mobile.Drawing.GraphicsEx.CopyFromScreen(this.CreateGraphics(), new Rectangle(0, 0, this.Width, this.Height));
             pictureBox1.Image = image;
+
+            Icon icon = this.Icon;
+            NotificationWithSoftKeys.Show(Guid.NewGuid(), "test", "text text", true, icon);
         }
     }
 }

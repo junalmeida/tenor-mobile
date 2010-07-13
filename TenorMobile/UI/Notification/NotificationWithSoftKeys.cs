@@ -628,6 +628,8 @@ namespace Tenor.Mobile.UI
         #endregion
 
 
+        static Random r = new Random();
+        static SHNOTIFICATIONDATA data;
         /// <summary>
         /// Displays a message balloon with a dismiss button.
         /// </summary>
@@ -638,38 +640,44 @@ namespace Tenor.Mobile.UI
         /// <param name="icon"></param>
         public static void Show(Guid id, string title, string text, bool showTime, Icon icon)
         {
+            
             if (id == null)
                 id = Guid.NewGuid();
             if (icon == null)
                 throw new ArgumentNullException("icon");
 
+            data = new SHNOTIFICATIONDATA();
+            if (PlatformSupportsCustomSoftKeyButtons)
+                data.cbStruct = Marshal.SizeOf(data);
+            else
+                data.cbStruct = Marshal.SizeOf(data) - 32; // "hide" the 20 bytes that were added to this struct in WM5.0    
 
-            SHNOTIFICATIONDATA data = new SHNOTIFICATIONDATA()
-            {
-                clsid = id,
-                csDuration = 10,
-                dwID = 1,
-                hicon = icon.Handle,
-                pszTitle = title,
-                pszHTML = text
-            };
+            data.clsid = id;
+            data.dwID = r.Next(0, 10000);
+            data.csDuration = 10;
+
+            data.hicon = icon.Handle;
+            data.pszTitle = title;
+            data.pszHTML = text;
+            data.npPriority = SHNP.INFORM;
+
 
 
             if (showTime)
                 data.grfFlags |= SHNF.TITLETIME;
 
 
-            data.leftSoftKey.pszTitle = string.Empty;
-            data.leftSoftKey.skc.grfFlags = (uint)SoftKeyType.Disabled;
-
-            data.rightSoftKey.pszTitle = "Dismiss";
-            data.rightSoftKey.skc.grfFlags = (uint)SoftKeyType.Dismiss;
-
-
             if (PlatformSupportsCustomSoftKeyButtons)
-                data.cbStruct = Marshal.SizeOf(data);
-            else
-                data.cbStruct = Marshal.SizeOf(data) - 32; // "hide" the 20 bytes that were added to this struct in WM5.0    
+            {
+                data.leftSoftKey.pszTitle = " ";
+                data.leftSoftKey.skc.grfFlags = (uint)SoftKeyType.Disabled;
+                data.leftSoftKey.skc.wpCmd = (uint)(data.dwID << 8);
+
+                data.rightSoftKey.pszTitle = "Dismiss";
+                data.rightSoftKey.skc.grfFlags = (uint)SoftKeyType.Dismiss;
+                data.rightSoftKey.skc.wpCmd = (uint)(data.dwID << 8) + 1;
+            }
+
             SHNotificationAdd(ref data);
         }
 

@@ -45,6 +45,7 @@
             this.kListControl1 = new Tenor.Mobile.UI.KListControl();
             this.headerStrip2 = new Tenor.Mobile.UI.HeaderStrip();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.button1 = new System.Windows.Forms.Button();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.headerStrip1 = new Tenor.Mobile.UI.HeaderStrip();
             this.textBox2 = new Tenor.Mobile.UI.TextControl();
@@ -54,7 +55,6 @@
             this.menuItem8 = new System.Windows.Forms.MenuItem();
             this.menuItem9 = new System.Windows.Forms.MenuItem();
             this.notificationWithSoftKeys1 = new Tenor.Mobile.UI.NotificationWithSoftKeys();
-            this.button1 = new System.Windows.Forms.Button();
             this.tabStrip1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -163,6 +163,15 @@
             this.tabPage2.Size = new System.Drawing.Size(240, 245);
             this.tabPage2.Text = "tabPage2";
             // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(101, 223);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(72, 20);
+            this.button1.TabIndex = 3;
+            this.button1.Text = "button1";
+            this.button1.Click += new System.EventHandler(this.button1_Click);
+            // 
             // pictureBox1
             // 
             this.pictureBox1.Location = new System.Drawing.Point(12, 92);
@@ -259,15 +268,6 @@
             // notificationWithSoftKeys1
             // 
             this.notificationWithSoftKeys1.NotificationId = new System.Guid("a877d65f-239c-47a7-9304-0d347f580408");
-            // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(101, 223);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(72, 20);
-            this.button1.TabIndex = 3;
-            this.button1.Text = "button1";
-            this.button1.Click += new System.EventHandler(this.button1_Click);
             // 
             // Form1
             // 
