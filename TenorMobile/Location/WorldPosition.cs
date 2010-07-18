@@ -14,7 +14,7 @@ namespace Tenor.Mobile.Location
     /// <summary>
     /// Provides location services based on cell id and gps information.
     /// </summary>
-    public class WorldPosition
+    public class WorldPosition : IDisposable
     {
         private const string GoogleMobileServiceUri = "http://www.google.com/glm/mmap";
         private const string OpenCellServiceUri = "http://www.opencellid.org/cell/get?key=7e93ae41e81f11b986a6e99adb691997&mcc={0}&mnc={1}&lac={2}&cellid={3}";
@@ -131,13 +131,7 @@ namespace Tenor.Mobile.Location
         /// </summary>
         ~WorldPosition()
         {
-            if (gps != null && gps.Opened)
-                gps.Close();
-            if (timer != null)
-            {
-                timer.Dispose();
-                timer = null;
-            }
+            this.Dispose();
         }
 
         /// <summary>
@@ -151,6 +145,11 @@ namespace Tenor.Mobile.Location
             this.PollLocation = pollLocation;
         }
 
+        /// <summary>
+        /// Creates an instance of WorldPosition.
+        /// </summary>
+        /// <param name="pollLocation"></param>
+        /// <param name="useGps"></param>
         public WorldPosition(bool pollLocation, bool useGps)
             : this()
         {
@@ -202,20 +201,22 @@ namespace Tenor.Mobile.Location
          */
         private bool GetCellTowerInfo()
         {
-            // initialise handles
-            IntPtr hRil = IntPtr.Zero;
-            IntPtr hRes = IntPtr.Zero;
-
-            // initialise RIL
-            hRes = RIL_Initialize(1,                      // RIL port 1
-                new RILRESULTCALLBACK(rilResultCallback), // function to call with result
-                null,                                     // function to call with notify
-                0,                                        // classes of notification to enable
-                0,                                        // RIL parameters
-                out hRil);                                // RIL handle returned
-
-            if (hRes != IntPtr.Zero)
+            try
             {
+                // initialise handles
+                IntPtr hRil = IntPtr.Zero;
+                IntPtr hRes = IntPtr.Zero;
+
+                // initialise RIL
+                hRes = RIL_Initialize(1,                      // RIL port 1
+                    new RILRESULTCALLBACK(rilResultCallback), // function to call with result
+                    null,                                     // function to call with notify
+                    0,                                        // classes of notification to enable
+                    0,                                        // RIL parameters
+                    out hRil);                                // RIL handle returned
+
+                if (hRes != IntPtr.Zero)
+                {
 #if DEBUG
                 if (Environment.OSVersion.Platform == PlatformID.WinCE && Tenor.Mobile.Device.Device.OemInfo.IndexOf("Emulator") > 1)
                 {
@@ -223,21 +224,27 @@ namespace Tenor.Mobile.Location
                     return true;
                 }
 #endif
-                throw new Exception("Cannot connect to GSM chip.");
+                    throw new Exception("Cannot connect to GSM chip.");
+                }
+
+                // initialised successfully
+
+                // use RIL to get cell tower info with the RIL handle just created
+                hRes = RIL_GetCellTowerInfo(hRil);
+
+                // wait for cell tower info to be returned
+                waithandle.WaitOne();
+
+                // finished - release the RIL handle
+                RIL_Deinitialize(hRil);
+
+                //celltower info finished
             }
-
-            // initialised successfully
-
-            // use RIL to get cell tower info with the RIL handle just created
-            hRes = RIL_GetCellTowerInfo(hRil);
-
-            // wait for cell tower info to be returned
-            waithandle.WaitOne();
-
-            // finished - release the RIL handle
-            RIL_Deinitialize(hRil);
-
-            //celltower info finished
+            catch(Exception ex)
+            {
+                OnError(new ErrorEventArgs(ex));
+                return false;
+            }
 
             if (idChanged)
             {
@@ -780,6 +787,21 @@ namespace Tenor.Mobile.Location
             else
                 return null;
         }
+
+        #region IDisposable Members
+
+        public void Dispose()
+        {
+            if (gps != null && gps.Opened)
+                gps.Close();
+            if (timer != null)
+            {
+                timer.Dispose();
+                timer = null;
+            }
+        }
+
+        #endregion
     }
 
 
