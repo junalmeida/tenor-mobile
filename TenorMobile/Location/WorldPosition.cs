@@ -123,7 +123,11 @@ namespace Tenor.Mobile.Location
             PollLocation = false;
             UseGps = true;
             FixType = FixType.Network;
-            timer = new Timer(new TimerCallback(PeriodicPoll), null, 500, Timeout.Infinite);
+            lock (this)
+            {
+                timer = new Timer(new TimerCallback(PeriodicPoll), null, Timeout.Infinite, Timeout.Infinite);
+                Poll();
+            }
         }
 
         /// <summary>
@@ -157,6 +161,20 @@ namespace Tenor.Mobile.Location
             this.UseGps = useGps;
         }
 
+
+        /// <summary>
+        /// Creates an instance of WorldPosition.
+        /// </summary>
+        /// <param name="pollLocation"></param>
+        /// <param name="useGps"></param>
+        public WorldPosition(bool pollLocation, bool useGps, int interval)
+            : this()
+        {
+            this.PollLocation = pollLocation;
+            this.UseGps = useGps;
+            this.PollingInterval = interval;
+        }
+
         /// <summary>
         /// Manually poll location.
         /// </summary>
@@ -180,11 +198,18 @@ namespace Tenor.Mobile.Location
 
             if (cellChanged && PollLocation && FixType == FixType.Network)
                 PollCellInternal();
-
-            if (PollingInterval > 0)
+            lock (this)
             {
-                //reset timer to the next pooling
-                timer.Change(PollingInterval, Timeout.Infinite);
+                if (timer != null)
+                {
+                    if (PollingInterval > 0)
+                    {
+                        //reset timer to the next pooling
+                        timer.Change(PollingInterval, Timeout.Infinite);
+                    }
+                    else
+                        timer.Change(Timeout.Infinite, Timeout.Infinite);
+                }
             }
         }
 
@@ -401,8 +426,12 @@ namespace Tenor.Mobile.Location
             {
                 if (CheckForGps())
                 {
-                    Gps.GpsPosition pos = gps.GetPosition(new TimeSpan(0, 0, 0, 0, PollingInterval));
-                    if (pos != null && pos.LongitudeValid && pos.LatitudeValid)
+                    int interval = PollingInterval;
+                    if (interval <= 0)
+                        interval = 5000;
+                    Gps.GpsPosition pos = gps.GetPosition(new TimeSpan(0, 0, 0, 0, interval));
+                    if (pos != null && pos.LongitudeValid && pos.LatitudeValid
+                        && pos.Latitude != 0 && pos.Longitude != 0)
                     {
 
                         Latitude = pos.Latitude;
@@ -428,7 +457,7 @@ namespace Tenor.Mobile.Location
 
         #region GeoLocation
 
-        public void PollCell()
+        private void PollCell()
         {
             GetCellTowerInfo(); //get current cell id before translating it to lat and lng
             PollCellInternal();
@@ -491,7 +520,7 @@ namespace Tenor.Mobile.Location
                                 info = null;
 
                         }
-                        if (info != null)
+                        if (info != null && info.Lat.HasValue && info.Lng.HasValue && info.Lat.Value != 0 && info.Lng.Value != 0)
                         {
                             Latitude = info.Lat;
                             Longitude = info.Lng;
