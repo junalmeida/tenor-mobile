@@ -198,6 +198,9 @@ namespace Tenor.Mobile.Location
 
             if (cellChanged && PollLocation && FixType == FixType.Network)
                 PollCellInternal();
+            if (FixType == FixType.Network && (!Latitude.HasValue || !Longitude.HasValue))
+                PollGeoIp();
+
             lock (this)
             {
                 if (timer != null)
@@ -213,23 +216,87 @@ namespace Tenor.Mobile.Location
             }
         }
 
+        private const string geoIp = "http://www.geoplugin.net/xml.gp";
+        private void PollGeoIp()
+        {
+            HttpWebRequest req = null;
+            HttpWebResponse res = null;
+            double? lat = null;
+            double? lng = null;
+            try
+            {
+                req = (HttpWebRequest)WebRequest.Create(geoIp);
+
+                req.Timeout = 50000;
+                req.Method = "GET";
+
+                res = (HttpWebResponse)req.GetResponse();
+
+                if (res.StatusCode == HttpStatusCode.OK)
+                {
+                    XmlDocument doc = new XmlDocument();
+                    doc.Load(res.GetResponseStream());
+
+                    lat = double.Parse(doc.DocumentElement.FirstChild.Attributes["geoplugin_latitude"].Value, System.Globalization.CultureInfo.GetCultureInfo("en-us"));
+                    lng = double.Parse(doc.DocumentElement.FirstChild.Attributes["geoplugin_longitude"].Value, System.Globalization.CultureInfo.GetCultureInfo("en-us"));
+                }
+
+            }
+            catch (WebException ex)
+            {
+                System.Diagnostics.Debug.WriteLine("WebRequest error: " + ex.Status.ToString(), "WorldPosition");
+                OnError(new ErrorEventArgs(ex));
+            }
+            catch (Exception ex)
+            {
+                if (req != null)
+                    Tenor.Mobile.Network.WebRequest.Abort(req);
+                System.Diagnostics.Debug.WriteLine(ex.Message.ToString(), "WorldPosition");
+                OnError(new ErrorEventArgs(ex));
+            }
+            finally
+            {
+                if (req != null)
+                    req = null;
+
+                if (res != null)
+                {
+                    res.Close();
+                    res = null;
+                }
+            }
+
+            if (!object.Equals(lat, Latitude) || !object.Equals(lng, Longitude))
+            {
+                Latitude = lat;
+                Longitude = lng;
+                OnLocationChanged(new EventArgs());
+            }
+            else
+                System.Diagnostics.Debug.WriteLine("Location unchanged.", "WorldPosition");
+
+        }
+
 
 
         #region Cell Functions
 
 
 
-
+        static bool maybeCDMA = false;
         bool idChanged = false;
         /*
          * Uses RIL to get CellID from the phone.
          */
         private bool GetCellTowerInfo()
         {
+            if (maybeCDMA)
+                return false;
+
+            IntPtr hRil = IntPtr.Zero;
             try
             {
                 // initialise handles
-                IntPtr hRil = IntPtr.Zero;
                 IntPtr hRes = IntPtr.Zero;
 
                 // initialise RIL
@@ -241,16 +308,7 @@ namespace Tenor.Mobile.Location
                     out hRil);                                // RIL handle returned
 
                 if (hRes != IntPtr.Zero)
-                {
-#if DEBUG
-                if (Environment.OSVersion.Platform == PlatformID.WinCE && Tenor.Mobile.Device.Device.OemInfo.IndexOf("Emulator") > 1)
-                {
-                    System.Diagnostics.Debug.WriteLine("Cell tower not available on emulator. Ignored for testing purposes.");
-                    return true;
-                }
-#endif
                     throw new Exception("Cannot connect to GSM chip.");
-                }
 
                 // initialised successfully
 
@@ -258,17 +316,28 @@ namespace Tenor.Mobile.Location
                 hRes = RIL_GetCellTowerInfo(hRil);
 
                 // wait for cell tower info to be returned
-                waithandle.WaitOne();
+                if (!waithandle.WaitOne(5000, false))
+                {
+                    maybeCDMA = true;
+                    return false;
+                }
 
-                // finished - release the RIL handle
-                RIL_Deinitialize(hRil);
 
                 //celltower info finished
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
-                OnError(new ErrorEventArgs(ex));
-                return false;
+                throw;
+            }
+            finally
+            {
+                // finished - release the RIL handle
+                try
+                {
+                    if (hRil != IntPtr.Zero)
+                        RIL_Deinitialize(hRil);
+                }
+                catch { }
             }
 
             if (idChanged)
