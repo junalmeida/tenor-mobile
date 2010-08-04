@@ -235,10 +235,12 @@ namespace Tenor.Mobile.Location
                 if (res.StatusCode == HttpStatusCode.OK)
                 {
                     XmlDocument doc = new XmlDocument();
-                    doc.Load(res.GetResponseStream());
+                    StreamReader reader = new StreamReader(res.GetResponseStream());
+                    string xml = reader.ReadToEnd();
+                    doc.LoadXml(xml);
 
-                    lat = double.Parse(doc.DocumentElement.FirstChild.Attributes["geoplugin_latitude"].Value, System.Globalization.CultureInfo.GetCultureInfo("en-us"));
-                    lng = double.Parse(doc.DocumentElement.FirstChild.Attributes["geoplugin_longitude"].Value, System.Globalization.CultureInfo.GetCultureInfo("en-us"));
+                    lat = double.Parse(doc.DocumentElement.SelectSingleNode("geoplugin_latitude").InnerText, System.Globalization.CultureInfo.GetCultureInfo("en-us"));
+                    lng = double.Parse(doc.DocumentElement.SelectSingleNode("geoplugin_longitude").InnerText, System.Globalization.CultureInfo.GetCultureInfo("en-us"));
                 }
 
             }
