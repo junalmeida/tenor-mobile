@@ -10,6 +10,56 @@ using System.Text;
 
 namespace Tenor.Mobile.Location
 {
+    public struct WorldPoint
+    {
+        public static readonly WorldPoint Empty = new WorldPoint();
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
+
+        /// <summary>
+        /// The UTC time of this fix.
+        /// </summary>
+        public DateTime FixTime { get; set; }
+
+        public double? Altitude { get; set; }
+
+        public bool IsEmpty
+        {
+            get
+            {
+                return Latitude == 0 || Longitude == 0 || FixTime == DateTime.MinValue;
+            }
+        }
+
+        public override string ToString()
+        {
+            return string.Format("{0}; {1}", Latitude, Longitude);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+            if (obj.GetType() != this.GetType())
+                return false;
+
+            WorldPoint other = (WorldPoint)obj;
+            return
+                Latitude.Equals(other.Latitude) &&
+                Longitude.Equals(other.Longitude) &&
+                FixTime.Equals(other.FixTime);
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 57;
+            hash = 27 * hash * Latitude.GetHashCode();
+            hash = 27 * hash * Longitude.GetHashCode();
+            hash = 27 * hash * FixTime.GetHashCode();
+            return hash;
+        }
+
+    }
 
     //---Based on code written by Dale Lane
     //---Source: http://dalelane.co.uk/blog/?p=241
@@ -18,12 +68,7 @@ namespace Tenor.Mobile.Location
     /// </summary>
     public class WorldPosition : IDisposable
     {
-        private struct WorldPoint
-        {
-            public double? Latitude;
-            public double? Longitude;
-            public double? Altitude;
-        }
+
 
         private const string GoogleMobileServiceUri = "http://www.google.com/glm/mmap";
         private const string OpenCellServiceUri = "http://www.opencellid.org/cell/get?key=7e93ae41e81f11b986a6e99adb691997&mcc={0}&mnc={1}&lac={2}&cellid={3}";
@@ -62,11 +107,6 @@ namespace Tenor.Mobile.Location
         public int AreaCode
         { get; private set; }
 
-        public double? Latitude
-        { get; private set; }
-
-        public double? Longitude
-        { get; private set; }
 
         public FixType FixType
         { get; private set; }
@@ -74,11 +114,9 @@ namespace Tenor.Mobile.Location
         public int NetworkCode
         { get; private set; }
 
-        public double? Altitude
+        public WorldPoint WorldPoint
         { get; private set; }
 
-        public DateTime LastFix
-        { get; private set; }
 
         
 
@@ -136,7 +174,7 @@ namespace Tenor.Mobile.Location
             PollingInterval = 5000;
             PollLocation = false;
             UseGps = true;
-            FixType = FixType.Network;
+            FixType = FixType.GsmNetwork;
             lock (this)
             {
                 timer = new Timer(new TimerCallback(PeriodicPoll), null, Timeout.Infinite, Timeout.Infinite);
@@ -202,7 +240,7 @@ namespace Tenor.Mobile.Location
             StringBuilder errors = new StringBuilder();
 
             bool cellChanged = GetCellTowerInfo();
-            WorldPoint point = new WorldPoint();
+            WorldPoint point = WorldPoint.Empty;
             if (UseGps)
             {
                 try
@@ -211,40 +249,42 @@ namespace Tenor.Mobile.Location
                 }
                 catch (Exception ex)
                 {
-                    errors.Append("\r\n");
                     errors.Append(ex.Message);
                 }
 
-                if (point.Latitude.HasValue && point.Longitude.HasValue)
+                if (!point.IsEmpty)
                     FixType = FixType.Gps;
-                else
-                    FixType = FixType.Network;
             }
             else
             {
-                FixType = FixType.Network;
                 if (gps != null && gps.Opened)
                     gps.Close();
             }
 
-            if (PollLocation && FixType == FixType.Network && (cellChanged || !Latitude.HasValue || Longitude.HasValue))
+            if (PollLocation && point.IsEmpty && cellChanged)
             {
                 try
                 {
-                    point = PollCellInternal();
+                    point = PollGsmNetwork();
+                    if (!point.IsEmpty)
+                        FixType = FixType.GsmNetwork;
                 }
                 catch (Exception ex)
                 {
-                    errors.Append("\r\n");
+                    Id = 0;
+                    if (errors.Length > 0)
+                        errors.Append("\r\n");
                     errors.Append(ex.Message);
                 }
             }
-            if (FixType == FixType.Network && 
-                (!point.Latitude.HasValue || !point.Longitude.HasValue || !Latitude.HasValue || !Longitude.HasValue))
+
+            if (point.IsEmpty && WorldPoint.IsEmpty)
             {
                 try
                 {
                     point = PollGeoIp();
+                    if (!point.IsEmpty)
+                        FixType = FixType.GeoIp;
                 }
                 catch (Exception ex)
                 {
@@ -254,18 +294,16 @@ namespace Tenor.Mobile.Location
             }
 
 
-            if (!point.Latitude.HasValue && !point.Longitude.HasValue && errors.Length > 0)
+            if (cellChanged && point.IsEmpty && errors.Length > 0)
             {
                 OnError(new ErrorEventArgs(new Exception(errors.ToString())));
             }
             else
             {
                 bool changed = false;
-                if (!object.Equals(Latitude, point.Latitude) || !object.Equals(Longitude, point.Longitude))
+                if (!point.IsEmpty && !point.Equals(this.WorldPoint))
                 {
-                    Latitude = point.Latitude;
-                    Longitude = point.Longitude;
-                    LastFix = DateTime.UtcNow;
+                    this.WorldPoint = point;
                     changed = true;
                 }
                 if (AlwaysHitLocationChanged || changed)
@@ -287,17 +325,26 @@ namespace Tenor.Mobile.Location
             }
         }
 
-        private const string geoIp = "http://www.geoplugin.net/xml.gp";
+        #region Geo IP
+        private const string geoPlugin = "http://www.geoplugin.net/xml.gp";
+        private const string hostIp = "http://api.hostip.info/get_html.php?position=true";
+        private const string geoIpTool = "http://geoiptool.com/data.php";
         private WorldPoint PollGeoIp()
         {
+            Exception exception = null;
+
+            WorldPoint point = new WorldPoint();
+
             HttpWebRequest req = null;
             HttpWebResponse res = null;
-            WorldPoint point = new WorldPoint();
+            var culture = System.Globalization.CultureInfo.GetCultureInfo("en-us");
+
+
             try
             {
-                req = (HttpWebRequest)WebRequest.Create(geoIp);
+                req = (HttpWebRequest)WebRequest.Create(geoIpTool);
 
-                req.Timeout = 50000;
+                req.Timeout = 10000;
                 req.Method = "GET";
 
                 res = (HttpWebResponse)req.GetResponse();
@@ -309,14 +356,20 @@ namespace Tenor.Mobile.Location
                     string xml = reader.ReadToEnd();
                     doc.LoadXml(xml);
 
-                    point.Latitude = double.Parse(doc.DocumentElement.SelectSingleNode("geoplugin_latitude").InnerText, System.Globalization.CultureInfo.GetCultureInfo("en-us"));
-                    point.Longitude = double.Parse(doc.DocumentElement.SelectSingleNode("geoplugin_longitude").InnerText, System.Globalization.CultureInfo.GetCultureInfo("en-us"));
-                }
+                    XmlNode node = doc.DocumentElement.SelectSingleNode("marker");
 
+                    point.Latitude = double.Parse(node.Attributes["lat"].Value, culture);
+                    point.Longitude = double.Parse(node.Attributes["lng"].Value, culture);
+                    point.FixTime = DateTime.UtcNow;
+
+                    exception = null;
+                }
+                else
+                    throw new Exception("Invalid response.");
             }
-            catch 
+            catch (Exception ex)
             {
-                throw;
+                exception = ex;
             }
             finally
             {
@@ -329,11 +382,115 @@ namespace Tenor.Mobile.Location
                     res = null;
                 }
             }
-            return point;
+          
 
+
+            if (exception != null)
+            {
+                try
+                {
+                    req = (HttpWebRequest)WebRequest.Create(hostIp);
+
+                    req.Timeout = 10000;
+                    req.Method = "GET";
+
+                    res = (HttpWebResponse)req.GetResponse();
+
+                    if (res.StatusCode == HttpStatusCode.OK)
+                    {
+                        StreamReader reader = new StreamReader(res.GetResponseStream());
+                        string file = reader.ReadToEnd();
+
+                        string header = "Latitude: ";
+                        int pos = file.IndexOf(header);
+                        pos += header.Length;
+                        int pos2 = file.IndexOf("\n", pos);
+
+                        string toParse = file.Substring(pos, pos2 - pos);
+                        point.Latitude = double.Parse(toParse, culture);
+
+                        header = "Longitude: ";
+                        pos = file.IndexOf(header);
+                        pos += header.Length;
+                        pos2 = file.IndexOf("\n", pos);
+
+                        toParse = file.Substring(pos, pos2 - pos);
+
+                        point.Longitude = double.Parse(toParse, culture);
+                        point.FixTime = DateTime.UtcNow;
+                        exception = null;
+                    }
+                    else
+                        throw new Exception("Invalid response");
+
+                }
+                catch (Exception ex)
+                {
+                    exception = ex;
+                }
+                finally
+                {
+                    if (req != null)
+                        req = null;
+
+                    if (res != null)
+                    {
+                        res.Close();
+                        res = null;
+                    }
+                }
+            }
+
+            if (exception != null)
+            {
+                try
+                {
+                    req = (HttpWebRequest)WebRequest.Create(geoPlugin);
+
+                    req.Timeout = 10000;
+                    req.Method = "GET";
+
+                    res = (HttpWebResponse)req.GetResponse();
+
+                    if (res.StatusCode == HttpStatusCode.OK)
+                    {
+                        XmlDocument doc = new XmlDocument();
+                        StreamReader reader = new StreamReader(res.GetResponseStream());
+                        string xml = reader.ReadToEnd();
+                        doc.LoadXml(xml);
+
+                        point.Latitude = double.Parse(doc.DocumentElement.SelectSingleNode("geoplugin_latitude").InnerText, culture);
+                        point.Longitude = double.Parse(doc.DocumentElement.SelectSingleNode("geoplugin_longitude").InnerText, culture);
+                        point.FixTime = DateTime.UtcNow;
+
+                        exception = null;
+                    }
+                    else
+                        throw new Exception("Invalid response.");
+                }
+                catch (Exception ex)
+                {
+                    exception = ex;
+                }
+                finally
+                {
+                    if (req != null)
+                        req = null;
+
+                    if (res != null)
+                    {
+                        res.Close();
+                        res = null;
+                    }
+                }
+            }
+            if (exception != null)
+                throw exception;
+
+            return point;
         }
 
-
+        #endregion
 
         #region Cell Functions
 
@@ -566,6 +723,7 @@ namespace Tenor.Mobile.Location
                     else
                         point.Altitude = null;
 
+                    point.FixTime = pos.Time;
                 }
             }
 
@@ -574,71 +732,55 @@ namespace Tenor.Mobile.Location
 
         #endregion
 
-        #region GeoLocation
+        #region Gsm Triangulation
 
 
-        private WorldPoint PollCellInternal()
+        private WorldPoint PollGsmNetwork()
         {
-            //if (getLocation != null)
-            //{
-            //    System.Diagnostics.Debug.WriteLine("Aborting current polling.", "WorldPosition");
-            //    getLocation.Abort(); //If we have threadabortexception, it will abort the requests.
-            //}
-
             WorldPoint point = new WorldPoint();
-            // getLocation = new Thread(new ThreadStart(delegate()
-            //{
             System.Diagnostics.Debug.WriteLine("Polling location...", "WorldPosition");
 
-            try
-            {
-                if (cellCache == null)
-                    cellCache = new List<CellInfo>();
+            if (cellCache == null)
+                cellCache = new List<CellInfo>();
 
-                CellInfo info = new CellInfo() { MCC = CountryCode, MNC = NetworkCode, LAC = AreaCode, CID = Id };
-                int index = cellCache.IndexOf(info);
-                if (index > -1)
+            CellInfo info = new CellInfo() { MCC = CountryCode, MNC = NetworkCode, LAC = AreaCode, CID = Id };
+            int index = cellCache.IndexOf(info);
+            if (index > -1)
+            {
+                info = cellCache[index];
+            }
+            else
+            {
+                Exception ex = null;
+                bool ok = false;
+                try
                 {
-                    info = cellCache[index];
+                    ok = TranslateCellIdWithGoogle(info, false);
                 }
+                catch (Exception ext) { ex = ext; }
+                if (!ok)
+                    ok = TranslateCellIdWithOpenCellId(info);
+                if (ok)
+                    cellCache.Add(info);
+                else if (ex != null)
+                    throw ex;
                 else
-                {
-                    Exception ex = null;
-                    bool ok = false;
-                    try
-                    {
-                        ok = TranslateCellIdWithGoogle(info, false);
-                    }
-                    catch (Exception ext) { ex = ext; }
-                    if (!ok)
-                        ok = TranslateCellIdWithOpenCellId(info);
-                    if (ok)
-                        cellCache.Add(info);
-                    else if (ex != null)
-                        throw ex;
-                    else
-                        info = null;
+                    info = null;
 
-                }
-                if (info != null && info.Lat.HasValue && info.Lng.HasValue)
-                {
-                    point.Latitude = info.Lat;
-                    point.Longitude = info.Lng;
-                }
             }
-            catch (Exception)
+            if (info != null &&
+                info.Lat.HasValue && 
+                info.Lng.HasValue &&
+                info.Lat.Value != 0 &&
+                info.Lng.Value != 0)
             {
-                throw;
+                point.Latitude = info.Lat.Value;
+                point.Longitude = info.Lng.Value;
+                point.FixTime = DateTime.UtcNow;
             }
+
             return point;
 
-            //getLocation = null;
-
-
-            //}));
-
-            //System.Diagnostics.Debug.WriteLine("Go!", "WorldPosition");
-            //getLocation.Start();
         }
 
 
@@ -899,8 +1041,8 @@ namespace Tenor.Mobile.Location
         /// <returns></returns>
         public Geolocation GetGeoLocation()
         {
-            if (Latitude.HasValue && Longitude.HasValue)
-                return Geolocation.Get(Latitude.Value, Longitude.Value);
+            if (!WorldPoint.IsEmpty)
+                return Geolocation.Get(WorldPoint.Latitude, WorldPoint.Longitude);
             else
                 return null;
         }
@@ -927,11 +1069,16 @@ namespace Tenor.Mobile.Location
         /// <summary>
         /// The last position cames from the internet.
         /// </summary>
-        Network,
+        GsmNetwork,
         /// <summary>
         /// The last position cames from the gps anthenna.
         /// </summary>
-        Gps
+        Gps,
+        /// <summary>
+        /// The last position cames from the device's ip address.
+        /// </summary>
+        GeoIp
+
     }
 
     public delegate void ErrorEventHandler(object sender, ErrorEventArgs e);

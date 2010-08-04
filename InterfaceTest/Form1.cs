@@ -81,10 +81,10 @@ namespace InterfaceTest
 
         private void UpdateCellInfo()
         {
-            if (cell.Latitude.HasValue)
+            if (!cell.WorldPoint.IsEmpty)
             {
                 textBox1.Text = string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-us"),
-                    "{0}: {1}, {2}", cell.Id, cell.Latitude, cell.Longitude);
+                    "{0}: {1}, {2}", cell.Id, cell.WorldPoint.Latitude, cell.WorldPoint.Longitude);
                 textBox2.Text = string.Format("{0}: {1}", cell.FixType.ToString(), cell.GetGeoLocation().ToString());
             }
             else
