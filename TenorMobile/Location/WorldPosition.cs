@@ -312,16 +312,20 @@ namespace Tenor.Mobile.Location
 
             lock (this)
             {
-                if (timer != null)
+                try
                 {
-                    if (PollingInterval > 0)
+                    if (timer != null)
                     {
-                        //reset timer to the next pooling
-                        timer.Change(PollingInterval, Timeout.Infinite);
+                        if (PollingInterval > 0)
+                        {
+                            //reset timer to the next pooling
+                            timer.Change(PollingInterval, Timeout.Infinite);
+                        }
+                        else
+                            timer.Change(Timeout.Infinite, Timeout.Infinite);
                     }
-                    else
-                        timer.Change(Timeout.Infinite, Timeout.Infinite);
                 }
+                catch (ObjectDisposedException) { }
             }
         }
 
