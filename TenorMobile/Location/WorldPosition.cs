@@ -10,6 +10,10 @@ using System.Text;
 
 namespace Tenor.Mobile.Location
 {
+
+    /// <summary>
+    /// Represents a Fix on gps or network triangulation
+    /// </summary>
     public struct WorldPoint
     {
         public static readonly WorldPoint Empty = new WorldPoint();
@@ -89,6 +93,14 @@ namespace Tenor.Mobile.Location
                 LocationChanged(this, e);
         }
 
+
+        public event EventHandler PollHit;
+        protected virtual void OnPollHit(EventArgs e)
+        {
+            if (PollHit != null)
+                PollHit(this, e);
+        }
+
         public event ErrorEventHandler Error;
         protected virtual void OnError(ErrorEventArgs e)
         {
@@ -139,17 +151,13 @@ namespace Tenor.Mobile.Location
         /// <summary>
         /// Determines whether to poll location from network when using cell id.
         /// </summary>
-        public bool PollLocation { get; set; }
+        public bool UseNetwork { get; set; }
 
         /// <summary>
         /// Determines whether to use gps to get latitude and longitude
         /// </summary>
         public bool UseGps { get; set; }
 
-        /// <summary>
-        /// Determines whether to call LocationChanged.
-        /// </summary>
-        public bool AlwaysHitLocationChanged { get; set; }
 
         /// <summary>
         /// Returns a string representation of this WorldPosition instance.
@@ -172,9 +180,9 @@ namespace Tenor.Mobile.Location
         public WorldPosition()
         {
             PollingInterval = 5000;
-            PollLocation = false;
+            UseNetwork = false;
             UseGps = true;
-            FixType = FixType.GsmNetwork;
+            FixType = FixType.GeoIp;
             lock (this)
             {
                 timer = new Timer(new TimerCallback(PeriodicPoll), null, Timeout.Infinite, Timeout.Infinite);
@@ -198,7 +206,7 @@ namespace Tenor.Mobile.Location
         public WorldPosition(bool pollLocation)
             : this()
         {
-            this.PollLocation = pollLocation;
+            this.UseNetwork = pollLocation;
         }
 
         /// <summary>
@@ -209,7 +217,7 @@ namespace Tenor.Mobile.Location
         public WorldPosition(bool pollLocation, bool useGps)
             : this()
         {
-            this.PollLocation = pollLocation;
+            this.UseNetwork = pollLocation;
             this.UseGps = useGps;
         }
 
@@ -222,7 +230,7 @@ namespace Tenor.Mobile.Location
         public WorldPosition(bool pollLocation, bool useGps, int interval)
             : this()
         {
-            this.PollLocation = pollLocation;
+            this.UseNetwork = pollLocation;
             this.UseGps = useGps;
             this.PollingInterval = interval;
         }
@@ -238,8 +246,7 @@ namespace Tenor.Mobile.Location
         private void PeriodicPoll(object state)
         {
             StringBuilder errors = new StringBuilder();
-
-            bool cellChanged = GetCellTowerInfo();
+            GetCellTowerInfo();
             WorldPoint point = WorldPoint.Empty;
             if (UseGps)
             {
@@ -261,7 +268,7 @@ namespace Tenor.Mobile.Location
                     gps.Close();
             }
 
-            if (PollLocation && point.IsEmpty && cellChanged)
+            if (UseNetwork && point.IsEmpty)
             {
                 try
                 {
@@ -271,7 +278,6 @@ namespace Tenor.Mobile.Location
                 }
                 catch (Exception ex)
                 {
-                    Id = 0;
                     if (errors.Length > 0)
                         errors.Append("\r\n");
                     errors.Append(ex.Message);
@@ -294,7 +300,7 @@ namespace Tenor.Mobile.Location
             }
 
 
-            if (cellChanged && point.IsEmpty && errors.Length > 0)
+            if (point.IsEmpty && errors.Length > 0)
             {
                 OnError(new ErrorEventArgs(new Exception(errors.ToString())));
             }
@@ -306,8 +312,9 @@ namespace Tenor.Mobile.Location
                     this.WorldPoint = point;
                     changed = true;
                 }
-                if (AlwaysHitLocationChanged || changed)
+                if (changed)
                     OnLocationChanged(new EventArgs());
+                OnPollHit(new EventArgs());
             }
 
             lock (this)
@@ -505,10 +512,10 @@ namespace Tenor.Mobile.Location
         /*
          * Uses RIL to get CellID from the phone.
          */
-        private bool GetCellTowerInfo()
+        private void GetCellTowerInfo()
         {
             if (maybeCDMA)
-                return false;
+                return;
 
             IntPtr hRil = IntPtr.Zero;
             try
@@ -526,7 +533,7 @@ namespace Tenor.Mobile.Location
 
                 if (hRes != IntPtr.Zero)
                 {
-                    return false;
+                    return;
                     //throw new Exception("Cannot connect to GSM chip.");
                 }
 
@@ -534,12 +541,13 @@ namespace Tenor.Mobile.Location
 
                 // use RIL to get cell tower info with the RIL handle just created
                 hRes = RIL_GetCellTowerInfo(hRil);
+                System.Diagnostics.Debug.WriteLine(string.Format("hRil: {0}; hRes: {1}", hRil, hRes), "WorldPosition");
 
                 // wait for cell tower info to be returned
                 if (!waithandle.WaitOne(5000, false))
                 {
                     maybeCDMA = true;
-                    return false;
+                    return;
                 }
 
 
@@ -564,10 +572,10 @@ namespace Tenor.Mobile.Location
             {
                 idChanged = false;
                 OnTowerChanged(new EventArgs());
-                return true;
+                return;
             }
             else
-                return false;   
+                return;   
 
         }
 
@@ -600,6 +608,8 @@ namespace Tenor.Mobile.Location
                 NetworkCode = Convert.ToInt32(rilCellTowerInfo.dwMobileNetworkCode);
                 idChanged = true;
             }
+            else
+                idChanged = false;
             // notify caller function that we have a result
             waithandle.Set();
         }
