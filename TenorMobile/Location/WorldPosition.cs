@@ -124,6 +124,10 @@ namespace Tenor.Mobile.Location
         public FixType FixType
         { get; private set; }
 
+
+        public FixService FixService
+        { get; private set; }
+
         public int NetworkCode
         { get; private set; }
 
@@ -184,6 +188,7 @@ namespace Tenor.Mobile.Location
             UseNetwork = false;
             UseGps = true;
             FixType = FixType.GeoIp;
+            FixService = FixService.None;
             lock (this)
             {
                 timer = new Timer(new TimerCallback(PeriodicPoll), null, Timeout.Infinite, Timeout.Infinite);
@@ -262,7 +267,10 @@ namespace Tenor.Mobile.Location
                 }
 
                 if (!point.IsEmpty)
+                {
                     FixType = FixType.Gps;
+                    FixService = FixService.None;
+                }
             }
             else
             {
@@ -377,6 +385,7 @@ namespace Tenor.Mobile.Location
                     point.Longitude = double.Parse(node.Attributes["lng"].Value, culture);
                     point.FixTime = DateTime.UtcNow;
 
+                    FixService = FixService.GeoIpTool;
                     exception = null;
                 }
                 else
@@ -410,7 +419,6 @@ namespace Tenor.Mobile.Location
                     req.Method = "GET";
 
                     res = (HttpWebResponse)req.GetResponse();
-
                     if (res.StatusCode == HttpStatusCode.OK)
                     {
                         StreamReader reader = new StreamReader(res.GetResponseStream());
@@ -433,6 +441,7 @@ namespace Tenor.Mobile.Location
 
                         point.Longitude = double.Parse(toParse, culture);
                         point.FixTime = DateTime.UtcNow;
+                        FixService = FixService.HostIp;
                         exception = null;
                     }
                     else
@@ -477,6 +486,7 @@ namespace Tenor.Mobile.Location
                         point.Latitude = double.Parse(doc.DocumentElement.SelectSingleNode("geoplugin_latitude").InnerText, culture);
                         point.Longitude = double.Parse(doc.DocumentElement.SelectSingleNode("geoplugin_longitude").InnerText, culture);
                         point.FixTime = DateTime.UtcNow;
+                        FixService = FixService.GeoPlugin;
 
                         exception = null;
                     }
@@ -528,11 +538,16 @@ namespace Tenor.Mobile.Location
                 IntPtr hRes = IntPtr.Zero;
 
                 RILRESULTCALLBACK callback = new RILRESULTCALLBACK(rilResultCallback);
-                GCHandle cb = GCHandle.Alloc(callback, GCHandleType.Pinned);
+                try
+                {
+                    GCHandle cb = GCHandle.Alloc(callback, GCHandleType.Pinned);
+                    callback = (RILRESULTCALLBACK)cb.Target;
+                }
+                catch { }
 
                 // initialise RIL
                 hRes = RIL_Initialize(1,                      // RIL port 1
-                    (RILRESULTCALLBACK)cb.Target,             // function to call with result
+                    callback,             // function to call with result
                     null,                                     // function to call with notify
                     0,                                        // classes of notification to enable
                     0,                                        // RIL parameters
@@ -561,9 +576,10 @@ namespace Tenor.Mobile.Location
 
                 //celltower info finished
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Debug.WriteLine(ex.ToString());
+                return;
             }
             finally
             {
@@ -623,7 +639,7 @@ namespace Tenor.Mobile.Location
         }
 
         #endregion
-
+#pragma warning disable
         #region Native Methods
         // -------------------------------------------------------------------
         //  RIL function definitions
@@ -702,6 +718,7 @@ namespace Tenor.Mobile.Location
         [DllImport("ril.dll")]
         private static extern IntPtr RIL_Deinitialize(IntPtr hRil);
         #endregion
+#pragma warning restore 
 
         #region Gps Fix
 
@@ -776,17 +793,18 @@ namespace Tenor.Mobile.Location
             {
                 Exception ex = null;
                 bool ok = false;
-                Debug.WriteLine("Polling location...", "WorldPosition");
                 try
                 {
                     ok = TranslateCellIdWithGoogle(info, false);
-                    Debug.WriteLine("GMM: " + ok.ToString());
+                    if (ok)
+                        info.Service = FixService.Google;
                 }
                 catch (Exception ext) { ex = ext; }
                 if (!ok)
                 {
                     ok = TranslateCellIdWithOpenCellId(info);
-                    Debug.WriteLine("OCI: " + ok.ToString());
+                    if (ok)
+                        info.Service = FixService.OpenCellOrg;
                 }
                 if (ok)
                     cellCache.Add(info);
@@ -805,6 +823,7 @@ namespace Tenor.Mobile.Location
                 point.Latitude = info.Lat.Value;
                 point.Longitude = info.Lng.Value;
                 point.FixTime = DateTime.UtcNow;
+                FixService = info.Service;
             }
 
             return point;
@@ -876,7 +895,7 @@ namespace Tenor.Mobile.Location
             public int CID { get; set; }
             public double? Lat { get; set; }
             public double? Lng { get; set; }
-
+            public FixService Service { get; set; }
 
             public override bool Equals(object obj)
             {
@@ -1108,6 +1127,27 @@ namespace Tenor.Mobile.Location
         GeoIp
 
     }
+
+    public enum FixService
+    {
+        None,
+        /// <summary>
+        /// The last position cames from google.
+        /// </summary>
+        Google,
+        /// <summary>
+        /// The last position cames from opencellid.
+        /// </summary>
+        OpenCellOrg,
+        /// <summary>
+        /// The last position cames from lastip
+        /// </summary>
+        GeoPlugin,
+        GeoIpTool,
+        HostIp
+
+    }
+
 
     public delegate void ErrorEventHandler(object sender, ErrorEventArgs e);
     public sealed class ErrorEventArgs : EventArgs

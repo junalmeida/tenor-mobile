@@ -10,13 +10,13 @@ namespace Tenor.Mobile
 {
     public static class Service
     {
-        private static bool messageLoop;
+        //private static bool messageLoop;
         public static void Run()
         {
             // start up the message pump
-            messageLoop = true;
+            //messageLoop = true;
             while (Pump()) { };
-            messageLoop = false;
+            //messageLoop = false;
         }
 
         public static void Exit()

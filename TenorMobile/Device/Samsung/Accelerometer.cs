@@ -8,6 +8,7 @@ namespace SamsungMobileSdk
 {
     internal class Accelerometer
     {
+#pragma warning disable
         public struct Vector
         {
             public float x;
@@ -33,5 +34,6 @@ namespace SamsungMobileSdk
 
         [DllImport(Shared.SamsungMobileSDKDllName, EntryPoint = "SmiAccelerometerUnregisterHandler")]
         public static extern SmiResultCode UnregisterHandler();
+#pragma warning restore
     }
 }

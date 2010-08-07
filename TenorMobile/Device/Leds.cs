@@ -8,6 +8,9 @@ using System.Runtime.InteropServices;
 
 namespace Tenor.Mobile.Device
 {
+    /// <summary>
+    /// Stores information about led status.
+    /// </summary>
     public enum LedStatus
     {
         Off = 0,
@@ -17,6 +20,8 @@ namespace Tenor.Mobile.Device
 
     internal static class Leds
     {
+
+#pragma warning disable
         class NLED_SETTINGS_INFO
         {
             public uint LedNum;
@@ -62,6 +67,18 @@ namespace Tenor.Mobile.Device
             }
         }
 
+        private static int GetLedCount()
+        {
+            int count = 0;
+            NLED_COUNT_INFO nci = new NLED_COUNT_INFO();
+            if (NLedGetDeviceInfo(NLED_COUNT_INFO_ID, nci))
+            {
+                count = nci.cLeds;
+            }
+            return count;
+        }
+
+#pragma warning restore
         public static void Vibrate(int millisecondsTimeout)
         {
             Thread t = new Thread(new ThreadStart(delegate()
@@ -74,16 +91,6 @@ namespace Tenor.Mobile.Device
         }
 
 
-        private static int GetLedCount()
-        {
-            int count = 0;
-            NLED_COUNT_INFO nci = new NLED_COUNT_INFO();
-            if (NLedGetDeviceInfo(NLED_COUNT_INFO_ID, nci))
-            {
-                count = nci.cLeds;
-            }
-            return count;
-        }
 
 
     }

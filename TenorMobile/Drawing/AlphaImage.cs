@@ -200,6 +200,7 @@ namespace Tenor.Mobile.Drawing
 
     internal class IImaging
     {
+#pragma warning disable
         #region stałe i struktury
 
         public enum PixelFormatID : int
@@ -347,6 +348,7 @@ namespace Tenor.Mobile.Drawing
         }
 
         #endregion
+#pragma warning restore
     }
 
 }

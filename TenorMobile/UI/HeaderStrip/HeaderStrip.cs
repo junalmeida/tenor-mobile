@@ -34,7 +34,7 @@ namespace Tenor.Mobile.UI
         /// <summary>
         /// Gets or sets the Text of this HeaderStrip.
         /// </summary>
-        public string Text { get; set; }
+        public override string Text { get; set; }
 
         private TabsCollection tabs;
         public TabsCollection Tabs
