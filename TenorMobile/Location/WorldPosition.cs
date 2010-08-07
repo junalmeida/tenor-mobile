@@ -7,6 +7,7 @@ using System.Threading;
 using System.Xml;
 using System.Drawing;
 using System.Text;
+using System.Diagnostics;
 
 namespace Tenor.Mobile.Location
 {
@@ -253,6 +254,7 @@ namespace Tenor.Mobile.Location
                 try
                 {
                     point = PollGps();
+                    Debug.WriteLine("Gps");
                 }
                 catch (Exception ex)
                 {
@@ -273,6 +275,7 @@ namespace Tenor.Mobile.Location
                 try
                 {
                     point = PollGsmNetwork();
+                    Debug.WriteLine("Gsm");
                     if (!point.IsEmpty)
                         FixType = FixType.GsmNetwork;
                 }
@@ -289,6 +292,7 @@ namespace Tenor.Mobile.Location
                 try
                 {
                     point = PollGeoIp();
+                    Debug.WriteLine("GeoIp");
                     if (!point.IsEmpty)
                         FixType = FixType.GeoIp;
                 }
@@ -523,9 +527,12 @@ namespace Tenor.Mobile.Location
                 // initialise handles
                 IntPtr hRes = IntPtr.Zero;
 
+                RILRESULTCALLBACK callback = new RILRESULTCALLBACK(rilResultCallback);
+                GCHandle cb = GCHandle.Alloc(callback, GCHandleType.Pinned);
+
                 // initialise RIL
                 hRes = RIL_Initialize(1,                      // RIL port 1
-                    new RILRESULTCALLBACK(rilResultCallback), // function to call with result
+                    (RILRESULTCALLBACK)cb.Target,             // function to call with result
                     null,                                     // function to call with notify
                     0,                                        // classes of notification to enable
                     0,                                        // RIL parameters
@@ -540,6 +547,7 @@ namespace Tenor.Mobile.Location
                 // initialised successfully
 
                 // use RIL to get cell tower info with the RIL handle just created
+                idChanged = false;
                 hRes = RIL_GetCellTowerInfo(hRil);
                 System.Diagnostics.Debug.WriteLine(string.Format("hRil: {0}; hRes: {1}", hRil, hRes), "WorldPosition");
 
@@ -752,12 +760,13 @@ namespace Tenor.Mobile.Location
         private WorldPoint PollGsmNetwork()
         {
             WorldPoint point = new WorldPoint();
-            System.Diagnostics.Debug.WriteLine("Polling location...", "WorldPosition");
-
+            if (CountryCode == 0 || NetworkCode == 0 || Id == 0)
+                return point;
             if (cellCache == null)
                 cellCache = new List<CellInfo>();
 
             CellInfo info = new CellInfo() { MCC = CountryCode, MNC = NetworkCode, LAC = AreaCode, CID = Id };
+            Debug.WriteLine("ID: " + Id.ToString());
             int index = cellCache.IndexOf(info);
             if (index > -1)
             {
@@ -767,13 +776,18 @@ namespace Tenor.Mobile.Location
             {
                 Exception ex = null;
                 bool ok = false;
+                Debug.WriteLine("Polling location...", "WorldPosition");
                 try
                 {
                     ok = TranslateCellIdWithGoogle(info, false);
+                    Debug.WriteLine("GMM: " + ok.ToString());
                 }
                 catch (Exception ext) { ex = ext; }
                 if (!ok)
+                {
                     ok = TranslateCellIdWithOpenCellId(info);
+                    Debug.WriteLine("OCI: " + ok.ToString());
+                }
                 if (ok)
                     cellCache.Add(info);
                 else if (ex != null)
