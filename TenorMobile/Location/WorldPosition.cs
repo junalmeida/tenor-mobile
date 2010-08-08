@@ -189,11 +189,7 @@ namespace Tenor.Mobile.Location
             UseGps = true;
             FixType = FixType.GeoIp;
             FixService = FixService.None;
-            lock (this)
-            {
-                timer = new Timer(new TimerCallback(PeriodicPoll), null, Timeout.Infinite, Timeout.Infinite);
-                Poll();
-            }
+            Poll();
         }
 
         /// <summary>
@@ -246,7 +242,24 @@ namespace Tenor.Mobile.Location
         /// </summary>
         public void Poll()
         {
-            timer.Change(500, Timeout.Infinite);
+            lock (this)
+            {
+                if (timer != null)
+                    timer.Dispose();
+                timer = new Timer(new TimerCallback(PeriodicPoll), null, 500, Timeout.Infinite);
+            }
+        }
+        /// <summary>
+        /// Stops the current polling
+        /// </summary>
+        public void Stop()
+        {
+            lock (this)
+            {
+                if (timer != null)
+                    timer.Dispose();
+                timer = null;
+            }
         }
 
         private void PeriodicPoll(object state)
@@ -1106,6 +1119,7 @@ namespace Tenor.Mobile.Location
                 timer = null;
             }
         }
+
 
         #endregion
     }
