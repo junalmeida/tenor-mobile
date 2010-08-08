@@ -29,6 +29,7 @@ namespace Tenor.Mobile.UI
             Skin.Current.DrawHeaderBackGround(this, e);
             Skin.Current.DrawTabs(this, e);
             Skin.Current.DrawHeaderText(this, e);
+            base.OnPaint(e);
         }
 
         /// <summary>
