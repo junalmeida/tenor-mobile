@@ -84,12 +84,12 @@ namespace InterfaceTest
             if (!cell.WorldPoint.IsEmpty)
             {
                 textBox1.Text = string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-us"),
-                    "{0}: {1}, {2}", cell.Id, cell.WorldPoint.Latitude, cell.WorldPoint.Longitude);
+                    "{0}: {1}, {2}", cell.CellId, cell.WorldPoint.Latitude, cell.WorldPoint.Longitude);
                 textBox2.Text = string.Format("{0}: {1}", cell.FixType.ToString(), cell.GetGeoLocation().ToString());
             }
             else
             {
-                textBox1.Text = string.Format("{0}: No fix yet.", cell.Id);
+                textBox1.Text = string.Format("{0}: No fix yet.", cell.CellId);
                 textBox2.Text = "Unknown";
             }
         }

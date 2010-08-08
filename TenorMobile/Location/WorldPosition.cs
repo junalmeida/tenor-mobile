@@ -38,7 +38,7 @@ namespace Tenor.Mobile.Location
 
         public override string ToString()
         {
-            return string.Format("{0}; {1}", Latitude, Longitude);
+            return string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-us"), "{0},{1}", Latitude, Longitude);
         }
 
         public override bool Equals(object obj)
@@ -77,6 +77,8 @@ namespace Tenor.Mobile.Location
 
         private const string GoogleMobileServiceUri = "http://www.google.com/glm/mmap";
         private const string OpenCellServiceUri = "http://www.opencellid.org/cell/get?key=7e93ae41e81f11b986a6e99adb691997&mcc={0}&mnc={1}&lac={2}&cellid={3}";
+        private const string CellDbServiceUri = "http://celldb.org/api/?method=celldb.getcell&username=junalmeida&hash=febc5aa5c2faa8ea990b8381495a23ae&mcc={0}&mnc={1}&lac={2}&cellid={3}&format=csv";
+
         Gps.Gps gps;
 
         #region Events
@@ -111,7 +113,18 @@ namespace Tenor.Mobile.Location
         #endregion
 
         #region Data
-        public int Id
+        public bool IsGpsOpen
+        {
+            get
+            {
+                return UseGps && CheckForGps();
+            }
+        }
+
+        public int CellId
+        { get; private set; }
+
+        public int BaseStationId
         { get; private set; }
 
         public int CountryCode
@@ -129,6 +142,9 @@ namespace Tenor.Mobile.Location
         { get; private set; }
 
         public int NetworkCode
+        { get; private set; }
+
+        public int TimingAdvance
         { get; private set; }
 
         public WorldPoint WorldPoint
@@ -170,7 +186,7 @@ namespace Tenor.Mobile.Location
         /// <returns></returns>
         public override string ToString()
         {
-            return string.Format("{0}-{1}-{2}", Id, AreaCode, CountryCode);
+            return string.Format("{0}-{1}-{2}-{3}", CellId, AreaCode, NetworkCode, CountryCode);
         }
 
 
@@ -577,7 +593,6 @@ namespace Tenor.Mobile.Location
                 // use RIL to get cell tower info with the RIL handle just created
                 idChanged = false;
                 hRes = RIL_GetCellTowerInfo(hRil);
-                System.Diagnostics.Debug.WriteLine(string.Format("hRil: {0}; hRes: {1}", hRil, hRes), "WorldPosition");
 
                 // wait for cell tower info to be returned
                 if (!waithandle.WaitOne(5000, false))
@@ -636,13 +651,19 @@ namespace Tenor.Mobile.Location
             Marshal.PtrToStructure(lpData, rilCellTowerInfo);
 
             // get the bits out of the RIL cell tower response that we want
-            uint id = rilCellTowerInfo.dwCellID;
-            if (id != Id)
+
+            int cid = Convert.ToInt32(rilCellTowerInfo.dwCellID);
+            int bid = Convert.ToInt32(rilCellTowerInfo.dwBaseStationID);
+            if (cid != CellId || bid != BaseStationId)
             {
-                Id = Convert.ToInt32(rilCellTowerInfo.dwCellID);
+                CellId = cid;
+                BaseStationId = bid;
+
                 AreaCode = Convert.ToInt32(rilCellTowerInfo.dwLocationAreaCode);
                 CountryCode = Convert.ToInt32(rilCellTowerInfo.dwMobileCountryCode);
                 NetworkCode = Convert.ToInt32(rilCellTowerInfo.dwMobileNetworkCode);
+                TimingAdvance = Convert.ToInt32(rilCellTowerInfo.dwTimingAdvance);
+
                 idChanged = true;
             }
             else
@@ -790,13 +811,13 @@ namespace Tenor.Mobile.Location
         private WorldPoint PollGsmNetwork()
         {
             WorldPoint point = new WorldPoint();
-            if (CountryCode == 0 || NetworkCode == 0 || Id == 0)
+            if (CountryCode == 0 || NetworkCode == 0 || CellId == 0)
                 return point;
             if (cellCache == null)
                 cellCache = new List<CellInfo>();
 
-            CellInfo info = new CellInfo() { MCC = CountryCode, MNC = NetworkCode, LAC = AreaCode, CID = Id };
-            Debug.WriteLine("ID: " + Id.ToString());
+            CellInfo info = new CellInfo() { MCC = CountryCode, MNC = NetworkCode, LAC = AreaCode, CID = CellId };
+            Debug.WriteLine("ID: " + CellId.ToString());
             int index = cellCache.IndexOf(info);
             if (index > -1)
             {
@@ -806,19 +827,36 @@ namespace Tenor.Mobile.Location
             {
                 Exception ex = null;
                 bool ok = false;
-                try
+       
+                if (!ok)
                 {
-                    ok = TranslateCellIdWithGoogle(info, false);
-                    if (ok)
-                        info.Service = FixService.Google;
+                    try
+                    {
+                        ok = TranslateCellIdWithGoogle(info, false);
+                        if (ok)
+                            info.Service = FixService.Google;
+                    }
+                    catch (Exception ext) { ex = ext; }
                 }
-                catch (Exception ext) { ex = ext; }
+
                 if (!ok)
                 {
                     ok = TranslateCellIdWithOpenCellId(info);
                     if (ok)
                         info.Service = FixService.OpenCellOrg;
                 }
+
+                if (!ok)
+                {
+                    try
+                    {
+                        ok = TranslateCellIdWithCellDb(info);
+                        if (ok)
+                            info.Service = FixService.CellDbOrg;
+                    }
+                    catch (Exception ext) { ex = ext; }
+                }  
+
                 if (ok)
                     cellCache.Add(info);
                 else if (ex != null)
@@ -871,10 +909,77 @@ namespace Tenor.Mobile.Location
                 {
                     XmlDocument doc = new XmlDocument();
                     doc.Load(res.GetResponseStream());
-
-                    info.Lat = double.Parse(doc.DocumentElement.FirstChild.Attributes["lat"].Value, System.Globalization.CultureInfo.GetCultureInfo("en-us"));
-                    info.Lng = double.Parse(doc.DocumentElement.FirstChild.Attributes["lon"].Value, System.Globalization.CultureInfo.GetCultureInfo("en-us"));
+                    var culture = System.Globalization.CultureInfo.GetCultureInfo("en-us");
+                    info.Lat = double.Parse(doc.DocumentElement.FirstChild.Attributes["lat"].Value, culture);
+                    info.Lng = double.Parse(doc.DocumentElement.FirstChild.Attributes["lon"].Value, culture);
                     return true;
+                }
+            }
+            catch (Exception)
+            {
+                if (req != null)
+                    Tenor.Mobile.Network.WebRequest.Abort(req);
+
+                throw;
+            }
+            finally
+            {
+                if (req != null)
+                    req = null;
+
+                if (res != null)
+                {
+                    res.Close();
+                    res = null;
+                }
+            }
+            return false;
+
+        }
+
+        private bool TranslateCellIdWithCellDb(CellInfo info)
+        {
+            HttpWebRequest req = null;
+            HttpWebResponse res = null;
+            try
+            {
+                string uri = string.Format(
+                    CellDbServiceUri,
+                    info.MCC,
+                    info.MNC,
+                    info.LAC,
+                    info.CID);
+
+                req = (HttpWebRequest)WebRequest.Create(
+                    new Uri(uri));
+
+                req.Timeout = 10000;
+                req.Method = "GET";
+
+                res = (HttpWebResponse)req.GetResponse();
+
+                if (res.StatusCode == HttpStatusCode.OK)
+                {
+                    using (StreamReader reader = new StreamReader(res.GetResponseStream()))
+                    {
+                        string csv = reader.ReadLine();
+                        while (!string.IsNullOrEmpty(csv))
+                        {
+                            string[] values = csv.Split(',');
+                            if (values.Length > 6)
+                            {
+                                var culture = System.Globalization.CultureInfo.GetCultureInfo("en-us");
+                                try
+                                {
+                                    info.Lat = double.Parse(values[4], culture);
+                                    info.Lng = double.Parse(values[5], culture);
+                                    return true;
+                                }
+                                catch { }
+                            }
+                            csv = reader.ReadLine();
+                        }
+                    }
                 }
             }
             catch (Exception)
@@ -1152,7 +1257,7 @@ namespace Tenor.Mobile.Location
         /// <summary>
         /// The last position cames from opencellid.
         /// </summary>
-        OpenCellOrg,
+        OpenCellOrg, CellDbOrg,
         /// <summary>
         /// The last position cames from lastip
         /// </summary>
