@@ -488,7 +488,6 @@ namespace Tenor.Mobile.UI
 #if DEBUG
                         System.Diagnostics.Debug.WriteLine(string.Format("{0}, {1}", speed, period));
 #endif
-                        Device.Device.HapticSoft(Convert.ToUInt32(period) + 100);
                     }
 
                 }
@@ -496,7 +495,6 @@ namespace Tenor.Mobile.UI
                 if (m_velocity.Y == 0 && m_velocity.X == 0)
                 {
                     m_timer.Enabled = false;
-                    Device.Device.HapticSoft(0);
                 }
 
                 Invalidate();
@@ -511,6 +509,7 @@ namespace Tenor.Mobile.UI
             // Do nothing
         }
 
+        KListItem lastItemPaint;
         /// <summary>
         /// Paints the control.
         /// </summary>
@@ -527,6 +526,13 @@ namespace Tenor.Mobile.UI
                 base.OnPaint(new PaintEventArgs(m_backBuffer, e.ClipRectangle));
 
                 KListItem startItem = FindItem(0, 0);
+                if (lastItemPaint == null)
+                    lastItemPaint = startItem;
+                else if (lastItemPaint != startItem)
+                {
+                    Tenor.Mobile.Device.Device.HapticSoft();
+                    lastItemPaint = startItem;
+                }
 
                 List<List<KListItem>>.Enumerator xEnumerator = m_items.GetEnumerator();
                 bool moreX = xEnumerator.MoveNext();
@@ -872,11 +878,13 @@ namespace Tenor.Mobile.UI
             {
                 m_offset.Y = 0;
                 m_velocity.Y = 0;
+                Tenor.Mobile.Device.Device.HapticBounce();
             }
             else if (m_offset.Y > MaxYOffset)
             {
                 m_offset.Y = MaxYOffset;
                 m_velocity.Y = 0;
+                Tenor.Mobile.Device.Device.HapticBounce();
             }
         }
 

@@ -98,6 +98,16 @@ namespace Tenor.Mobile.Device
 
 
 
+        public static void HapticBounce()
+        {
+            if (haptic == null)
+                haptic = CreateHaptics();
+            if (haptic != null)
+                haptic.Bounce();
+
+        }
+
+
         public static bool HapticFeedback
         {
             get

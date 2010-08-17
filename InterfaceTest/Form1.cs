@@ -16,7 +16,6 @@ namespace InterfaceTest
 {
     public partial class Form1 : Form
     {
-        Tenor.Mobile.Location.WorldPosition cell;
 
 
         public Form1()
@@ -48,51 +47,8 @@ namespace InterfaceTest
             kListControl1.SelectedItem = kListControl1[0];
 
 
-            //cell = new Tenor.Mobile.Location.WorldPosition(true);
-            //cell.TowerChanged += new EventHandler(cell_TowerChanged);
-            //cell.LocationChanged += new EventHandler(cell_LocationChanged);
         }
 
-        void cell_LocationChanged(object sender, EventArgs e)
-        {
-            if (this.InvokeRequired)
-            {
-                try
-                {
-                    this.Invoke(new System.Threading.ThreadStart(UpdateCellInfo));
-                }
-                catch (ObjectDisposedException)
-                { }
-            }
-        }
-
-        void cell_TowerChanged(object sender, EventArgs e)
-        {
-            if (this.InvokeRequired)
-            {
-                try
-                {
-                    this.Invoke(new System.Threading.ThreadStart(UpdateCellInfo));
-                }
-                catch (ObjectDisposedException)
-                { }
-            }
-        }
-
-        private void UpdateCellInfo()
-        {
-            if (!cell.WorldPoint.IsEmpty)
-            {
-                textBox1.Text = string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-us"),
-                    "{0}: {1}, {2}", cell.CellId, cell.WorldPoint.Latitude, cell.WorldPoint.Longitude);
-                textBox2.Text = string.Format("{0}: {1}", cell.FixType.ToString(), cell.GetGeoLocation().ToString());
-            }
-            else
-            {
-                textBox1.Text = string.Format("{0}: No fix yet.", cell.CellId);
-                textBox2.Text = "Unknown";
-            }
-        }
 
         private void menuItem2_Click(object sender, EventArgs e)
         {
@@ -271,6 +227,8 @@ namespace InterfaceTest
 
             Icon icon = this.Icon;
             NotificationWithSoftKeys.Show(Guid.NewGuid(), "test", "text text", true, icon);
+
+            Tenor.Mobile.Device.Device.HapticBounce();
         }
     }
 }

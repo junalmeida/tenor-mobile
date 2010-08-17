@@ -9,5 +9,6 @@ namespace Tenor.Mobile.Device
         void Soft();
 
         void Soft(uint period);
+        void Bounce();
     }
 }

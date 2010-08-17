@@ -102,6 +102,37 @@ namespace Tenor.Mobile.Device.Samsung
             }
         }
 
+        public void Bounce()
+        {
+            try
+            {
+
+                Thread t = new Thread(new ThreadStart(delegate()
+                {
+
+                    Haptics.HapticsNote[] _hapticsNotes = new Haptics.HapticsNote[1];
+                    _hapticsNotes[0].magnitude = 255;
+                    _hapticsNotes[0].startingMagnitude = 0;
+                    _hapticsNotes[0].endingMagnitude = 0;
+                    _hapticsNotes[0].duration = 50;
+                    _hapticsNotes[0].endTimeDuration = 0;
+                    _hapticsNotes[0].startTimeDuration = 0;
+                    _hapticsNotes[0].style = Haptics.NoteStyle.Strong;
+                    _hapticsNotes[0].period = 10;
+
+                    Haptics.PlayNotes(handle, 1, _hapticsNotes, false, null);
+
+
+                }));
+                t.Start();
+
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine(ex.Message, "Haptic.Soft");
+            }
+        }
+
         private void TimerHit(object state)
         {
             Haptics.HapticsNote[] _hapticsNotes = new Haptics.HapticsNote[1];
