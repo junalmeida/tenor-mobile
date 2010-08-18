@@ -640,9 +640,17 @@ namespace Tenor.Mobile.UI
         /// <param name="icon"></param>
         public static void Show(Guid id, string title, string text, bool showTime, Icon icon)
         {
-            
+
             if (id == null)
                 id = Guid.NewGuid();
+            else
+            {
+                try
+                {
+                    SHNotificationRemove(ref id, 0);
+                }
+                catch { }
+            }
             if (icon == null)
                 throw new ArgumentNullException("icon");
 
@@ -653,7 +661,7 @@ namespace Tenor.Mobile.UI
                 data.cbStruct = Marshal.SizeOf(data) - 32; // "hide" the 20 bytes that were added to this struct in WM5.0    
 
             data.clsid = id;
-            data.dwID = r.Next(0, 10000);
+            data.dwID = 0; //r.Next(0, 10000);
             data.csDuration = 10;
 
             data.hicon = icon.Handle;
