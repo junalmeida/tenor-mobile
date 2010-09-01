@@ -157,7 +157,11 @@ namespace Tenor.Mobile.UI
 
         protected override void OnPaint(PaintEventArgs pe)
         {
-            Tenor.Mobile.UI.Skin.Current.DrawTextControlBackground(this, pe.Graphics, new Rectangle(0, 0, this.Width, this.Height));
+            try
+            {
+                Tenor.Mobile.UI.Skin.Current.DrawTextControlBackground(this, pe.Graphics, new Rectangle(0, 0, this.Width, this.Height));
+            }
+            catch { }
         }
 
         protected override void OnResize(EventArgs e)
