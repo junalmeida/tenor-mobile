@@ -318,6 +318,7 @@ namespace Tenor.Mobile.UI
                     RoundedRectangle.Fill(graphics, p, brush, bounds,
                         ellipse
                         );
+
                 }
             }
         }

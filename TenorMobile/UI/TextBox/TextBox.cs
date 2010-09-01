@@ -39,6 +39,7 @@ namespace Tenor.Mobile.UI
             text.ContextMenu = context;
         }
 
+
         void text_KeyUp(object sender, KeyEventArgs e)
         {
             OnKeyUp(e);
@@ -74,6 +75,7 @@ namespace Tenor.Mobile.UI
         {
             this.BackColor = Tenor.Mobile.UI.Skin.Current.ControlBackColor;
             base.OnParentChanged(e);
+            ResetbackBuffer();
         }
 
         void context_Popup(object sender, EventArgs e)
@@ -155,13 +157,31 @@ namespace Tenor.Mobile.UI
         {
         }
 
+        Bitmap backBufferBmp;
+        Graphics backBuffer;
+
+        private void ResetbackBuffer()
+        {
+            if (backBuffer != null)
+                backBuffer.Dispose();
+            if (backBufferBmp != null)
+                backBufferBmp.Dispose();
+            backBuffer = null;
+            backBufferBmp = null;
+        }
+
+
         protected override void OnPaint(PaintEventArgs pe)
         {
-            try
+            if (backBuffer == null && this.Width > 0 && this.Height > 0)
             {
-                Tenor.Mobile.UI.Skin.Current.DrawTextControlBackground(this, pe.Graphics, new Rectangle(0, 0, this.Width, this.Height));
+                backBufferBmp = new Bitmap(this.Width, this.Height);
+                backBuffer = Graphics.FromImage(backBufferBmp);
+
+                Tenor.Mobile.UI.Skin.Current.DrawTextControlBackground(this, backBuffer, new Rectangle(0, 0, backBufferBmp.Width, backBufferBmp.Height));
             }
-            catch { }
+            if (backBufferBmp != null)
+                pe.Graphics.DrawImage(backBufferBmp, 0, 0);
         }
 
         protected override void OnResize(EventArgs e)
@@ -177,7 +197,9 @@ namespace Tenor.Mobile.UI
                     this.Height - 4 * Tenor.Mobile.UI.Skin.Current.ScaleFactor.Height).ToSize();
                 text.Top = (this.Height / 2) - (text.Height / 2);
             }
+            ResetbackBuffer();
         }
+
 
 
         public InputMode InputMode
