@@ -186,6 +186,7 @@
             this.headerStrip1.Size = new System.Drawing.Size(240, 38);
             this.headerStrip1.TabIndex = 2;
             this.headerStrip1.Text = "Now Playing";
+            this.headerStrip1.Click += new System.EventHandler(this.headerStrip1_Click);
             // 
             // textBox2
             // 

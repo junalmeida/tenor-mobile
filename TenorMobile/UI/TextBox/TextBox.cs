@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 using Microsoft.WindowsCE.Forms;
+using System.Threading;
 
 namespace Tenor.Mobile.UI
 {
@@ -26,6 +27,7 @@ namespace Tenor.Mobile.UI
             text.Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom;
             this.Controls.Add(text);
             text.GotFocus += new EventHandler(text_GotFocus);
+            text.LostFocus += new EventHandler(text_LostFocus);
             text.KeyDown += new KeyEventHandler(text_KeyDown);
             text.KeyPress += new KeyPressEventHandler(text_KeyPress);
             text.KeyUp += new KeyEventHandler(text_KeyUp);
@@ -136,13 +138,45 @@ namespace Tenor.Mobile.UI
             SelectionStart = pos;
         }
 
+        System.Threading.Timer timer = null;
+        static bool focus = false;
         void text_GotFocus(object sender, EventArgs e)
         {
             if (input != null)
             {
                 Microsoft.WindowsCE.Forms.InputModeEditor.SetInputMode(this.text, this.InputMode);
                 input.Enabled = true;
+                focus = true;
             }
+        }
+
+        void text_LostFocus(object sender, EventArgs e)
+        {
+            focus = false;
+            if (timer != null)
+            {
+                timer.Dispose();
+            }
+            timer = new System.Threading.Timer(
+                new System.Threading.TimerCallback(timer_Callback),
+                null,
+                1000, System.Threading.Timeout.Infinite);
+        }
+
+        void timer_Callback(object state)
+        {
+            if (this.InvokeRequired)
+                this.Invoke(new ThreadStart(CloseInput));
+            else
+                CloseInput();
+            
+        }
+
+        private void CloseInput()
+        {
+            timer.Dispose();
+            if (!focus)
+                input.Enabled = false;
         }
 
         public override bool Focused
@@ -213,6 +247,7 @@ namespace Tenor.Mobile.UI
             base.OnGotFocus(e);
             text.Focus();
         }
+
 
 
         #region TextBox Methods and Properties

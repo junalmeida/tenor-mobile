@@ -230,5 +230,10 @@ namespace InterfaceTest
 
             Tenor.Mobile.Device.Device.HapticBounce();
         }
+
+        private void headerStrip1_Click(object sender, EventArgs e)
+        {
+            tabStrip1.SelectedIndex = 0;
+        }
     }
 }
