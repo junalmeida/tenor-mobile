@@ -104,7 +104,7 @@ namespace Tenor.Mobile.UI
             int bottomHeight = 15 * ScaleFactor.Height;
 
             Point offset = new Point(2 * ScaleFactor.Width, 2 * ScaleFactor.Width);
-            int defaultWidth = 46 * ScaleFactor.Width;
+            int defaultWidth = 42 * ScaleFactor.Width;
             Size corner = new Size(8 * ScaleFactor.Width, 8 * ScaleFactor.Height);
 
             Pen penBorder = new Pen(Strings.ToColor(BorderLineColor));
