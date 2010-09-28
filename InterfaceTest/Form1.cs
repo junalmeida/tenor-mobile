@@ -52,6 +52,9 @@ namespace InterfaceTest
 
         private void menuItem2_Click(object sender, EventArgs e)
         {
+            textBox2.Focus();
+
+
             Random r = new Random();
             kListControl1.Clear();
             kListControl1.Layout = Tenor.Mobile.UI.KListLayout.Vertical;

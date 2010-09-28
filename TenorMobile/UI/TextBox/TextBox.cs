@@ -140,9 +140,17 @@ namespace Tenor.Mobile.UI
 
         System.Threading.Timer timer = null;
         static bool focus = false;
+        bool doCheckVisible = false;
         void text_GotFocus(object sender, EventArgs e)
         {
-            if (input != null)
+            doCheckVisible = true;
+            this.Invalidate();
+        }
+
+        private void EnableInput()
+        {
+            doCheckVisible = false;
+            if (input != null && text != null && text.Focused)
             {
                 Microsoft.WindowsCE.Forms.InputModeEditor.SetInputMode(this.text, this.InputMode);
                 input.Enabled = true;
@@ -207,6 +215,7 @@ namespace Tenor.Mobile.UI
 
         protected override void OnPaint(PaintEventArgs pe)
         {
+
             if (backBuffer == null && this.Width > 0 && this.Height > 0)
             {
                 backBufferBmp = new Bitmap(this.Width, this.Height);
@@ -216,6 +225,9 @@ namespace Tenor.Mobile.UI
             }
             if (backBufferBmp != null)
                 pe.Graphics.DrawImage(backBufferBmp, 0, 0);
+
+            if (doCheckVisible)
+                EnableInput();
         }
 
         protected override void OnResize(EventArgs e)
