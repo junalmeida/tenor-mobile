@@ -18,7 +18,7 @@
     <NativePlatformName>Windows Mobile 5.0 Pocket PC SDK</NativePlatformName>
     <FormFactorID>
     </FormFactorID>
-    <SignAssembly>true</SignAssembly>
+    <SignAssembly>false</SignAssembly>
     <AssemblyOriginatorKeyFile>tenorframework.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -109,7 +109,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="tenorframework.snk" />
-    <None Include="UI\DesignTimeAttributes.xmta" />
+    <EmbeddedResource Include="UI\DesignTimeAttributes.xmta" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Location\" />

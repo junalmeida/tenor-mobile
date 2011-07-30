@@ -173,11 +173,14 @@ namespace Tenor.Mobile.UI
 
         void timer_Callback(object state)
         {
-            if (this.InvokeRequired)
-                this.Invoke(new ThreadStart(CloseInput));
-            else
-                CloseInput();
-            
+            try
+            {
+                if (this.InvokeRequired)
+                    this.Invoke(new ThreadStart(CloseInput));
+                else
+                    CloseInput();
+            }
+            catch (ObjectDisposedException) { }
         }
 
         private void CloseInput()
